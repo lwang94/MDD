@@ -18,20 +18,20 @@ def get_axis_info(widget, keys='pcp'):
     return res
 
 def load_data(contents, usecols):
-    values=[]
+    datapoints = []
     for csvfile in contents:
         content_string = csvfile.split(',')[1]
         decoded_string = base64.b64decode(content_string)
-        data = io.StringIO(decoded_string.decode('utf-8'))
+        data_string = io.StringIO(decoded_string.decode('utf-8'))
         if usecols is None:
-            value = (
-                pd.read_csv(data)
+            data = (
+                pd.read_csv(data_string)
                 .values.transpose().flatten()
             )
         else:
-            value = (
-                pd.read_csv(data, usecols=usecols)
+            data = (
+                pd.read_csv(data_string, usecols=usecols)
                 .values.flatten()
             )
-        values += list(value)
-    return np.array(values)
+        datapoints += list(data)
+    return np.array(datapoints)

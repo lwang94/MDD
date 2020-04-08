@@ -1,13 +1,10 @@
-import dash
 import dash_table as dt
 import dash_core_components as dcc
-import dash_daq as daq
 import dash_html_components as html
-from dash.dependencies import Input, Output, State
 
-import pandas as pd
 import math as math
-import numpy as np
+
+import config as cf
 
 
 def app_layout():
@@ -17,29 +14,34 @@ def app_layout():
             children='A3MD',
             style={'textAlign': 'center'}
         ),
+
+        dcc.ConfirmDialog(
+            id='error_message'
+        ),
+
         html.Div(
             children=[
                 html.Div(
                     children=[
-                        dt.DataTable(
+                        dt.DataTable( # set max height and vertical scrolling after determining optimal size
                             id='metadata_table',
                             columns=[
-                                {'name': 'Dimension', 'id': 'Dimension', 'type': 'numeric'},
+                                {'name': 'Axis', 'id': 'Axis', 'type': 'numeric'},
                                 {'name': 'Name', 'id': 'Name'},
                                 {'name': 'Num Values', 'id': 'Num Values', 'type': 'numeric'},
-                                {'name': 'Method', 'id': 'Method', 'presentation': 'dropdown'} # give it a better name
+                                {'name': 'Define Values', 'id': 'Define Values', 'presentation': 'dropdown'}
                             ],
                             data=[
                                 {
-                                    'Dimension': math.nan,
+                                    'Axis': math.nan,
                                     'Name': '',
                                     'Num Values': 0,
-                                    'Method': 'Upload'
+                                    'Define Values': 'Upload'
                                 }
                                 for i in range(3)
                             ],
                             dropdown={
-                                'Method': {
+                                'Define Values': {
                                     'options': [
                                         {'label': 'Upload', 'value': 'Upload'},
                                         {'label': 'Range', 'value': 'Range'},
@@ -58,12 +60,12 @@ def app_layout():
                     children=[
                         html.Button(
                             'Confirm',
-                            id='confirm_axis',
+                            id='confirm_values',
                             n_clicks=0,
                             style={'marginBottom': 18}
                         ),
                         html.Div(
-                            id='axis_methods'
+                            id='defval_methods'
                         )
                     ],
                     className='one column'
@@ -78,7 +80,7 @@ def app_layout():
                                 'marginBottom': 26}
                         ),
                         html.Div(
-                            id='axis_inputs'
+                            id='valueslice'
                         )
                     ],
                     className='one third columns'
@@ -87,14 +89,15 @@ def app_layout():
                     children=[
                         html.Hr(style={'marginBottom': 30}),
                         html.Div(
-                            id='axis_graduated_bars'
+                            id='show_valueslice'
                         )
                     ],
                     className='four twothirds columns',
                     style={'align': 'left'}
                 )
             ],
-            className='one row'
+            className='one row',
+            style={'borderStyle': 'solid'}
         ),
         html.Div(
             children=[
@@ -107,31 +110,60 @@ def app_layout():
                 ),
                 html.Hr(className='five columns'),
                 dcc.Upload(
-                    id='add_values',
+                    id='add_data',
                     children=html.Button(
-                        'Add Values',
+                        'Add Data',
                         style={'width': 130, 'marginLeft': 40}
                     ),
                     multiple=True,
                     className='one column'
                 ),
                 dcc.Input(
-                    id='value_header',
+                    id='data_headers',
                     placeholder='Header1, Header2,...',
                     type='text',
                     style={'width': 130, 'marginLeft': 85},
                     className='one column'
                 ),
                 html.Pre(
-                        'WARNING: Leaving this field blank adds ALL the columns in the .csv file',
+                        cf.warning_dataheader,
                         style={'textAlign': 'left', 'marginLeft': 20, 'color': '#d40000'},
                         className='four columns'
                 )
             ],
             className='one row'
         ),
+        html.Div(
+            children=[
+                dcc.Graph(
+                    id='tempgraph',
+                    className='six columns',
+                    style={'borderStyle': 'solid'}
+                ),
+                html.Div(
+                    children=[
+                        html.Div(
+                            dt.DataTable( # set max height and vertical scrolling after determining optimal size
+                                id='graphslice_table',
+                                columns=[
+                                    {'name': 'Name', 'id': 'gName', 'type': 'text', 'editable': False},
+                                    {'name': 'Axis', 'id': 'gAxis', 'type': 'numeric', 'presentation': 'dropdown'},
+                                    {'name': 'Start', 'id': 'gStart', 'type': 'numeric', 'presentation': 'dropdown'},
+                                    {'name': 'Stop', 'id': 'gStop', 'type': 'numeric', 'presentation': 'dropdown'}
+                                ],
+                                editable=True
+                            ),
+                            style={'borderStyle': 'solid'}
+                        ),
+                    ],
+                    className='six columns'
+                )
+            ],
+            className='one row'
+        ),
+
 
         html.Div(id='metadata', style={'display': 'none'}),
-        html.Div(id='mddata', style={'display': 'none'}),
-        html.Div(id='mddata_copy', style={'display': 'none'}),
+        html.Div(id='mdd', style={'display': 'none'}),
+        html.Div(id='mddcopy', style={'display': 'none'}),
     ])

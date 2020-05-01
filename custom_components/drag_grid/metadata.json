@@ -1,0 +1,2388 @@
+{
+  "src/lib/components/DragGrid.react.js": {
+    "description": "ExampleComponent is an example component.\r\nIt takes a property, `label`, and\r\ndisplays it.\r\nIt renders an input with the property `value`\r\nwhich is editable by the user.",
+    "displayName": "DragGrid",
+    "methods": [
+      {
+        "name": "create_children",
+        "docblock": null,
+        "modifiers": [],
+        "params": [],
+        "returns": null
+      },
+      {
+        "name": "onLC",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "lc",
+            "type": null
+          }
+        ],
+        "returns": null
+      },
+      {
+        "name": "onD",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "layout",
+            "type": null
+          },
+          {
+            "name": "oldItem",
+            "type": null
+          },
+          {
+            "name": "newItem",
+            "type": null
+          },
+          {
+            "name": "placeholder",
+            "type": null
+          },
+          {
+            "name": "e",
+            "type": null
+          },
+          {
+            "name": "element",
+            "type": null
+          }
+        ],
+        "returns": null
+      }
+    ],
+    "props": {
+      "id": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "The ID used to identify this component in Dash callbacks."
+      },
+      "label": {
+        "type": {
+          "name": "string"
+        },
+        "required": true,
+        "description": "A label that will be printed when this component is rendered."
+      },
+      "children": {
+        "type": {
+          "name": "array"
+        },
+        "required": false,
+        "description": "The children in each part of the grid.",
+        "defaultValue": {
+          "value": "[' ']",
+          "computed": false
+        }
+      },
+      "layout": {
+        "type": {
+          "name": "array"
+        },
+        "required": false,
+        "description": "The layout of the grid",
+        "defaultValue": {
+          "value": "[{i: 'default', x: 0, y: 0, w: 1, h: 1}]",
+          "computed": false
+        }
+      },
+      "compacttype": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "The compact type",
+        "defaultValue": {
+          "value": "'horizontal'",
+          "computed": false
+        }
+      },
+      "rowheight": {
+        "type": {
+          "name": "number"
+        },
+        "required": false,
+        "description": "The height of one row in the grid",
+        "defaultValue": {
+          "value": "30",
+          "computed": false
+        }
+      },
+      "width": {
+        "type": {
+          "name": "number"
+        },
+        "required": false,
+        "description": "The total width of the grid",
+        "defaultValue": {
+          "value": "1200",
+          "computed": false
+        }
+      },
+      "numcolumns": {
+        "type": {
+          "name": "number"
+        },
+        "required": false,
+        "description": "The number of columns",
+        "defaultValue": {
+          "value": "6",
+          "computed": false
+        }
+      },
+      "maxrows": {
+        "type": {
+          "name": "number"
+        },
+        "required": false,
+        "description": "Maximum number of rows in grid",
+        "defaultValue": {
+          "value": "1",
+          "computed": false
+        }
+      },
+      "setProps": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "Dash-assigned callback that should be called to report property changes\r\nto Dash, to make them available for callbacks."
+      }
+    }
+  },
+  "src/lib/components/react-grid-layout/lib/GridItem.jsx": {
+    "description": "An individual item within a ReactGridLayout.",
+    "displayName": "GridItem",
+    "methods": [
+      {
+        "name": "moveDroppingItem",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "prevProps",
+            "type": {
+              "name": "signature",
+              "type": "object",
+              "raw": "{\r\n  children: ReactElement<any>,\r\n  cols: number,\r\n  containerWidth: number,\r\n  margin: [number, number],\r\n  containerPadding: [number, number],\r\n  rowHeight: number,\r\n  maxRows: number,\r\n  isDraggable: boolean,\r\n  isResizable: boolean,\r\n  static?: boolean,\r\n  useCSSTransforms?: boolean,\r\n  usePercentages?: boolean,\r\n  transformScale: number,\r\n  droppingPosition?: DroppingPosition,\r\n\r\n  className: string,\r\n  style?: Object,\r\n  // Draggability\r\n  cancel: string,\r\n  handle: string,\r\n\r\n  x: number,\r\n  y: number,\r\n  w: number,\r\n  h: number,\r\n\r\n  minW: number,\r\n  maxW: number,\r\n  minH: number,\r\n  maxH: number,\r\n  i: string,\r\n\r\n  onDrag?: GridItemCallback<GridDragEvent>,\r\n  onDragStart?: GridItemCallback<GridDragEvent>,\r\n  onDragStop?: GridItemCallback<GridDragEvent>,\r\n  onResize?: GridItemCallback<GridResizeEvent>,\r\n  onResizeStart?: GridItemCallback<GridResizeEvent>,\r\n  onResizeStop?: GridItemCallback<GridResizeEvent>\r\n}",
+              "signature": {
+                "properties": [
+                  {
+                    "key": "children",
+                    "value": {
+                      "name": "ReactElement",
+                      "elements": [
+                        {
+                          "name": "any"
+                        }
+                      ],
+                      "raw": "ReactElement<any>",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "cols",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "containerWidth",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "margin",
+                    "value": {
+                      "name": "tuple",
+                      "raw": "[number, number]",
+                      "elements": [
+                        {
+                          "name": "number"
+                        },
+                        {
+                          "name": "number"
+                        }
+                      ],
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "containerPadding",
+                    "value": {
+                      "name": "tuple",
+                      "raw": "[number, number]",
+                      "elements": [
+                        {
+                          "name": "number"
+                        },
+                        {
+                          "name": "number"
+                        }
+                      ],
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "rowHeight",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "maxRows",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "isDraggable",
+                    "value": {
+                      "name": "boolean",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "isResizable",
+                    "value": {
+                      "name": "boolean",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "static",
+                    "value": {
+                      "name": "boolean",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "useCSSTransforms",
+                    "value": {
+                      "name": "boolean",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "usePercentages",
+                    "value": {
+                      "name": "boolean",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "transformScale",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "droppingPosition",
+                    "value": {
+                      "name": "DroppingPosition",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "className",
+                    "value": {
+                      "name": "string",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "style",
+                    "value": {
+                      "name": "Object",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "cancel",
+                    "value": {
+                      "name": "string",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "handle",
+                    "value": {
+                      "name": "string",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "x",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "y",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "w",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "h",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "minW",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "maxW",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "minH",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "maxH",
+                    "value": {
+                      "name": "number",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "i",
+                    "value": {
+                      "name": "string",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "onDrag",
+                    "value": {
+                      "name": "GridItemCallback",
+                      "elements": [
+                        {
+                          "name": "GridDragEvent"
+                        }
+                      ],
+                      "raw": "GridItemCallback<GridDragEvent>",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "onDragStart",
+                    "value": {
+                      "name": "GridItemCallback",
+                      "elements": [
+                        {
+                          "name": "GridDragEvent"
+                        }
+                      ],
+                      "raw": "GridItemCallback<GridDragEvent>",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "onDragStop",
+                    "value": {
+                      "name": "GridItemCallback",
+                      "elements": [
+                        {
+                          "name": "GridDragEvent"
+                        }
+                      ],
+                      "raw": "GridItemCallback<GridDragEvent>",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "onResize",
+                    "value": {
+                      "name": "GridItemCallback",
+                      "elements": [
+                        {
+                          "name": "GridResizeEvent"
+                        }
+                      ],
+                      "raw": "GridItemCallback<GridResizeEvent>",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "onResizeStart",
+                    "value": {
+                      "name": "GridItemCallback",
+                      "elements": [
+                        {
+                          "name": "GridResizeEvent"
+                        }
+                      ],
+                      "raw": "GridItemCallback<GridResizeEvent>",
+                      "required": false
+                    }
+                  },
+                  {
+                    "key": "onResizeStop",
+                    "value": {
+                      "name": "GridItemCallback",
+                      "elements": [
+                        {
+                          "name": "GridResizeEvent"
+                        }
+                      ],
+                      "raw": "GridItemCallback<GridResizeEvent>",
+                      "required": false
+                    }
+                  }
+                ]
+              },
+              "alias": "Props"
+            }
+          }
+        ],
+        "returns": null
+      },
+      {
+        "name": "getPositionParams",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "props",
+            "type": null
+          }
+        ],
+        "returns": {
+          "type": {
+            "name": "PositionParams"
+          }
+        }
+      },
+      {
+        "name": "createStyle",
+        "docblock": "This is where we set the grid item's absolute placement. It gets a little tricky because we want to do it\r\nwell when server rendering, and the only way to do that properly is to use percentage width/left because\r\nwe don't know exactly what the browser viewport is.\r\nUnfortunately, CSS Transforms, which are great for performance, break in this instance because a percentage\r\nleft is relative to the item itself, not its container! So we cannot use them on the server rendering pass.\r\n\n@param  {Object} pos Position object with width, height, left, top.\r\n@return {Object}     Style object.",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "pos",
+            "description": "Position object with width, height, left, top.",
+            "type": {
+              "name": "Position",
+              "alias": "Position"
+            },
+            "optional": false
+          }
+        ],
+        "returns": {
+          "description": "Style object.",
+          "type": {
+            "name": "signature",
+            "type": "object",
+            "raw": "{ [key: string]: ?string }",
+            "signature": {
+              "properties": [
+                {
+                  "key": {
+                    "name": "string"
+                  },
+                  "value": {
+                    "name": "string",
+                    "nullable": true,
+                    "required": true
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "description": "This is where we set the grid item's absolute placement. It gets a little tricky because we want to do it\r\nwell when server rendering, and the only way to do that properly is to use percentage width/left because\r\nwe don't know exactly what the browser viewport is.\r\nUnfortunately, CSS Transforms, which are great for performance, break in this instance because a percentage\r\nleft is relative to the item itself, not its container! So we cannot use them on the server rendering pass."
+      },
+      {
+        "name": "mixinDraggable",
+        "docblock": "Mix a Draggable instance into a child.\r\n@param  {Element} child    Child element.\r\n@return {Element}          Child wrapped in Draggable.",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "child",
+            "description": "Child element.",
+            "type": {
+              "name": "ReactElement",
+              "elements": [
+                {
+                  "name": "any"
+                }
+              ],
+              "raw": "ReactElement<any>",
+              "alias": "ReactElement"
+            },
+            "optional": false
+          },
+          {
+            "name": "isDraggable",
+            "type": {
+              "name": "boolean"
+            }
+          }
+        ],
+        "returns": {
+          "description": "Child wrapped in Draggable.",
+          "type": {
+            "name": "ReactElement",
+            "elements": [
+              {
+                "name": "any"
+              }
+            ],
+            "raw": "ReactElement<any>"
+          }
+        },
+        "description": "Mix a Draggable instance into a child."
+      },
+      {
+        "name": "mixinResizable",
+        "docblock": "Mix a Resizable instance into a child.\r\n@param  {Element} child    Child element.\r\n@param  {Object} position  Position object (pixel values)\r\n@return {Element}          Child wrapped in Resizable.",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "child",
+            "description": "Child element.",
+            "type": {
+              "name": "ReactElement",
+              "elements": [
+                {
+                  "name": "any"
+                }
+              ],
+              "raw": "ReactElement<any>",
+              "alias": "ReactElement"
+            },
+            "optional": false
+          },
+          {
+            "name": "position",
+            "description": "Position object (pixel values)",
+            "type": {
+              "name": "Position",
+              "alias": "Position"
+            },
+            "optional": false
+          },
+          {
+            "name": "isResizable",
+            "type": {
+              "name": "boolean"
+            }
+          }
+        ],
+        "returns": {
+          "description": "Child wrapped in Resizable.",
+          "type": {
+            "name": "ReactElement",
+            "elements": [
+              {
+                "name": "any"
+              }
+            ],
+            "raw": "ReactElement<any>"
+          }
+        },
+        "description": "Mix a Resizable instance into a child."
+      },
+      {
+        "name": "onDragStart",
+        "docblock": "onDragStart event handler\r\n@param  {Event}  e             event data\r\n@param  {Object} callbackData  an object with node, delta and position information",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "e",
+            "description": "event data",
+            "type": {
+              "name": "Event",
+              "alias": "Event"
+            },
+            "optional": false
+          },
+          {
+            "name": "{ node }: ReactDraggableCallbackData",
+            "type": {
+              "name": "ReactDraggableCallbackData",
+              "alias": "ReactDraggableCallbackData"
+            }
+          }
+        ],
+        "returns": null,
+        "description": "onDragStart event handler"
+      },
+      {
+        "name": "onDrag",
+        "docblock": "onDrag event handler\r\n@param  {Event}  e             event data\r\n@param  {Object} callbackData  an object with node, delta and position information",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "e",
+            "description": "event data",
+            "type": {
+              "name": "Event",
+              "alias": "Event"
+            },
+            "optional": false
+          },
+          {
+            "name": "{ node, deltaX, deltaY }: ReactDraggableCallbackData",
+            "type": {
+              "name": "ReactDraggableCallbackData",
+              "alias": "ReactDraggableCallbackData"
+            }
+          }
+        ],
+        "returns": null,
+        "description": "onDrag event handler"
+      },
+      {
+        "name": "onDragStop",
+        "docblock": "onDragStop event handler\r\n@param  {Event}  e             event data\r\n@param  {Object} callbackData  an object with node, delta and position information",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "e",
+            "description": "event data",
+            "type": {
+              "name": "Event",
+              "alias": "Event"
+            },
+            "optional": false
+          },
+          {
+            "name": "{ node }: ReactDraggableCallbackData",
+            "type": {
+              "name": "ReactDraggableCallbackData",
+              "alias": "ReactDraggableCallbackData"
+            }
+          }
+        ],
+        "returns": null,
+        "description": "onDragStop event handler"
+      },
+      {
+        "name": "onResizeStop",
+        "docblock": "onResizeStop event handler\r\n@param  {Event}  e             event data\r\n@param  {Object} callbackData  an object with node and size information",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "e",
+            "description": "event data",
+            "type": {
+              "name": "Event",
+              "alias": "Event"
+            },
+            "optional": false
+          },
+          {
+            "name": "callbackData",
+            "description": "an object with node and size information",
+            "type": {
+              "name": "signature",
+              "type": "object",
+              "raw": "{ node: HTMLElement, size: Position }",
+              "signature": {
+                "properties": [
+                  {
+                    "key": "node",
+                    "value": {
+                      "name": "HTMLElement",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "size",
+                    "value": {
+                      "name": "Position",
+                      "required": true
+                    }
+                  }
+                ]
+              }
+            },
+            "optional": false
+          }
+        ],
+        "returns": null,
+        "description": "onResizeStop event handler"
+      },
+      {
+        "name": "onResizeStart",
+        "docblock": "onResizeStart event handler\r\n@param  {Event}  e             event data\r\n@param  {Object} callbackData  an object with node and size information",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "e",
+            "description": "event data",
+            "type": {
+              "name": "Event",
+              "alias": "Event"
+            },
+            "optional": false
+          },
+          {
+            "name": "callbackData",
+            "description": "an object with node and size information",
+            "type": {
+              "name": "signature",
+              "type": "object",
+              "raw": "{ node: HTMLElement, size: Position }",
+              "signature": {
+                "properties": [
+                  {
+                    "key": "node",
+                    "value": {
+                      "name": "HTMLElement",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "size",
+                    "value": {
+                      "name": "Position",
+                      "required": true
+                    }
+                  }
+                ]
+              }
+            },
+            "optional": false
+          }
+        ],
+        "returns": null,
+        "description": "onResizeStart event handler"
+      },
+      {
+        "name": "onResize",
+        "docblock": "onResize event handler\r\n@param  {Event}  e             event data\r\n@param  {Object} callbackData  an object with node and size information",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "e",
+            "description": "event data",
+            "type": {
+              "name": "Event",
+              "alias": "Event"
+            },
+            "optional": false
+          },
+          {
+            "name": "callbackData",
+            "description": "an object with node and size information",
+            "type": {
+              "name": "signature",
+              "type": "object",
+              "raw": "{ node: HTMLElement, size: Position }",
+              "signature": {
+                "properties": [
+                  {
+                    "key": "node",
+                    "value": {
+                      "name": "HTMLElement",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "size",
+                    "value": {
+                      "name": "Position",
+                      "required": true
+                    }
+                  }
+                ]
+              }
+            },
+            "optional": false
+          }
+        ],
+        "returns": null,
+        "description": "onResize event handler"
+      },
+      {
+        "name": "onResizeHandler",
+        "docblock": "Wrapper around drag events to provide more useful data.\r\nAll drag events call the function with the given handler name,\r\nwith the signature (index, x, y).\r\n\n@param  {String} handlerName Handler name to wrap.\r\n@return {Function}           Handler function.",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "e",
+            "type": {
+              "name": "Event",
+              "alias": "Event"
+            }
+          },
+          {
+            "name": "{ node, size }: { node: HTMLElement, size: Position }",
+            "type": {
+              "name": "signature",
+              "type": "object",
+              "raw": "{ node: HTMLElement, size: Position }",
+              "signature": {
+                "properties": [
+                  {
+                    "key": "node",
+                    "value": {
+                      "name": "HTMLElement",
+                      "required": true
+                    }
+                  },
+                  {
+                    "key": "size",
+                    "value": {
+                      "name": "Position",
+                      "required": true
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "handlerName",
+            "description": "Handler name to wrap.",
+            "type": {
+              "name": "string"
+            },
+            "optional": false
+          }
+        ],
+        "returns": {
+          "description": "Handler function.",
+          "type": {
+            "name": "Function"
+          }
+        },
+        "description": "Wrapper around drag events to provide more useful data.\r\nAll drag events call the function with the given handler name,\r\nwith the signature (index, x, y)."
+      }
+    ],
+    "props": {
+      "children": {
+        "type": {
+          "name": "element"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "ReactElement",
+          "elements": [
+            {
+              "name": "any"
+            }
+          ],
+          "raw": "ReactElement<any>"
+        }
+      },
+      "cols": {
+        "type": {
+          "name": "number"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        }
+      },
+      "containerWidth": {
+        "type": {
+          "name": "number"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        }
+      },
+      "rowHeight": {
+        "type": {
+          "name": "number"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        }
+      },
+      "margin": {
+        "type": {
+          "name": "array"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "tuple",
+          "raw": "[number, number]",
+          "elements": [
+            {
+              "name": "number"
+            },
+            {
+              "name": "number"
+            }
+          ]
+        }
+      },
+      "maxRows": {
+        "type": {
+          "name": "number"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        }
+      },
+      "containerPadding": {
+        "type": {
+          "name": "array"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "tuple",
+          "raw": "[number, number]",
+          "elements": [
+            {
+              "name": "number"
+            },
+            {
+              "name": "number"
+            }
+          ]
+        }
+      },
+      "x": {
+        "type": {
+          "name": "number"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        }
+      },
+      "y": {
+        "type": {
+          "name": "number"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        }
+      },
+      "w": {
+        "type": {
+          "name": "number"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        }
+      },
+      "h": {
+        "type": {
+          "name": "number"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        }
+      },
+      "minW": {
+        "type": {
+          "name": "custom",
+          "raw": "function(props: Props, propName: string) {\r\n  const value = props[propName];\r\n  if (typeof value !== \"number\") return new Error(\"minWidth not Number\");\r\n  if (value > props.w || value > props.maxW)\r\n    return new Error(\"minWidth larger than item width/maxWidth\");\r\n}"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        },
+        "defaultValue": {
+          "value": "1",
+          "computed": false
+        }
+      },
+      "maxW": {
+        "type": {
+          "name": "custom",
+          "raw": "function(props: Props, propName: string) {\r\n  const value = props[propName];\r\n  if (typeof value !== \"number\") return new Error(\"maxWidth not Number\");\r\n  if (value < props.w || value < props.minW)\r\n    return new Error(\"maxWidth smaller than item width/minWidth\");\r\n}"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        },
+        "defaultValue": {
+          "value": "Infinity",
+          "computed": true
+        }
+      },
+      "minH": {
+        "type": {
+          "name": "custom",
+          "raw": "function(props: Props, propName: string) {\r\n  const value = props[propName];\r\n  if (typeof value !== \"number\") return new Error(\"minHeight not Number\");\r\n  if (value > props.h || value > props.maxH)\r\n    return new Error(\"minHeight larger than item height/maxHeight\");\r\n}"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        },
+        "defaultValue": {
+          "value": "1",
+          "computed": false
+        }
+      },
+      "maxH": {
+        "type": {
+          "name": "custom",
+          "raw": "function(props: Props, propName: string) {\r\n  const value = props[propName];\r\n  if (typeof value !== \"number\") return new Error(\"maxHeight not Number\");\r\n  if (value < props.h || value < props.minH)\r\n    return new Error(\"maxHeight smaller than item height/minHeight\");\r\n}"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        },
+        "defaultValue": {
+          "value": "Infinity",
+          "computed": true
+        }
+      },
+      "i": {
+        "type": {
+          "name": "string"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "string"
+        }
+      },
+      "onDragStop": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "GridItemCallback",
+          "elements": [
+            {
+              "name": "GridDragEvent"
+            }
+          ],
+          "raw": "GridItemCallback<GridDragEvent>"
+        }
+      },
+      "onDragStart": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "GridItemCallback",
+          "elements": [
+            {
+              "name": "GridDragEvent"
+            }
+          ],
+          "raw": "GridItemCallback<GridDragEvent>"
+        }
+      },
+      "onDrag": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "GridItemCallback",
+          "elements": [
+            {
+              "name": "GridDragEvent"
+            }
+          ],
+          "raw": "GridItemCallback<GridDragEvent>"
+        }
+      },
+      "onResizeStop": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "GridItemCallback",
+          "elements": [
+            {
+              "name": "GridResizeEvent"
+            }
+          ],
+          "raw": "GridItemCallback<GridResizeEvent>"
+        }
+      },
+      "onResizeStart": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "GridItemCallback",
+          "elements": [
+            {
+              "name": "GridResizeEvent"
+            }
+          ],
+          "raw": "GridItemCallback<GridResizeEvent>"
+        }
+      },
+      "onResize": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "GridItemCallback",
+          "elements": [
+            {
+              "name": "GridResizeEvent"
+            }
+          ],
+          "raw": "GridItemCallback<GridResizeEvent>"
+        }
+      },
+      "isDraggable": {
+        "type": {
+          "name": "bool"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "boolean"
+        }
+      },
+      "isResizable": {
+        "type": {
+          "name": "bool"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "boolean"
+        }
+      },
+      "static": {
+        "type": {
+          "name": "bool"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "boolean"
+        }
+      },
+      "useCSSTransforms": {
+        "type": {
+          "name": "bool"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "boolean"
+        }
+      },
+      "transformScale": {
+        "type": {
+          "name": "number"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        },
+        "defaultValue": {
+          "value": "1",
+          "computed": false
+        }
+      },
+      "className": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "string"
+        },
+        "defaultValue": {
+          "value": "\"\"",
+          "computed": false
+        }
+      },
+      "handle": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "string"
+        },
+        "defaultValue": {
+          "value": "\"\"",
+          "computed": false
+        }
+      },
+      "cancel": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "string"
+        },
+        "defaultValue": {
+          "value": "\"\"",
+          "computed": false
+        }
+      },
+      "droppingPosition": {
+        "type": {
+          "name": "shape",
+          "value": {
+            "e": {
+              "name": "object",
+              "required": true
+            },
+            "left": {
+              "name": "number",
+              "required": true
+            },
+            "top": {
+              "name": "number",
+              "required": true
+            }
+          }
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "DroppingPosition"
+        }
+      },
+      "usePercentages": {
+        "required": false,
+        "flowType": {
+          "name": "boolean"
+        },
+        "description": ""
+      },
+      "style": {
+        "required": false,
+        "flowType": {
+          "name": "Object"
+        },
+        "description": ""
+      }
+    }
+  },
+  "src/lib/components/react-grid-layout/lib/ReactGridLayout.jsx": {
+    "description": "A reactive, fluid grid layout with draggable, resizable components.",
+    "displayName": "ReactGridLayout",
+    "methods": [
+      {
+        "name": "containerHeight",
+        "docblock": "Calculates a pixel value for the container.\r\n@return {String} Container height in pixels.",
+        "modifiers": [],
+        "params": [],
+        "returns": {
+          "description": "Container height in pixels.",
+          "type": {
+            "name": "String"
+          }
+        },
+        "description": "Calculates a pixel value for the container."
+      },
+      {
+        "name": "onDragStart",
+        "docblock": "When dragging starts\r\n@param {String} i Id of the child\r\n@param {Number} x X position of the move\r\n@param {Number} y Y position of the move\r\n@param {Event} e The mousedown event\r\n@param {Element} node The current dragging DOM element",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "i",
+            "description": "Id of the child",
+            "type": {
+              "name": "string"
+            },
+            "optional": false
+          },
+          {
+            "name": "x",
+            "description": "X position of the move",
+            "type": {
+              "name": "number"
+            },
+            "optional": false
+          },
+          {
+            "name": "y",
+            "description": "Y position of the move",
+            "type": {
+              "name": "number"
+            },
+            "optional": false
+          },
+          {
+            "name": "{ e, node }: GridDragEvent",
+            "type": {
+              "name": "GridDragEvent",
+              "alias": "GridDragEvent"
+            }
+          }
+        ],
+        "returns": null,
+        "description": "When dragging starts"
+      },
+      {
+        "name": "onDrag",
+        "docblock": "Each drag movement create a new dragelement and move the element to the dragged location\r\n@param {String} i Id of the child\r\n@param {Number} x X position of the move\r\n@param {Number} y Y position of the move\r\n@param {Event} e The mousedown event\r\n@param {Element} node The current dragging DOM element",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "i",
+            "description": "Id of the child",
+            "type": {
+              "name": "string"
+            },
+            "optional": false
+          },
+          {
+            "name": "x",
+            "description": "X position of the move",
+            "type": {
+              "name": "number"
+            },
+            "optional": false
+          },
+          {
+            "name": "y",
+            "description": "Y position of the move",
+            "type": {
+              "name": "number"
+            },
+            "optional": false
+          },
+          {
+            "name": "{ e, node }: GridDragEvent",
+            "type": {
+              "name": "GridDragEvent",
+              "alias": "GridDragEvent"
+            }
+          }
+        ],
+        "returns": null,
+        "description": "Each drag movement create a new dragelement and move the element to the dragged location"
+      },
+      {
+        "name": "onDragStop",
+        "docblock": "When dragging stops, figure out which position the element is closest to and update its x and y.\r\n@param  {String} i Index of the child.\r\n@param {Number} x X position of the move\r\n@param {Number} y Y position of the move\r\n@param {Event} e The mousedown event\r\n@param {Element} node The current dragging DOM element",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "i",
+            "description": "Index of the child.",
+            "type": {
+              "name": "string"
+            },
+            "optional": false
+          },
+          {
+            "name": "x",
+            "description": "X position of the move",
+            "type": {
+              "name": "number"
+            },
+            "optional": false
+          },
+          {
+            "name": "y",
+            "description": "Y position of the move",
+            "type": {
+              "name": "number"
+            },
+            "optional": false
+          },
+          {
+            "name": "{ e, node }: GridDragEvent",
+            "type": {
+              "name": "GridDragEvent",
+              "alias": "GridDragEvent"
+            }
+          }
+        ],
+        "returns": null,
+        "description": "When dragging stops, figure out which position the element is closest to and update its x and y."
+      },
+      {
+        "name": "onLayoutMaybeChanged",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "newLayout",
+            "type": {
+              "name": "Layout",
+              "alias": "Layout"
+            }
+          },
+          {
+            "name": "oldLayout",
+            "type": {
+              "name": "Layout",
+              "nullable": true
+            }
+          }
+        ],
+        "returns": null
+      },
+      {
+        "name": "onResizeStart",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "i",
+            "type": {
+              "name": "string"
+            }
+          },
+          {
+            "name": "w",
+            "type": {
+              "name": "number"
+            }
+          },
+          {
+            "name": "h",
+            "type": {
+              "name": "number"
+            }
+          },
+          {
+            "name": "{ e, node }: GridResizeEvent",
+            "type": {
+              "name": "GridResizeEvent",
+              "alias": "GridResizeEvent"
+            }
+          }
+        ],
+        "returns": null
+      },
+      {
+        "name": "onResize",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "i",
+            "type": {
+              "name": "string"
+            }
+          },
+          {
+            "name": "w",
+            "type": {
+              "name": "number"
+            }
+          },
+          {
+            "name": "h",
+            "type": {
+              "name": "number"
+            }
+          },
+          {
+            "name": "{ e, node }: GridResizeEvent",
+            "type": {
+              "name": "GridResizeEvent",
+              "alias": "GridResizeEvent"
+            }
+          }
+        ],
+        "returns": null
+      },
+      {
+        "name": "onResizeStop",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "i",
+            "type": {
+              "name": "string"
+            }
+          },
+          {
+            "name": "w",
+            "type": {
+              "name": "number"
+            }
+          },
+          {
+            "name": "h",
+            "type": {
+              "name": "number"
+            }
+          },
+          {
+            "name": "{ e, node }: GridResizeEvent",
+            "type": {
+              "name": "GridResizeEvent",
+              "alias": "GridResizeEvent"
+            }
+          }
+        ],
+        "returns": null
+      },
+      {
+        "name": "placeholder",
+        "docblock": "Create a placeholder object.\r\n@return {Element} Placeholder div.",
+        "modifiers": [],
+        "params": [],
+        "returns": {
+          "description": "Placeholder div.",
+          "type": {
+            "name": "ReactElement",
+            "elements": [
+              {
+                "name": "any"
+              }
+            ],
+            "raw": "ReactElement<any>",
+            "nullable": true
+          }
+        },
+        "description": "Create a placeholder object."
+      },
+      {
+        "name": "processGridItem",
+        "docblock": "Given a grid item, set its style attributes & surround in a <Draggable>.\r\n@param  {Element} child React element.\r\n@return {Element}       Element wrapped in draggable and properly placed.",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "child",
+            "description": "React element.",
+            "type": {
+              "name": "ReactElement",
+              "elements": [
+                {
+                  "name": "any"
+                }
+              ],
+              "raw": "ReactElement<any>",
+              "alias": "ReactElement"
+            },
+            "optional": false
+          },
+          {
+            "name": "isDroppingItem",
+            "optional": true,
+            "type": {
+              "name": "boolean"
+            }
+          }
+        ],
+        "returns": {
+          "description": "Element wrapped in draggable and properly placed.",
+          "type": {
+            "name": "ReactElement",
+            "elements": [
+              {
+                "name": "any"
+              }
+            ],
+            "raw": "ReactElement<any>",
+            "nullable": true
+          }
+        },
+        "description": "Given a grid item, set its style attributes & surround in a <Draggable>."
+      },
+      {
+        "name": "onDragOver",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "e",
+            "type": {
+              "name": "DragOverEvent",
+              "alias": "DragOverEvent"
+            }
+          }
+        ],
+        "returns": null
+      },
+      {
+        "name": "removeDroppingPlaceholder",
+        "docblock": null,
+        "modifiers": [],
+        "params": [],
+        "returns": null
+      },
+      {
+        "name": "onDragLeave",
+        "docblock": null,
+        "modifiers": [],
+        "params": [],
+        "returns": null
+      },
+      {
+        "name": "onDragEnter",
+        "docblock": null,
+        "modifiers": [],
+        "params": [],
+        "returns": null
+      },
+      {
+        "name": "onDrop",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "e",
+            "type": {
+              "name": "Event",
+              "alias": "Event"
+            }
+          }
+        ],
+        "returns": null
+      }
+    ],
+    "props": {
+      "autoSize": {
+        "defaultValue": {
+          "value": "true",
+          "computed": false
+        },
+        "required": false
+      },
+      "cols": {
+        "defaultValue": {
+          "value": "12",
+          "computed": false
+        },
+        "required": false
+      },
+      "className": {
+        "defaultValue": {
+          "value": "\"\"",
+          "computed": false
+        },
+        "required": false
+      },
+      "style": {
+        "defaultValue": {
+          "value": "{}",
+          "computed": false
+        },
+        "required": false
+      },
+      "draggableHandle": {
+        "defaultValue": {
+          "value": "\"\"",
+          "computed": false
+        },
+        "required": false
+      },
+      "draggableCancel": {
+        "defaultValue": {
+          "value": "\"\"",
+          "computed": false
+        },
+        "required": false
+      },
+      "containerPadding": {
+        "defaultValue": {
+          "value": "null",
+          "computed": false
+        },
+        "required": false
+      },
+      "rowHeight": {
+        "defaultValue": {
+          "value": "150",
+          "computed": false
+        },
+        "required": false
+      },
+      "maxRows": {
+        "defaultValue": {
+          "value": "Infinity",
+          "computed": true
+        },
+        "required": false
+      },
+      "layout": {
+        "defaultValue": {
+          "value": "[]",
+          "computed": false
+        },
+        "required": false
+      },
+      "margin": {
+        "defaultValue": {
+          "value": "[10, 10]",
+          "computed": false
+        },
+        "required": false
+      },
+      "isDraggable": {
+        "defaultValue": {
+          "value": "true",
+          "computed": false
+        },
+        "required": false
+      },
+      "isResizable": {
+        "defaultValue": {
+          "value": "true",
+          "computed": false
+        },
+        "required": false
+      },
+      "isDroppable": {
+        "defaultValue": {
+          "value": "false",
+          "computed": false
+        },
+        "required": false
+      },
+      "useCSSTransforms": {
+        "defaultValue": {
+          "value": "true",
+          "computed": false
+        },
+        "required": false
+      },
+      "transformScale": {
+        "defaultValue": {
+          "value": "1",
+          "computed": false
+        },
+        "required": false
+      },
+      "verticalCompact": {
+        "defaultValue": {
+          "value": "true",
+          "computed": false
+        },
+        "required": false
+      },
+      "compactType": {
+        "defaultValue": {
+          "value": "\"vertical\"",
+          "computed": false
+        },
+        "required": false
+      },
+      "preventCollision": {
+        "defaultValue": {
+          "value": "false",
+          "computed": false
+        },
+        "required": false
+      },
+      "droppingItem": {
+        "defaultValue": {
+          "value": "{\r\n  i: \"__dropping-elem__\",\r\n  h: 1,\r\n  w: 1\r\n}",
+          "computed": false
+        },
+        "required": false
+      },
+      "onLayoutChange": {
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        },
+        "required": false
+      },
+      "onDragStart": {
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        },
+        "required": false
+      },
+      "onDrag": {
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        },
+        "required": false
+      },
+      "onDragStop": {
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        },
+        "required": false
+      },
+      "onResizeStart": {
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        },
+        "required": false
+      },
+      "onResize": {
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        },
+        "required": false
+      },
+      "onResizeStop": {
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        },
+        "required": false
+      },
+      "onDrop": {
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        },
+        "required": false
+      }
+    },
+    "composes": [
+      "./ReactGridLayoutPropTypes"
+    ]
+  },
+  "src/lib/components/react-grid-layout/lib/ResponsiveReactGridLayout.jsx": {
+    "description": "",
+    "displayName": "ResponsiveReactGridLayout",
+    "methods": [
+      {
+        "name": "generateInitialState",
+        "docblock": null,
+        "modifiers": [],
+        "params": [],
+        "returns": {
+          "type": {
+            "name": "signature",
+            "type": "object",
+            "raw": "{\r\n  layout: Layout,\r\n  breakpoint: string,\r\n  cols: number,\r\n  layouts?: { [key: string]: Layout }\r\n}",
+            "signature": {
+              "properties": [
+                {
+                  "key": "layout",
+                  "value": {
+                    "name": "Layout",
+                    "required": true
+                  }
+                },
+                {
+                  "key": "breakpoint",
+                  "value": {
+                    "name": "string",
+                    "required": true
+                  }
+                },
+                {
+                  "key": "cols",
+                  "value": {
+                    "name": "number",
+                    "required": true
+                  }
+                },
+                {
+                  "key": "layouts",
+                  "value": {
+                    "name": "signature",
+                    "type": "object",
+                    "raw": "{ [key: string]: Layout }",
+                    "signature": {
+                      "properties": [
+                        {
+                          "key": {
+                            "name": "string"
+                          },
+                          "value": {
+                            "name": "Layout",
+                            "required": true
+                          }
+                        }
+                      ]
+                    },
+                    "required": false
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "onLayoutChange",
+        "docblock": null,
+        "modifiers": [],
+        "params": [
+          {
+            "name": "layout",
+            "type": {
+              "name": "Layout",
+              "alias": "Layout"
+            }
+          }
+        ],
+        "returns": null
+      },
+      {
+        "name": "onWidthChange",
+        "docblock": "When the width changes work through breakpoints and reset state with the new width & breakpoint.\r\nWidth changes are necessary to figure out the widget widths.",
+        "modifiers": [],
+        "params": [
+          {
+            "name": "prevProps",
+            "type": {
+              "name": "Props",
+              "elements": [
+                {
+                  "name": "unknown"
+                }
+              ],
+              "raw": "Props<*>",
+              "alias": "Props"
+            }
+          }
+        ],
+        "returns": null,
+        "description": "When the width changes work through breakpoints and reset state with the new width & breakpoint.\r\nWidth changes are necessary to figure out the widget widths."
+      }
+    ],
+    "props": {
+      "breakpoint": {
+        "type": {
+          "name": "string"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "Breakpoint",
+          "nullable": true
+        }
+      },
+      "breakpoints": {
+        "type": {
+          "name": "object"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "Breakpoints",
+          "elements": [
+            {
+              "name": "Breakpoint"
+            }
+          ],
+          "raw": "Breakpoints<Breakpoint>"
+        },
+        "defaultValue": {
+          "value": "{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }",
+          "computed": false
+        }
+      },
+      "cols": {
+        "type": {
+          "name": "object"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "signature",
+          "type": "object",
+          "raw": "{ [key: Breakpoint]: number }",
+          "signature": {
+            "properties": [
+              {
+                "key": {
+                  "name": "Breakpoint"
+                },
+                "value": {
+                  "name": "number",
+                  "required": true
+                }
+              }
+            ]
+          }
+        },
+        "defaultValue": {
+          "value": "{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }",
+          "computed": false
+        }
+      },
+      "margin": {
+        "type": {
+          "name": "union",
+          "value": [
+            {
+              "name": "array"
+            },
+            {
+              "name": "object"
+            }
+          ]
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "union",
+          "raw": "{ [key: Breakpoint]: [number, number] } | [number, number]",
+          "elements": [
+            {
+              "name": "signature",
+              "type": "object",
+              "raw": "{ [key: Breakpoint]: [number, number] }",
+              "signature": {
+                "properties": [
+                  {
+                    "key": {
+                      "name": "Breakpoint"
+                    },
+                    "value": {
+                      "name": "tuple",
+                      "raw": "[number, number]",
+                      "elements": [
+                        {
+                          "name": "number"
+                        },
+                        {
+                          "name": "number"
+                        }
+                      ],
+                      "required": true
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "tuple",
+              "raw": "[number, number]",
+              "elements": [
+                {
+                  "name": "number"
+                },
+                {
+                  "name": "number"
+                }
+              ]
+            }
+          ]
+        },
+        "defaultValue": {
+          "value": "[10, 10]",
+          "computed": false
+        }
+      },
+      "containerPadding": {
+        "type": {
+          "name": "union",
+          "value": [
+            {
+              "name": "array"
+            },
+            {
+              "name": "object"
+            }
+          ]
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "union",
+          "raw": "{ [key: Breakpoint]: [number, number] } | [number, number]",
+          "elements": [
+            {
+              "name": "signature",
+              "type": "object",
+              "raw": "{ [key: Breakpoint]: [number, number] }",
+              "signature": {
+                "properties": [
+                  {
+                    "key": {
+                      "name": "Breakpoint"
+                    },
+                    "value": {
+                      "name": "tuple",
+                      "raw": "[number, number]",
+                      "elements": [
+                        {
+                          "name": "number"
+                        },
+                        {
+                          "name": "number"
+                        }
+                      ],
+                      "required": true
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "tuple",
+              "raw": "[number, number]",
+              "elements": [
+                {
+                  "name": "number"
+                },
+                {
+                  "name": "number"
+                }
+              ]
+            }
+          ]
+        },
+        "defaultValue": {
+          "value": "{\r\n  lg: [0, 0],\r\n  md: [0, 0],\r\n  sm: [0, 0],\r\n  xs: [0, 0],\r\n  xxs: [0, 0]\r\n}",
+          "computed": false
+        }
+      },
+      "layouts": {
+        "type": {
+          "name": "custom",
+          "raw": "function(props: Props<>, propName: string) {\r\n  if (type(props[propName]) !== \"[object Object]\") {\r\n    throw new Error(\r\n      \"Layout property must be an object. Received: \" +\r\n        type(props[propName])\r\n    );\r\n  }\r\n  Object.keys(props[propName]).forEach(key => {\r\n    if (!(key in props.breakpoints)) {\r\n      throw new Error(\r\n        \"Each key in layouts must align with a key in breakpoints.\"\r\n      );\r\n    }\r\n    validateLayout(props.layouts[key], \"layouts.\" + key);\r\n  });\r\n}"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "ResponsiveLayout",
+          "elements": [
+            {
+              "name": "Breakpoint"
+            }
+          ],
+          "raw": "ResponsiveLayout<Breakpoint>"
+        },
+        "defaultValue": {
+          "value": "{}",
+          "computed": false
+        }
+      },
+      "width": {
+        "type": {
+          "name": "number"
+        },
+        "required": true,
+        "description": "",
+        "flowType": {
+          "name": "number"
+        }
+      },
+      "onBreakpointChange": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "signature",
+          "type": "function",
+          "raw": "(Breakpoint, cols: number) => void",
+          "signature": {
+            "arguments": [
+              {
+                "name": "",
+                "type": {
+                  "name": "Breakpoint"
+                }
+              },
+              {
+                "name": "cols",
+                "type": {
+                  "name": "number"
+                }
+              }
+            ],
+            "return": {
+              "name": "void"
+            }
+          }
+        },
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        }
+      },
+      "onLayoutChange": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "signature",
+          "type": "function",
+          "raw": "(Layout, { [key: Breakpoint]: Layout }) => void",
+          "signature": {
+            "arguments": [
+              {
+                "name": "",
+                "type": {
+                  "name": "Layout"
+                }
+              },
+              {
+                "name": "",
+                "type": {
+                  "name": "signature",
+                  "type": "object",
+                  "raw": "{ [key: Breakpoint]: Layout }",
+                  "signature": {
+                    "properties": [
+                      {
+                        "key": {
+                          "name": "Breakpoint"
+                        },
+                        "value": {
+                          "name": "Layout",
+                          "required": true
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "return": {
+              "name": "void"
+            }
+          }
+        },
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        }
+      },
+      "onWidthChange": {
+        "type": {
+          "name": "func"
+        },
+        "required": false,
+        "description": "",
+        "flowType": {
+          "name": "signature",
+          "type": "function",
+          "raw": "(\r\n  containerWidth: number,\r\n  margin: [number, number],\r\n  cols: number,\r\n  containerPadding: [number, number] | null\r\n) => void",
+          "signature": {
+            "arguments": [
+              {
+                "name": "containerWidth",
+                "type": {
+                  "name": "number"
+                }
+              },
+              {
+                "name": "margin",
+                "type": {
+                  "name": "tuple",
+                  "raw": "[number, number]",
+                  "elements": [
+                    {
+                      "name": "number"
+                    },
+                    {
+                      "name": "number"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "cols",
+                "type": {
+                  "name": "number"
+                }
+              },
+              {
+                "name": "containerPadding",
+                "type": {
+                  "name": "union",
+                  "raw": "[number, number] | null",
+                  "elements": [
+                    {
+                      "name": "tuple",
+                      "raw": "[number, number]",
+                      "elements": [
+                        {
+                          "name": "number"
+                        },
+                        {
+                          "name": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "null"
+                    }
+                  ]
+                }
+              }
+            ],
+            "return": {
+              "name": "void"
+            }
+          }
+        },
+        "defaultValue": {
+          "value": "noop",
+          "computed": true
+        }
+      }
+    },
+    "composes": [
+      null
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 import dash_table as dt
 import dash_core_components as dcc
 import dash_html_components as html
+import drag_grid as dg
 
 import math as math
 
@@ -127,7 +128,11 @@ def app_layout():
                 ),
                 html.Pre(
                         cf.warning_dataheader,
-                        style={'textAlign': 'left', 'marginLeft': 20, 'color': '#d40000'},
+                        style={
+                            'textAlign': 'left',
+                            'marginLeft': 20,
+                            'color': '#f3742b'
+                        },
                         className='four columns'
                 )
             ],
@@ -135,31 +140,52 @@ def app_layout():
         ),
         html.Div(
             children=[
-                dcc.Graph(
-                    id='tempgraph',
-                    className='six columns',
-                    style={'borderStyle': 'solid'}
+                html.Div(
+                    children=[
+                        dg.DragGrid(
+                            id='moveaxis',
+                            label='label',
+                            width=1700
+                        ),
+                        dcc.Dropdown(
+                            id='graph_params',
+                            multi=True
+                        )
+                    ],
+                    className='six columns'
                 ),
                 html.Div(
                     children=[
-                        html.Div(
-                            dt.DataTable( # set max height and vertical scrolling after determining optimal size
-                                id='graphslice_table',
-                                columns=[
-                                    {'name': 'Name', 'id': 'gName', 'type': 'text', 'editable': False},
-                                    {'name': 'Axis', 'id': 'gAxis', 'type': 'numeric', 'presentation': 'dropdown'},
-                                    {'name': 'Start', 'id': 'gStart', 'type': 'numeric', 'presentation': 'dropdown'},
-                                    {'name': 'Stop', 'id': 'gStop', 'type': 'numeric', 'presentation': 'dropdown'}
-                                ],
-                                editable=True
-                            ),
-                            style={'borderStyle': 'solid'}
+                        dt.DataTable(
+                            id='slice_table',
+                            editable=True,
+                            style_table={'overflowX': 'scroll'}
                         ),
+                        html.Div(
+                            children=[
+                                html.Pre(id='slice_validation'),
+                                html.Div(
+                                    id='slice_indices',
+                                    style={'display': 'none'}
+                                )
+                            ]
+                        )
                     ],
                     className='six columns'
                 )
             ],
-            className='one row'
+            className='one row',
+            style={'borderStyle': 'solid'}
+        ),
+        html.Div(
+            dg.DragGrid(
+                id='graphs',
+                label='label',
+                rowheight=600,
+                width=3500
+            ),
+            className='one row',
+            style={'borderStyle': 'solid'}
         ),
 
 

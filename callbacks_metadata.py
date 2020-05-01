@@ -99,7 +99,7 @@ def metadata_callbacks(app):
         Output('metadata', 'children'),
         [Input('confirm_values', 'n_clicks')],
         [State('defval_methods', 'children'),
-        State('metadata_table', 'data')]
+         State('metadata_table', 'data')]
     )
     def define_values(n_clicks, defval_methods, data):
         """rewrite this to also handle the many exceptions that can occur

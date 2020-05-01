@@ -1,0 +1,15 @@
+Package: dragGrid
+Title: draggable grid for plotly dash
+Version: 0.0.1
+Description: draggable grid for plotly dash
+Depends: R (>= 3.0.2)
+Imports: 
+Suggests: 
+License: MIT + file LICENSE
+URL: 
+BugReports: 
+Encoding: UTF-8
+LazyData: true
+KeepSource: true
+Author: Lawrence Wang [aut]
+Maintainer: Lawrence Wang <lawrence.fy.wang@gmail.com>

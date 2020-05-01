@@ -1,0 +1,7 @@
+include drag_grid/drag_grid.min.js
+include drag_grid/drag_grid.min.js.map
+include drag_grid/metadata.json
+include drag_grid/package-info.json
+include README.md
+include LICENSE
+include package.json

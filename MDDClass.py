@@ -103,8 +103,8 @@ class MDD:
         new_pos = np.array(new_pos)
         self.dataArray = np.moveaxis(
             self.dataArray,
-            new_pos - 1,
-            np.arange(len(self.metadata.index))
+            np.arange(len(self.metadata.index)),
+            new_pos - 1
         )
 
         self.metadata['Axis'] = new_pos
@@ -124,42 +124,42 @@ class MDD:
 
 # mdd = MDD(metadata)
 
-# path = Path.cwd() / 'testfiles'
-# filelist = [path / 'T1P2.csv', path / 'T1_5P2.csv', path / 'T2P2.csv', path / 'T2_5P2.csv', path / 'T3P2.csv'] * 3
-# values = load_data(filelist, ['Current'])
-# indices = [
-#     {
-#         3: (2, 2),
-#         2: (1, 1),
-#         1: (0, 499)
-#     },
-#     {
-#         3: (2, 2),
-#         2: (1.5, 1.5),
-#         1: (0, 499)
-#     },
-#     {
-#         3: (2, 2),
-#         2: (2, 2),
-#         1: (0, 499)
-#     },
-#     {
-#         3: (2, 2),
-#         2: (2.5, 2.5),
-#         1: (0, 499)
-#     },
-#     {
-#         3: (2, 2),
-#         2: (3, 3),
-#         1: (0, 499)
-#     }
-# ]
-# for i, csv in enumerate(filelist[0:5]):
-#     values = load_data([csv], ['Current'])
-#     mdd.add_values(values, indices[i])
-# print(mdd.dataDF.head(20))
-# print(mdd.dataDF['y'].unique())
+# # path = Path.cwd() / 'testfiles'
+# # filelist = [path / 'T1P2.csv', path / 'T1_5P2.csv', path / 'T2P2.csv', path / 'T2_5P2.csv', path / 'T3P2.csv'] * 3
+# # values = load_data(filelist, ['Current'])
+# # indices = [
+# #     {
+# #         3: (2, 2),
+# #         2: (1, 1),
+# #         1: (0, 499)
+# #     },
+# #     {
+# #         3: (2, 2),
+# #         2: (1.5, 1.5),
+# #         1: (0, 499)
+# #     },
+# #     {
+# #         3: (2, 2),
+# #         2: (2, 2),
+# #         1: (0, 499)
+# #     },
+# #     {
+# #         3: (2, 2),
+# #         2: (2.5, 2.5),
+# #         1: (0, 499)
+# #     },
+# #     {
+# #         3: (2, 2),
+# #         2: (3, 3),
+# #         1: (0, 499)
+# #     }
+# # ]
+# # for i, csv in enumerate(filelist[0:5]):
+# #     values = load_data([csv], ['Current'])
+# #     mdd.add_values(values, indices[i])
+# # print(mdd.dataDF.head(20))
+# # print(mdd.dataDF['y'].unique())
 # print('#################################################')
-# mdd.move_axis([3, 2, 1])
+# mdd.move_axis([3, 1, 2])
 # print(mdd.dataDF.head(20))
-# print(mdd.dataArray)
+# print(mdd.dataArray.shape)

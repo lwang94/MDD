@@ -4,6 +4,8 @@ import dash_daq as daq
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
+import bisect
+import json
 import pandas as pd
 
 import MDDClass as mc
@@ -143,78 +145,125 @@ def mdd_callbacks(app):
 
 
     @app.callback(
-        [Output('graphslice_table', 'data'),
-        Output('graphslice_table', 'dropdown')],
-        [Input('metadata', 'children'),
-        Input('graphslice_table', 'data_timestamp')],
-        [State('graphslice_table', 'data'),
-        State('graphslice_table', 'active_cell')]
+        [Output('slice_table', 'columns'),
+         Output('slice_table', 'data')],
+        [Input('metadata', 'children')]
     )
-    def update_gs_table(metadata, dtime, datastate, activecell):
-        ctx = dash.callback_context
-        if ctx.triggered[-1]['prop_id'] == 'metadata.children':
-            datalist = []
-            meta = pd.read_json(metadata, orient='split').to_dict('records')
-            for row in meta:
-                print(row)
-                data = {
-                    'gName': row['Name'],
-                    'gAxis': row['Axis'],
-                    'gStart': row['Values'][0],
-                    'gStop': row['Values'][-1]
-                }
-                datalist.append(data)
-
-            dropdown = {
-                'gAxis': {
-                    'options': [
-                        {'label': str(i + 1), 'value': i + 1}
-                        for i in range(len(meta))
-                    ]
-                }
-            }
-            return datalist, dropdown
-        else:
-            print(activecell)
+    def create_slicetables(metadata):
+        meta = (
+            pd.read_json(metadata, orient='split')
+            .sort_values(by=['Axis'], ignore_index=True)
+            .to_dict('records')
+        )
+        columns = [
+            {'name': '', 'id': 'slice', 'type': 'text', 'editable': False}
+        ]
+        filters = []
+        for i in range(len(meta)):
+            col = {'name': f'{meta[i]["Name"]}', 'id': f'slice_{meta[i]["Name"]}', 'type': 'numeric'}
+            columns.append(col)
 
 
 
-# def create_mdd(metadata):
-#     meta = pd.read_json(metadata, orient='split')
-#     mdd = mc.MDD(meta)
-#     return mc.to_json_pair(mdd)
+        data_start = {f'slice_{meta[i]["Name"]}': meta[i]['Values'][0] for i in range(len(meta))}
+        data_start['slice'] = 'Start'
+
+        data_stop = {f'slice_{meta[i]["Name"]}': meta[i]['Values'][-1] for i in range(len(meta))}
+        data_stop['slice'] = 'Stop'
+
+        data = [data_start, data_stop]
+
+        return columns, data
 
 
-# def add_data(mdd_state, add_value, valueslice, value_header):
-#     mdd = mc.read_json_pair(mdd_state)
+    @app.callback(
+        [Output('slice_validation', 'children'),
+         Output('slice_indices', 'children'),
+         Output('slice_table', 'style_data_conditional')],
+        [Input('slice_table', 'data')],
+        [State('metadata', 'children')]
+    )
+    def validate_slice(data, metadata):
+        meta = (
+            pd.read_json(metadata, orient='split')
+            .sort_values(by=['Axis'], ignore_index=True)
+        )
+        message = ''
+        indices = {}
+        sdc = []
+        for name in meta['Name']:
+            valid_vals = meta.loc[meta['Name'] == name]['Values'].array[0]
+            start = data[0][f'slice_{name}']
+            start_ind = bisect.bisect_left(valid_vals, start)
+            if start_ind >= len(valid_vals):
+                start_ind = len(valid_vals) - 1
 
-#     headers = value_header.split(',')
-#     values = au.load_data(add_value, usecols=headers)
+            stop = data[1][f'slice_{name}']
+            stop_ind = bisect.bisect_left(valid_vals, stop)
+            if stop_ind < start_ind:
+                stop_ind = start_ind + 1
+            if stop_ind >= len(valid_vals):
+                stop_ind = len(valid_vals) - 1
 
-#     indices = {}
-#     for widget in valueslice:
-#         dim = int(
-#             au.get_axis_info(
-#                 widget,
-#                 keys='pc'
-#             )
-#             [0]['props']['id']
-#             .split('_')[0]
-#         )
-#         start = float(
-#             au.get_axis_info(
-#                 widget,
-#                 keys='pc'
-#             )
-#             [0]['props']['value']
-#         )
-#         stop = float(
-#             au.get_axis_info(
-#                 widget,
-#                 keys='pc'
-#             )
-#             [1]['props']['value']
-#         )
-#         indices[dim] = (start, stop)
-#     mdd.add_values(values, indices)
-#     return mc.to_json_pair(mdd)
+            indices[f'{name}'] = [start_ind, stop_ind]
+            if valid_vals[start_ind] != start:
+                message += f'WARNING:{start} is an invalid start value for {name}, using {valid_vals[start_ind]} instead\n'
+                sdc.append({
+                    'if': {
+                        'column_id': f'slice_{name}',
+                        'row_index': 0
+                    },
+                    'backgroundColor': '#FF0000',
+                    'color': 'white'
+                })
+            if valid_vals[stop_ind] != stop:
+                message += f'WARNING: {stop} is an invalid stop value for {name}, using {valid_vals[stop_ind]} instead\n'
+                sdc.append({
+                    'if': {
+                        'column_id': f'slice_{name}',
+                        'row_index': 1
+                    },
+                    'backgroundColor': '#FF0000',
+                    'color': 'white'
+                })
+        return message, json.dumps(indices), sdc
+
+
+
+
+
+    @app.callback(
+        [Output('moveaxis', 'children'),
+        Output('moveaxis', 'layout'),
+        Output('moveaxis', 'maxrows')],
+        [Input('metadata', 'children')]
+    )
+    def create_moveaxis(metadata):
+        meta = (
+            pd.read_json(metadata, orient='split')
+            .sort_values(by=['Axis'], ignore_index=True)
+            .to_dict('records')
+        )
+        divstyle = {
+            'border': '1 px solid #33DEF0',
+            'backgroundColor': '#33DEF0',
+            'textAlign': 'center'
+        }
+        items = [meta[i]['Name'] for i in range(len(meta))]
+
+        nrows = len(meta) // 6 + 1
+        ncolumns = 6
+        if len(meta) % 6 == 0:
+            nrows = len(meta) // 6
+        if len(meta) // 6 == 0:
+            ncolumns = len(meta) % 6
+
+        children, layout = au.define_draggrid(
+            nrows,
+            ncolumns,
+            items,
+            divstyle,
+            isResizable=False
+        )
+
+        return children, layout, nrows

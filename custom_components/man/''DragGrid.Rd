@@ -10,8 +10,8 @@ ExampleComponent is an example component. It takes a property, `label`, and di
 }
 
 \usage{
-''DragGrid(children=NULL, id=NULL, label=NULL, layout=NULL, compacttype=NULL,
-rowheight=NULL, width=NULL, numcolumns=NULL, maxrows=NULL)
+''DragGrid(children=NULL, id=NULL, label=NULL, divstyle=NULL, layout=NULL,
+compacttype=NULL, rowheight=NULL, width=NULL, numcolumns=NULL, maxrows=NULL)
 }
 
 \arguments{

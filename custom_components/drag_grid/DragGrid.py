@@ -15,6 +15,7 @@ Keyword arguments:
 - children (list; default [' ']): The children in each part of the grid.
 - id (string; optional): The ID used to identify this component in Dash callbacks.
 - label (string; required): A label that will be printed when this component is rendered.
+- divstyle (dict; optional): The style of the Div that contains the children
 - layout (list; default [{i: 'default', x: 0, y: 0, w: 1, h: 1}]): The layout of the grid
 - compacttype (string; default 'horizontal'): The compact type
 - rowheight (number; default 30): The height of one row in the grid
@@ -22,12 +23,12 @@ Keyword arguments:
 - numcolumns (number; default 6): The number of columns
 - maxrows (number; default 1): Maximum number of rows in grid"""
     @_explicitize_args
-    def __init__(self, children=None, id=Component.UNDEFINED, label=Component.REQUIRED, layout=Component.UNDEFINED, compacttype=Component.UNDEFINED, rowheight=Component.UNDEFINED, width=Component.UNDEFINED, numcolumns=Component.UNDEFINED, maxrows=Component.UNDEFINED, **kwargs):
-        self._prop_names = ['children', 'id', 'label', 'layout', 'compacttype', 'rowheight', 'width', 'numcolumns', 'maxrows']
+    def __init__(self, children=None, id=Component.UNDEFINED, label=Component.REQUIRED, divstyle=Component.UNDEFINED, layout=Component.UNDEFINED, compacttype=Component.UNDEFINED, rowheight=Component.UNDEFINED, width=Component.UNDEFINED, numcolumns=Component.UNDEFINED, maxrows=Component.UNDEFINED, **kwargs):
+        self._prop_names = ['children', 'id', 'label', 'divstyle', 'layout', 'compacttype', 'rowheight', 'width', 'numcolumns', 'maxrows']
         self._type = 'DragGrid'
         self._namespace = 'drag_grid'
         self._valid_wildcard_attributes =            []
-        self.available_properties = ['children', 'id', 'label', 'layout', 'compacttype', 'rowheight', 'width', 'numcolumns', 'maxrows']
+        self.available_properties = ['children', 'id', 'label', 'divstyle', 'layout', 'compacttype', 'rowheight', 'width', 'numcolumns', 'maxrows']
         self.available_wildcard_properties =            []
 
         _explicit_args = kwargs.pop('_explicit_args')

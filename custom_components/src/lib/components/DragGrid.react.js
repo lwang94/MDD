@@ -14,7 +14,8 @@ import GridLayout from 'react-grid-layout';
 export default class DragGrid extends Component {
     constructor(props) {
         super(props);
-        console.log(this.props.children);
+        this.myRef = React.createRef();
+
         this.onLC = this.onLC.bind(this);
         this.onD = this.onD.bind(this);
         this.create_children = this.create_children.bind(this);
@@ -24,9 +25,13 @@ export default class DragGrid extends Component {
     create_children() {
         const children = []
         if (this.props.children != null) {
-            for (let inc = 0; inc < this.props.children.length; inc += 1) {
-                const child = <div key={this.props.layout[inc].i}>
-                    {this.props.children[inc]}
+            let propchild = this.props.children;
+            if (propchild.constructor != Array) {
+                propchild = [propchild]
+            };
+            for (let inc = 0; inc < propchild.length; inc += 1) {
+                const child = <div key={this.props.layout[inc].i} style={this.props.divstyle}>
+                    {propchild[inc]}
                 </div>;
                 children.push(child);
             }
@@ -39,9 +44,10 @@ export default class DragGrid extends Component {
             layout: lc
         })
     }
-    // layout, oldItem, newItem, placeholder, e,
+
     onD(layout, oldItem, newItem, placeholder, e, element) {
-        const grid = document.getElementsByClassName('react-grid-layout')[0];
+        const grid = this.myRef.current;
+
         const translateXMaxValue = grid.offsetWidth - element.offsetWidth;
         const translateYMaxValue = grid.offsetHeight - element.offsetHeight;
 
@@ -67,18 +73,21 @@ export default class DragGrid extends Component {
 
     render() {
         return (
-        <GridLayout
-            className='layout'
-            layout={this.props.layout}
-            compactType={this.props.compacttype}
-            rowHeight={this.props.rowheight}
-            width={this.props.width}
-            cols={this.props.numcolumns}
-            maxRows={this.props.maxrows}
-            onLayoutChange={this.onLC}
-            onDrag={this.onD}>
+        <div ref={this.myRef}>
+            <GridLayout
+                className='layout'
+                layout={this.props.layout}
+                compactType={this.props.compacttype}
+                rowHeight={this.props.rowheight}
+                width={this.props.width}
+                cols={this.props.numcolumns}
+                maxRows={this.props.maxrows}
+                onLayoutChange={this.onLC}
+                onDrag={this.onD}
+            >
                 {this.create_children()}
             </GridLayout>
+        </div>
         )
     }
 }
@@ -86,6 +95,7 @@ export default class DragGrid extends Component {
 
 DragGrid.defaultProps = {
     children: [' '],
+    divstyle: {},
     layout: [{i: 'default', x: 0, y: 0, w: 1, h: 1}],
     compacttype: 'horizontal',
     rowheight: 30,
@@ -109,6 +119,11 @@ DragGrid.propTypes = {
      * The children in each part of the grid.
      */
     children: PropTypes.array,
+
+    /**
+     * The style of the Div that contains the children
+     */
+    divstyle: PropTypes.object,
 
     /**
      * The layout of the grid

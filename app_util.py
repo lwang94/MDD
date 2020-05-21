@@ -43,39 +43,33 @@ def load_data(contents, usecols):
 
 
 def define_draggrid(
-    nrows, ncolumns, items, divstyle,
-    w=1, h=1, isResizable=True, isDraggable=True
+    nrows, ncolumns, items, keys,
+    w=1, h=1, spacex=1, spacey=1,
+    isResizable=True, isDraggable=True
 ):
-    print(ncolumns)
     children = []
     layout = []
-    if len(items) < nrows * ncolumns:
-        items += [html.Div() for i in range((nrows * ncolumns) - len(items))]
-    for itemy in range(nrows):
-        for itemx in range(ncolumns):
-            increment = itemx + itemy * nrows
+    for increment in range(len(items)):
+        itemx = increment % ncolumns
+        itemy = increment // ncolumns
 
-            item = {
-                'i': f'item_{increment}',
-                'x': itemx,
-                'y': itemy,
-                'w': w,
-                'h': h,
-                'isResizable': isResizable,
-                'isDraggable': isDraggable
-            }
-            layout.append(item)
-            children.append(
-                html.Div(
-                    items[increment],
-                    style=divstyle
-                )
-            )
+        item = {
+            'i': keys[increment],
+            'x': itemx * spacex,
+            'y': itemy * spacey,
+            'w': w,
+            'h': h,
+            'isResizable': isResizable,
+            'isDraggable': isDraggable
+        }
+        layout.append(item)
+        children.append(
+            items[increment]
+        )
     return children, layout
 
 
-def line_graph(mdd, new_pos, sing_vals, last_vals):
-    mdd.move_axis(new_pos)
+def line_graph(mdd, sing_vals, last_vals):
     x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
     slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
     y = mdd.dataArray[tuple(slice_list)]
@@ -94,7 +88,7 @@ def line_graph(mdd, new_pos, sing_vals, last_vals):
             )
         },
         style={
-            'width': 600,
-            'height': 600
+            'height': '90%',
+            'width': '90%'
         }
     )

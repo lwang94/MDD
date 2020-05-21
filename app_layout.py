@@ -98,7 +98,7 @@ def app_layout():
                 )
             ],
             className='one row',
-            style={'borderStyle': 'solid'}
+            # style={'borderStyle': 'solid'}
         ),
         html.Div(
             children=[
@@ -145,7 +145,7 @@ def app_layout():
                         dg.DragGrid(
                             id='moveaxis',
                             label='label',
-                            width=1700
+                            width=900
                         ),
                         dcc.Dropdown(
                             id='graph_params',
@@ -175,21 +175,22 @@ def app_layout():
                 )
             ],
             className='one row',
-            style={'borderStyle': 'solid'}
+            # style={'borderStyle': 'solid'}
         ),
         html.Div(
             dg.DragGrid(
                 id='graphs',
                 label='label',
-                rowheight=600,
-                width=3500
+                rowheight=50,
+                width=1800,
+                compacttype='vertical'
             ),
             className='one row',
-            style={'borderStyle': 'solid'}
+            # style={'borderStyle': 'solid'}
         ),
-
 
         html.Div(id='metadata', style={'display': 'none'}),
         html.Div(id='mdd', style={'display': 'none'}),
         html.Div(id='mddcopy', style={'display': 'none'}),
+        html.Div(id='lastslice', style={'display': 'none'})
     ])

@@ -81,6 +81,17 @@
           "computed": false
         }
       },
+      "divstyle": {
+        "type": {
+          "name": "object"
+        },
+        "required": false,
+        "description": "The style of the Div that contains the children",
+        "defaultValue": {
+          "value": "{}",
+          "computed": false
+        }
+      },
       "layout": {
         "type": {
           "name": "array"

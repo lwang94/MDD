@@ -235,7 +235,9 @@ def mdd_callbacks(app):
     @app.callback(
         [Output('moveaxis', 'children'),
         Output('moveaxis', 'layout'),
-        Output('moveaxis', 'maxrows')],
+        Output('moveaxis', 'divstyle'),
+        Output('moveaxis', 'maxrows'),
+        Output('moveaxis', 'numcolumns')],
         [Input('metadata', 'children')]
     )
     def create_moveaxis(metadata):
@@ -250,6 +252,7 @@ def mdd_callbacks(app):
             'textAlign': 'center'
         }
         items = [meta[i]['Name'] for i in range(len(meta))]
+        keys = [f'axis_{i}' for i in range(len(meta))]
 
         nrows = len(meta) // 6 + 1
         ncolumns = 6
@@ -257,13 +260,14 @@ def mdd_callbacks(app):
             nrows = len(meta) // 6
         if len(meta) // 6 == 0:
             ncolumns = len(meta) % 6
+        print(ncolumns)
 
         children, layout = au.define_draggrid(
             nrows,
             ncolumns,
             items,
-            divstyle,
+            keys,
             isResizable=False
         )
 
-        return children, layout, nrows
+        return children, layout, divstyle, nrows, ncolumns

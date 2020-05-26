@@ -16,21 +16,39 @@ def app_layout():
             style={'textAlign': 'center'}
         ),
 
+        # Error Messages
         dcc.ConfirmDialog(
             id='error_message'
         ),
 
+        # First Row
         html.Div(
             children=[
+                # Metadata DataTable
                 html.Div(
                     children=[
-                        dt.DataTable( # set max height and vertical scrolling after determining optimal size
+                        dt.DataTable(
                             id='metadata_table',
                             columns=[
-                                {'name': 'Axis', 'id': 'Axis', 'type': 'numeric'},
-                                {'name': 'Name', 'id': 'Name'},
-                                {'name': 'Num Values', 'id': 'Num Values', 'type': 'numeric'},
-                                {'name': 'Define Values', 'id': 'Define Values', 'presentation': 'dropdown'}
+                                {
+                                    'name': 'Axis',
+                                    'id': 'Axis',
+                                    'type': 'numeric'
+                                },
+                                {
+                                    'name': 'Name',
+                                    'id': 'Name'
+                                },
+                                {
+                                    'name': 'Num Values',
+                                    'id': 'Num Values',
+                                    'type': 'numeric'
+                                },
+                                {
+                                    'name': 'Define Values',
+                                    'id': 'Define Values',
+                                    'presentation': 'dropdown'
+                                }
                             ],
                             data=[
                                 {
@@ -57,6 +75,8 @@ def app_layout():
                     ],
                     className='five columns'
                 ),
+
+                # Column for methods of defining valuess
                 html.Div(
                     children=[
                         html.Button(
@@ -71,6 +91,8 @@ def app_layout():
                     ],
                     className='one column'
                 ),
+
+                # Columns for slicing values when uploading data
                 html.Div(
                     children=[
                         html.Pre(
@@ -86,6 +108,8 @@ def app_layout():
                     ],
                     className='one third columns'
                 ),
+
+                # Progress bars showing number of values in axis
                 html.Div(
                     children=[
                         html.Hr(style={'marginBottom': 30}),
@@ -98,10 +122,13 @@ def app_layout():
                 )
             ],
             className='one row',
-            # style={'borderStyle': 'solid'}
+            style={'height': 300, 'overflowY': 'scroll'}
         ),
+
+        # Second Row
         html.Div(
             children=[
+                # Button to add row to metadata datatable
                 html.Button(
                     'Add Row',
                     id='add_rows',
@@ -110,6 +137,8 @@ def app_layout():
                     className='one column'
                 ),
                 html.Hr(className='five columns'),
+
+                # Button to upload data to MDD
                 dcc.Upload(
                     id='add_data',
                     children=html.Button(
@@ -119,6 +148,8 @@ def app_layout():
                     multiple=True,
                     className='one column'
                 ),
+
+                # Input allowing app to to find correct column in datafile
                 dcc.Input(
                     id='data_headers',
                     placeholder='Header1, Header2,...',
@@ -138,15 +169,19 @@ def app_layout():
             ],
             className='one row'
         ),
+
+        # Third Row
         html.Div(
             children=[
                 html.Div(
                     children=[
+                        # Grid to move axis
                         dg.DragGrid(
                             id='moveaxis',
                             label='label',
                             width=900
                         ),
+                        # Dropdown showing line graph parameters
                         dcc.Dropdown(
                             id='graph_params',
                             multi=True
@@ -156,6 +191,7 @@ def app_layout():
                 ),
                 html.Div(
                     children=[
+                        # Slice value datatable (for displaying graph)
                         dt.DataTable(
                             id='slice_table',
                             editable=True,
@@ -174,10 +210,12 @@ def app_layout():
                     className='six columns'
                 )
             ],
-            className='one row',
-            # style={'borderStyle': 'solid'}
+            className='one row'
         ),
+
+        # Fourth Row
         html.Div(
+            # Graph grid
             dg.DragGrid(
                 id='graphs',
                 label='label',
@@ -186,7 +224,7 @@ def app_layout():
                 compacttype='vertical'
             ),
             className='one row',
-            # style={'borderStyle': 'solid'}
+            style={'height': 900, 'overflowY': 'scroll'}
         ),
 
         html.Div(id='metadata', style={'display': 'none'}),

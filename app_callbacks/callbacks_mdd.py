@@ -260,14 +260,12 @@ def mdd_callbacks(app):
             nrows = len(meta) // 6
         if len(meta) // 6 == 0:
             ncolumns = len(meta) % 6
-        print(ncolumns)
 
-        children, layout = au.define_draggrid(
+        layout = au.define_draggrid(
             nrows,
             ncolumns,
-            items,
             keys,
             isResizable=False
         )
 
-        return children, layout, divstyle, nrows, ncolumns
+        return items, layout, divstyle, nrows, ncolumns

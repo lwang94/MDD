@@ -1,18 +1,20 @@
 import dash
 
 import app_layout as al
-from callbacks_metadata import metadata_callbacks
-from callbacks_mdd import mdd_callbacks
-from callbacks_graphs import graphs_callbacks
+from app_callbacks import callbacks_metadata
+from app_callbacks import callbacks_mdd
+from app_callbacks import callbacks_graphs
 
 app = dash.Dash(__name__)
 app.config.suppress_callback_exceptions = True
 
+# create layout
 app.layout = al.app_layout()
 
-metadata_callbacks(app)
-mdd_callbacks(app)
-graphs_callbacks(app)
+# include callbacks
+callbacks_metadata.metadata_callbacks(app)
+callbacks_mdd.mdd_callbacks(app)
+callbacks_graphs.graphs_callbacks(app)
 
 
 if __name__ == '__main__':

@@ -43,30 +43,27 @@ def load_data(contents, usecols):
 
 
 def define_draggrid(
-    nrows, ncolumns, items, keys,
-    w=1, h=1, spacex=1, spacey=1,
+    nrows, ncolumns, keys,
+    start_row=0, w=1, h=1, spacex=1, spacey=1,
     isResizable=True, isDraggable=True
 ):
-    children = []
     layout = []
-    for increment in range(len(items)):
+    for increment in range(len(keys)):
         itemx = increment % ncolumns
         itemy = increment // ncolumns
 
         item = {
             'i': keys[increment],
             'x': itemx * spacex,
-            'y': itemy * spacey,
+            'y': start_row + itemy * spacey,
             'w': w,
             'h': h,
             'isResizable': isResizable,
             'isDraggable': isDraggable
         }
         layout.append(item)
-        children.append(
-            items[increment]
-        )
-    return children, layout
+
+    return layout
 
 
 def line_graph(mdd, sing_vals, last_vals):

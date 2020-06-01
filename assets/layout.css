@@ -441,6 +441,14 @@ hr {
   box-sizing: border-box;
   cursor: se-resize;
 }
+
+/*DataTable*/
+.dash-spreadsheet-container table {
+  --accent: #1EAEDB !important;
+  --selected-background: #B7E9F7 !important;
+  --selected-accent: #B7E9F7 !important;
+  --selected-color: #B7E9F7 !important;
+}
 /* Media Queries
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 /*

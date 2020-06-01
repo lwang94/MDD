@@ -1,20 +1,25 @@
 import pandas as pd
 import numpy as np
 import itertools
-import bisect
 
 from pathlib import Path
-import json
-
+import app_util as au
 
 def to_json_pair(mdd):
+    """
+    Turns mdd into pair of jsons containing its core information
+    """
     metadata = mdd.metadata.to_json(orient='split')
     dataDF = mdd.dataDF.to_json(orient='split')
     return [metadata, dataDF]
 
 
 def read_json_pair(js_pair):
-    """js has to be a list of json strings with the first element the metadata and the second element the coordinate data"""
+    """
+    Creates mdd from pair of jsons containing core information.
+    js_pair is a list of jsons with the first element the metadata
+    and the second element the coordinate data.
+    """
     metadata = pd.read_json(js_pair[0], orient='split')
     mdd = MDD(metadata)
     mdd.dataDF = pd.read_json(js_pair[1], orient='split')
@@ -23,71 +28,102 @@ def read_json_pair(js_pair):
 
 class MDD:
     def __init__(self, metadata):
+        # always sort metadata by Axis when first creating instance of class
         self.metadata = metadata.sort_values('Axis', ignore_index=True)
-        columns = [f'x{self.metadata.loc[i]["Axis"]}' for i in range(len(self.metadata))] + ['y']
-        rows=[]
+
+        # create coordinate DataFrame from metadata
+        columns = [
+            f'x{self.metadata.loc[i]["Axis"]}'
+            for i in range(len(self.metadata))
+        ] + ['y']
+        rows = []
         for coord in itertools.product(*self.metadata['Values']):
             row = {columns[i]: coord[i] for i in range(len(coord))}
             row['y'] = np.nan
             rows.append(row)
         self.dataDF = pd.DataFrame(rows, columns=columns)
 
-
     @property
     def dataDF(self):
         return self.__dataDF
 
-
     @dataDF.setter
     def dataDF(self, dataDF):
+        """
+        Sets dataDF so that any change to dataDF will be reflected in dataArray
+        """
         self.__dataDF = dataDF
-        self.__dataArray = (self.__dataDF['y']
-                           .copy()
-                           .to_numpy()
-                           .reshape(self.metadata['Num Values'])
-                           )
+        self.__dataArray = (
+            self.__dataDF['y']
+            .copy()  # prevents unwanted interactions
+            .to_numpy()
+            .reshape(self.metadata['Num Values'])
+        )
 
+    def change_df_val(self, val, index):
+        """
+        Updates single value in dataDF. Use this when setting single dataDF
+        values because it's faster than the regular setter
+        """
+        self.__dataDF.at[index, 'y'] = val
 
-    def change_df_val(self, val, target):
-        self.__dataDF.at[target, 'y'] = val
-        targ = target
         targslice = []
-        for ad in self.axis_containers():
-            pos = targ // ad
-            targslice.append(pos)
-            targ -= pos * ad
-        self.__dataArray[targslice] = val
 
+        # find coordinates in Array from DF index
+        for ad in self.axis_containers():
+            pos = index // ad
+            targslice.append(pos)
+            index -= pos * ad
+        self.__dataArray[targslice] = val
 
     @property
     def dataArray(self):
         return self.__dataArray
 
-
     @dataArray.setter
     def dataArray(self, dataArray):
+        """
+        Sets dataArray so that any change to dataDF will be reflected in dataDF
+        """
         self.__dataArray = dataArray
         self.__dataDF['y'] = self.__dataArray.flatten()
 
-
     def change_array_val(self, val, target):
+        """
+        Updates single value in dataArray. Use this when setting single
+        dataArray values because it's faster than the regular setter
+        """
         self.__dataArray[target] = val
+
+        # update dataDF as well
         targ = 0
         for i in range(len(self.axis_containers())):
             targ += target[i] * self.axis_containers()[i]
-        self.__dataDF.at[target, 'y'] = val
-
+        self.__dataDF.at[targ, 'y'] = val
 
     def axis_containers(self):
+        """
+        Returns list containing dimensionality information based on the
+        number of values in each axis.  Helper function for converting
+        from DF index and Array coordinates.
+        Ex. Num Values = [3, 3, 5, 5, 20]
+            Calculations...
+                3 x 5 x 5 x 20 --> 1500
+                5 x 5 x 20     --> 500
+                5 x 20         --> 100
+                20             --> 20
+                                   1
+            Axis Containers = [1500, 500, 100, 20, 1]
+        """
         axis_containers_list = []
         num_values = self.metadata['Num Values']
         for i in range(1, len(num_values)):
             axis_containers_list.append(np.prod(num_values[i:]))
         return axis_containers_list + [1]
 
-
     def add_data(self, data, indices):
-        "make sure order of axes match in app"
+        "Adds data to mdd"
+        # find coordinates to add data to
         slice_list = [slice(None, None) for i in range(len(indices))]
         shape = [None for i in range(len(indices))]
         for i in indices:
@@ -95,11 +131,14 @@ class MDD:
             index_stop = self.metadata.loc[i-1]['Values'].index(indices[i][1])
             slice_list[i-1] = slice(index_start, index_stop+1)
             shape[i-1] = index_stop - index_start + 1
+
+        # update Array and DF
         self.__dataArray[tuple(slice_list)] = data.reshape(tuple(shape))
         self.__dataDF['y'] = self.__dataArray.flatten()
 
-
     def move_axis(self, new_pos):
+        "Moves mdd axes"
+        # move dataArray axes
         new_pos = np.array(new_pos)
         self.dataArray = np.moveaxis(
             self.dataArray,
@@ -107,13 +146,45 @@ class MDD:
             new_pos - 1
         )
 
+        # update metadata and DF
         self.metadata['Axis'] = new_pos
         self.metadata = self.metadata.sort_values('Axis', ignore_index=True)
-        columns = [f'x{self.metadata.loc[i]["Axis"]}' for i in range(len(self.metadata))]
+        columns = [
+            f'x{self.metadata.loc[i]["Axis"]}'
+            for i in range(len(self.metadata))
+        ]
         rows = []
         for coord in itertools.product(*self.metadata['Values']):
             rows.append({columns[i]: coord[i] for i in range(len(coord))})
         self.__dataDF[columns] = pd.DataFrame(rows, columns=columns)
+
+    def generate_features(self):
+        # try:
+        cols = list(self.training.columns)
+        cols.remove('y')
+
+        # squaring values
+        colssquared = [f'{col}_squared' for col in cols]
+        self.training[colssquared] = self.training[cols] ** 2
+
+        # cubing values
+        colscubed = [f'{col}_cubed' for col in cols]
+        self.training[colscubed] = self.training[cols] ** 3
+
+        # log values
+        colslog = [f'{col}_log' for col in cols]
+        self.training[colslog] = np.log(self.training[cols])
+
+        # except:
+        #     print('ERROR: Please create training first using mdd.create_training()')
+
+    def create_training(self):
+        self.training = self.dataDF.copy().dropna()
+
+
+
+
+
 
 
 # x1 = {'Axis': 1, 'Name': 'DAC', 'Num Values': 500, 'Define Values': 'Upload', 'Values': list(np.arange(0, 500))}
@@ -124,40 +195,40 @@ class MDD:
 
 # mdd = MDD(metadata)
 
-# # path = Path.cwd() / 'testfiles'
-# # filelist = [path / 'T1P2.csv', path / 'T1_5P2.csv', path / 'T2P2.csv', path / 'T2_5P2.csv', path / 'T3P2.csv'] * 3
-# # values = load_data(filelist, ['Current'])
-# # indices = [
-# #     {
-# #         3: (2, 2),
-# #         2: (1, 1),
-# #         1: (0, 499)
-# #     },
-# #     {
-# #         3: (2, 2),
-# #         2: (1.5, 1.5),
-# #         1: (0, 499)
-# #     },
-# #     {
-# #         3: (2, 2),
-# #         2: (2, 2),
-# #         1: (0, 499)
-# #     },
-# #     {
-# #         3: (2, 2),
-# #         2: (2.5, 2.5),
-# #         1: (0, 499)
-# #     },
-# #     {
-# #         3: (2, 2),
-# #         2: (3, 3),
-# #         1: (0, 499)
-# #     }
-# # ]
-# # for i, csv in enumerate(filelist[0:5]):
-# #     values = load_data([csv], ['Current'])
-# #     mdd.add_values(values, indices[i])
-# # print(mdd.dataDF.head(20))
+# path = Path.cwd() / 'testfiles'
+# filelist = [path / 'T1P2.csv', path / 'T1_5P2.csv', path / 'T2P2.csv', path / 'T2_5P2.csv', path / 'T3P2.csv'] * 3
+# values = au.load_data(filelist, ['Current'])
+# indices = [
+#     {
+#         3: (2, 2),
+#         2: (1, 1),
+#         1: (0, 499)
+#     },
+#     {
+#         3: (2, 2),
+#         2: (1.5, 1.5),
+#         1: (0, 499)
+#     },
+#     {
+#         3: (2, 2),
+#         2: (2, 2),
+#         1: (0, 499)
+#     },
+#     {
+#         3: (2, 2),
+#         2: (2.5, 2.5),
+#         1: (0, 499)
+#     },
+#     {
+#         3: (2, 2),
+#         2: (3, 3),
+#         1: (0, 499)
+#     }
+# ]
+# for i, csv in enumerate(filelist[0:5]):
+#     values = load_data([csv], ['Current'])
+#     mdd.add_values(values, indices[i])
+# print(mdd.dataDF.head(20))
 # # print(mdd.dataDF['y'].unique())
 # print('#################################################')
 # mdd.move_axis([3, 1, 2])

@@ -2,7 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_daq as daq
 import dash_html_components as html
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, MATCH
 
 import bisect
 import json
@@ -14,99 +14,99 @@ import app_util as au
 
 def mdd_callbacks(app):
 
-
-    # Create widgets for inputting value slices
     @app.callback(
-        Output('valueslice', 'children'),
+        [Output('start_valueslice', 'children'),
+         Output('stop_valueslice', 'children'),
+         Output('slider_valueslice', 'children')],
         [Input('metadata', 'children')]
     )
     def valueslice_inputs(data):
         data = pd.read_json(data, orient='split').to_dict('records')
-        valueslice_widg = []
+        start_valueslice_widg = []
+        stop_valueslice_widg = []
+        slider_valueslice_widg = []
         for i, row in enumerate(data):
-            valueslice=html.Div(
-                children=
-                [
-                    dcc.Input(
-                        id=f'{data[i]["Axis"]}_start',
-                        type='text',
-                        value=row['Values'][0],
-                        style={
-                            'marginBottom': 12,
-                            'marginRight': 10,
-                            'width': 50
-                        }
-                    ),
-                    dcc.Input(
-                        id=f'{data[i]["Axis"]}_stop',
-                        type='text',
-                        value=row['Values'][-1],
-                        style={
-                            'marginBottom': 12,
-                            'width': 50
-                        }
-                    )
-                ],
-                id=f'{i}_input'
+            start_valueslice = dcc.Input(
+                id={'type': 'start', 'index': i},
+                type='text',
+                value=row['Values'][0],
+                style={
+                    # 'backgroundColor': 'transparent',
+                    'marginBottom': 12,
+                    'width': 50
+                }
             )
-            valueslice_widg.append(valueslice)
-        return valueslice_widg
+
+            stop_valueslice = dcc.Input(
+                id={'type': 'stop', 'index': i},
+                type='text',
+                value=row['Values'][-1],
+                style={
+                    # 'backgroundColor': 'transparent',
+                    'marginBottom': 12,
+                    'width': 50
+                }
+            )
 
 
-    # Show Value Slice Graphically (change when plotly release wildcard Inputs)
+            slider_valueslice = html.Div(
+                dcc.RangeSlider(
+                    id={'type': 'slider', 'index': i},
+                    min=row['Values'][0],
+                    max=row['Values'][-1],
+                    marks={j: '' for j in row['Values']},
+                    step=None,
+                    value=[row['Values'][0], row['Values'][-1]]
+                ),
+                style={
+                    'marginBottom': 11
+                }
+            )
+
+            start_valueslice_widg.append(start_valueslice)
+            stop_valueslice_widg.append(stop_valueslice)
+            slider_valueslice_widg.append(slider_valueslice)
+        return start_valueslice_widg, stop_valueslice_widg, slider_valueslice_widg
+
     @app.callback(
-        Output('show_valueslice', 'children'),
-        [Input('metadata_table', 'data')],
-        [State('show_valueslice', 'children')]
+        Output({'type': 'slider', 'index': MATCH}, 'value'),
+        [Input({'type': 'start', 'index': MATCH}, 'n_blur'),
+         Input({'type': 'stop', 'index': MATCH}, 'n_blur')],
+        [State({'type': 'start', 'index': MATCH}, 'value'),
+         State({'type': 'stop', 'index': MATCH}, 'value')]
     )
-    def show_vs(data, svs):
-        show_vs_widg = []
-        if svs is None:
-            for i in range(3):
-                show_vs_widg.append(
-                    html.Div(
-                        daq.GraduatedBar(
-                            id=f'{i}_svs0',
-                            max=0,
-                            size=675
-                        ),
-                        style={'marginBottom': 20}
-                    )
-                )
-            return show_vs_widg
-        else:
-            for i, row in enumerate(data):
-                n_values = min(300, row['Num Values'])
-                widget = html.Div(
-                    daq.GraduatedBar(
-                        id=f'{i}_svs{row["Num Values"]}',
-                        max=n_values,
-                        step=1,
-                        value=n_values,
-                        size=675
-                    ),
-                    style={'marginBottom': 20}
-                )
-                show_vs_widg.append(widget)
-            return show_vs_widg
+    def update_slider(nstart, nstop, start, stop):
+        if nstart is not None or nstop is not None:
+            value = [float(start), float(stop)]
+            return value
+
+    @app.callback(
+        [Output({'type': 'start', 'index': MATCH}, 'value'),
+         Output({'type': 'stop', 'index': MATCH}, 'value')],
+        [Input({'type': 'slider', 'index': MATCH}, 'value')]
+    )
+    def update_startstop(sliderval):
+        return sliderval[0], sliderval[1]
 
 
     # Create and add data to mdd
     @app.callback(
         Output('mdd', 'children'),
         [Input('metadata', 'children'),
-        Input('add_data', 'contents')],
+         Input('add_data', 'contents')], # CAN'T REUPLOAD SAME FILES (GOOGLE FOR DEBUG SOLUTION LATER)
         [State('mdd', 'children'),
-        State('valueslice', 'children'),
-        State('data_headers', 'value')]
+         State('start_valueslice', 'children'),
+         State('stop_valueslice', 'children'),
+         State('data_headers', 'value')]
     )
     def create_mdd(
         metadata, add_data,
-        mdd_state, valueslice, data_headers
+        mdd_state, start_valueslice, stop_valueslice,
+        data_headers
     ):
+        meta = pd.read_json(metadata, orient='split')
         ctx = dash.callback_context
         if ctx.triggered[-1]['prop_id'] == 'metadata.children':
-            meta = pd.read_json(metadata, orient='split')
             mdd = mc.MDD(meta)
             return mc.to_json_pair(mdd)
         else:
@@ -116,30 +116,13 @@ def mdd_callbacks(app):
             data = au.load_data(add_data, usecols=headers)
 
             indices = {}
-            for widget in valueslice:
-                ax = int(
-                    au.get_axis_info(
-                        widget,
-                        keys='pc'
-                    )
-                    [0]['props']['id']
-                    .split('_')[0]
-                )
-                start = float(
-                    au.get_axis_info(
-                        widget,
-                        keys='pc'
-                    )
-                    [0]['props']['value']
-                )
-                stop = float(
-                    au.get_axis_info(
-                        widget,
-                        keys='pc'
-                    )
-                    [1]['props']['value']
-                )
+            for i in range(len(start_valueslice)):
+                ax = meta['Axis'][i]
+                start = start_valueslice[i]['props']['value']
+                stop = stop_valueslice[i]['props']['value']
+
                 indices[ax] = (start, stop)
+
             mdd.add_data(data, indices)
             return mc.to_json_pair(mdd)
 
@@ -269,3 +252,17 @@ def mdd_callbacks(app):
         )
 
         return items, layout, divstyle, nrows, ncolumns
+
+
+    # TESTING MDD, DELETE LATER
+    @app.callback(
+        Output('check', 'children'),
+        [Input('checkbutton', 'n_clicks')],
+        [State('mdd', 'children')]
+    )
+    def check(button, mddstate):
+        if button > 0:
+            mdd = mc.read_json_pair(mddstate)
+            mdd.create_training()
+            mdd.generate_features()
+            print(mdd.training)

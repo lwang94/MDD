@@ -1,6 +1,6 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, MATCH
 
 import pandas as pd
 import math as math
@@ -30,7 +30,6 @@ def metadata_callbacks(app):
             })
         return rows
 
-
     # Create widgets for defining values
     @app.callback(
         Output('defval_methods', 'children'),
@@ -39,59 +38,73 @@ def metadata_callbacks(app):
     )
     def define_value_methods(data, defval_methods):
         defval = []
-        if defval_methods is None:
-            for i in range(3):
-                defval.append(
-                    html.Div(
-                        dcc.Upload(
-                            id=f'{i}_UploadNone',
-                            children=html.Button('Upload'),
-                            style={'marginBottom': 12},
-                            multiple=True
+        for i, row in enumerate(data):
+            # create upload button if Define Values is Upload
+            if row['Define Values'] == 'Upload':
+                widget = html.Div(
+                            dcc.Upload(
+                                id={'type': 'upload', 'index': i},
+                                children=html.Button(
+                                    id={'type': 'uploadbutton', 'index': i}
+                                ),
+                                style={'marginBottom': 12},
+                                multiple=True
+                            )
+                        )
+
+            # create input box if Define Values is Range
+            elif row['Define Values'] == 'Range':
+                widget = html.Div(
+                        dcc.Input(
+                            id={'type': 'range', 'index': i},
+                            placeholder='Start, Stop',
+                            type='text',
+                            debounce=True,
+                            style={
+                                'background': 'transparent',
+                                'border': '1px solid',
+                                'marginBottom': 12,
+                                'width': 115
+                            }
                         )
                     )
-                )
-            return defval
 
+            # create input box if Define Values is Custom
+            else:
+                widget = html.Div(
+                        dcc.Input(
+                            id={'type': 'custom', 'index': i},
+                            placeholder='value1, value2,...',
+                            type='text',
+                            debounce=True,
+                            style={
+                                'background': 'transparent',
+                                'border': '1px solid',
+                                'marginBottom': 12,
+                                'width': 115
+                            }
+                        )
+                    )
+
+            # check if value has already been defined
+            if 0 <= i < len(defval_methods) and widget.children.id == au.get_axis_info(defval_methods[i])['id']:
+                widget = defval_methods[i]
+
+            defval.append(widget)
+
+        return defval
+
+    # Change upload button style if contents uploaded
+    @app.callback(
+        [Output({'type': 'uploadbutton', 'index': MATCH}, 'children'),
+         Output({'type': 'uploadbutton', 'index': MATCH}, 'style')],
+        [Input({'type': 'upload', 'index': MATCH}, 'filename')]
+    )
+    def upload_confirm(fname):
+        if fname is None:
+            return 'Upload', {'border': '1px solid'}
         else:
-            for i, row in enumerate(data):
-                if row['Define Values'] == 'Upload':
-                    widget = html.Div(
-                                dcc.Upload(
-                                    id=f'{i}_Upload{row["Num Values"]}',
-                                    children=html.Button('Upload'),
-                                    style={'marginBottom': 12},
-                                    multiple=True
-                                )
-                            )
-                elif row['Define Values'] == 'Range':
-                    widget = html.Div(
-                            dcc.Input(
-                                id=f'{i}_Range{row["Num Values"]}',
-                                placeholder='Start, Stop',
-                                type='text',
-                                debounce=True,
-                                style={'marginBottom': 12, 'width': 115}
-                            )
-                        )
-                else:
-                    widget = html.Div(
-                            dcc.Input(
-                                id=f'{i}_Custom{row["Num Values"]}',
-                                placeholder='value1, value2,...',
-                                type='text',
-                                debounce=True,
-                                style={'marginBottom': 12, 'width': 115}
-                            )
-                        )
-
-                # check if value has already been defined
-                if 0 <= i < len(defval_methods) and widget.children.id == au.get_axis_info(defval_methods[i])['id']:
-                    widget = defval_methods[i]
-
-                defval.append(widget)
-
-            return defval
+            return fname, {'border': '2px solid #607D8B'}
 
 
     # Define values from methods
@@ -113,6 +126,8 @@ def metadata_callbacks(app):
                 return cf.error_axislength
 
             df = pd.DataFrame(data)
+            if df['Name'].is_unique is False:
+                return cf.error_uniquenames
             values = []
             for i, row in enumerate(data):
                 if row['Define Values'] == 'Upload':

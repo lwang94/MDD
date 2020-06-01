@@ -1,4 +1,5 @@
 # Error messages
+error_uniquenames = 'ERROR: Axis names must all be unique'
 error_axislength = 'ERROR: Axis values do not match number of rows in metadata table'
 error_csv = 'ERROR: Only .csv files can be uploaded to the app.'
 error_uploadheader = 'ERROR: Cannot find Name in file.'

@@ -17,51 +17,15 @@ app = dash.Dash(
 app.layout = html.Div([
     html.Div(
         children=[
-            drag_grid.DragGrid(
+            dcc.Input(
                 id='input',
-                label='my-label',
-                children=[html.Div('Voltage') for i in range(9)],
-                layout=[{
-                    'i': f'comp_{compx}{compy}',
-                    'x': compx,
-                    'y': compy,
-                    'w': 1,
-                    'h': 1,
-                    'isResizable': False,
-                    'isDraggable': True
-                } for compx, compy in itertools.product(range(3), range(3))],
-                numcolumns=3,
-                maxrows=3,
-                divstyle = {
-                    'border': '1 px solid #33DEF0',
-                    'backgroundColor': '#33DEF0',
-                    'textAlign': 'center',
-                    'position': 'relative'
-                },
-                width=900
+                type='number',
+                value=0
             ),
-            html.Div(id='output'),
             drag_grid.DragGrid(
-                id='input2',
+                id='output',
                 label='my-label2',
-                children=[html.Div('Temp', style={'height': 100}) for i in range(9)],
-                layout=[{
-                    'i': f'comp2_{compx}{compy}',
-                    'x': compx,
-                    'y': compy,
-                    'w': 1,
-                    'h': 1,
-                    'isResizable': True,
-                    'isDraggable': True
-                } for compx, compy in itertools.product(range(3), range(3))],
-                numcolumns=3,
-                maxrows=3,
-                divstyle = {
-                    'borderStyle': 'solid',
-                    'height': 100,
-                    'position': 'relative'
-                },
-                rowheight=500,
+                rowheight=100,
                 width=1800
             ),
         ],
@@ -69,13 +33,33 @@ app.layout = html.Div([
     )
 ])
 
-# @app.callback(
-#     Output('output', 'children'),
-#     [Input('input', 'layout')]
-# )
-# def out(layout):
-#     x = layout[0]['x']
-#     return str(x)
+@app.callback(
+    [Output('output', 'children'),
+     Output('output', 'layout'),
+     Output('output', 'numcolumns'),
+     Output('output', 'maxrows'),
+     Output('output', 'divstyle')],
+    [Input('input', 'value')]
+)
+def out(val):
+    children = [html.Div('Temp') for i in range(val**2)]
+    layout = [{
+        'i': f'comp2_{compx}{compy}',
+        'x': compx * 5,
+        'y': compy * 5,
+        'w': 5,
+        'h': 5,
+        'isResizable': True,
+        'isDraggable': True
+    } for compx, compy in itertools.product(range(val), range(val))]
+    ncolumns = val * 5
+    nrows = val * 5
+    divstyle = {
+        'borderStyle': 'solid'
+    }
+    return children, layout, ncolumns, nrows, divstyle
+
+
 
 
 # @app.callback(Output('output', 'children'), [Input('input', 'value')])

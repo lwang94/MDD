@@ -11,6 +11,10 @@ import pandas as pd
 import MDDClass as mc
 import app_util as au
 
+from sklearn import ensemble as em
+from sklearn import model_selection as msl
+from sklearn import metrics
+
 
 def mdd_callbacks(app):
 
@@ -18,10 +22,9 @@ def mdd_callbacks(app):
         [Output('start_valueslice', 'children'),
          Output('stop_valueslice', 'children'),
          Output('slider_valueslice', 'children')],
-        [Input('metadata', 'children')]
+        [Input('metadata', 'data')]
     )
     def valueslice_inputs(data):
-        data = pd.read_json(data, orient='split').to_dict('records')
         start_valueslice_widg = []
         stop_valueslice_widg = []
         slider_valueslice_widg = []
@@ -91,26 +94,32 @@ def mdd_callbacks(app):
 
     # Create and add data to mdd
     @app.callback(
-        Output('mdd', 'children'),
-        [Input('metadata', 'children'),
+        Output('mdd', 'data'),
+        [Input('metadata', 'data'),
          Input('add_data', 'contents')], # CAN'T REUPLOAD SAME FILES (GOOGLE FOR DEBUG SOLUTION LATER)
-        [State('mdd', 'children'),
+        [State('mdd', 'data'),
          State('start_valueslice', 'children'),
          State('stop_valueslice', 'children'),
          State('data_headers', 'value')]
     )
     def create_mdd(
-        metadata, add_data,
+        meta, add_data,
         mdd_state, start_valueslice, stop_valueslice,
         data_headers
     ):
-        meta = pd.read_json(metadata, orient='split')
+        meta = pd.DataFrame(meta)
         ctx = dash.callback_context
-        if ctx.triggered[-1]['prop_id'] == 'metadata.children':
-            mdd = mc.MDD(meta)
-            return mc.to_json_pair(mdd)
+        if ctx.triggered[-1]['prop_id'] == 'metadata.data':
+            mdd = mc.MDD(
+                meta
+            )
+            return mdd.dataDF.to_dict('records')
+
         else:
-            mdd = mc.read_json_pair(mdd_state)
+            mdd = mc.MDD(
+                meta
+            )
+            mdd.dataDF = pd.DataFrame(mdd_state)
 
             headers = data_headers.split(',')
             data = au.load_data(add_data, usecols=headers)
@@ -124,17 +133,16 @@ def mdd_callbacks(app):
                 indices[ax] = (start, stop)
 
             mdd.add_data(data, indices)
-            return mc.to_json_pair(mdd)
-
+            return mdd.dataDF.to_dict('records')
 
     @app.callback(
         [Output('slice_table', 'columns'),
          Output('slice_table', 'data')],
-        [Input('metadata', 'children')]
+        [Input('metadata', 'data')]
     )
     def create_slicetables(metadata):
         meta = (
-            pd.read_json(metadata, orient='split')
+            pd.DataFrame(metadata)
             .sort_values(by=['Axis'], ignore_index=True)
             .to_dict('records')
         )
@@ -161,14 +169,14 @@ def mdd_callbacks(app):
 
     @app.callback(
         [Output('slice_validation', 'children'),
-         Output('slice_indices', 'children'),
+         Output('slice_indices', 'data'),
          Output('slice_table', 'style_data_conditional')],
         [Input('slice_table', 'data')],
-        [State('metadata', 'children')]
+        [State('metadata', 'data')]
     )
     def validate_slice(data, metadata):
         meta = (
-            pd.read_json(metadata, orient='split')
+            pd.DataFrame(metadata)
             .sort_values(by=['Axis'], ignore_index=True)
         )
         message = ''
@@ -209,11 +217,7 @@ def mdd_callbacks(app):
                     'backgroundColor': '#FF0000',
                     'color': 'white'
                 })
-        return message, json.dumps(indices), sdc
-
-
-
-
+        return message, indices, sdc
 
     @app.callback(
         [Output('moveaxis', 'children'),
@@ -221,16 +225,16 @@ def mdd_callbacks(app):
         Output('moveaxis', 'divstyle'),
         Output('moveaxis', 'maxrows'),
         Output('moveaxis', 'numcolumns')],
-        [Input('metadata', 'children')]
+        [Input('metadata', 'data')]
     )
     def create_moveaxis(metadata):
         meta = (
-            pd.read_json(metadata, orient='split')
+            pd.DataFrame(metadata)
             .sort_values(by=['Axis'], ignore_index=True)
             .to_dict('records')
         )
         divstyle = {
-            'border': '1 px solid #33DEF0',
+            'borderRadius': '10px',
             'backgroundColor': '#33DEF0',
             'textAlign': 'center'
         }
@@ -258,11 +262,80 @@ def mdd_callbacks(app):
     @app.callback(
         Output('check', 'children'),
         [Input('checkbutton', 'n_clicks')],
-        [State('mdd', 'children')]
+        [State('mdd', 'data'),
+         State('metadata', 'data')]
     )
-    def check(button, mddstate):
+    def check(button, mddstate, meta):
         if button > 0:
+            # mdd = mc.MDD(
+            #     pd.DataFrame(meta)
+            # )
+            # mdd.dataDF = pd.DataFrame(mddstate)
             mdd = mc.read_json_pair(mddstate)
+
             mdd.create_training()
-            mdd.generate_features()
-            print(mdd.training)
+            model = em.RandomForestRegressor(max_features=len(mdd.trainX.columns)//3, random_state=42, verbose=20)
+
+            trainX, testX, trainY, testY = msl.train_test_split(mdd.trainX, mdd.trainY, test_size=0.2, random_state=42)
+
+            model.fit(trainX, trainY)
+            print('finished training')
+
+            # print(model.score(testX, testY))
+
+            # print(testX.head(3))
+            # print(testY.head(3))
+            # print(model.predict(testX.head(3)))
+
+
+            pred = model.predict(testX)
+            mae = metrics.mean_absolute_error(testY, pred)
+            print(mae)
+
+            # mdd.create_training()
+            # print(mdd.trainX)
+            # mdd.train_model()
+            # print('finished training')
+
+            # test_set = mdd.dataDF[mdd.dataDF.isnull().any(axis=1)]
+            # testX = test_set.drop(['y'], axis=1)
+            # testX = mc.generate_features(testX)
+
+            # # testY = testX['x1'] + 2 * testX['x2'] ** 2 + 4 * testX['x3'] # EASY ML
+            # testY = (testX['x1'] / testX['x2'] + testX['x2'] * (testX['x1'] + testX['x3']) ** 2) / mdd.dataDF['y'].max() # ML
+            # # testY = testX['x3'] * testX['x2'] ** 2 # EXPERIMENTAL
+
+            # print(testX)
+            # print(testY)
+
+            # print(mdd.model.score(testX, testY))
+
+            # EASY ML
+            # data = {
+            #     'x1': [2, 2, 2],
+            #     'x2': [1, 1, 3],
+            #     'x3': [9, 402, 274]
+            # }
+            # EXPECT: 40, 1612, 1116
+
+            # ML
+            # data = {
+            #     'x1': [2, 2, 2],
+            #     'x2': [1, 1, 3],
+            #     'x3': [2, 139, 96]
+            # }
+            # EXPECT: 18, 19883, 28812
+
+            # EXPERIMENTAL
+            # data = {
+            #     'x1': [3, 3, 3],
+            #     'x2': [5, 5, 5],
+            #     'x3': [2, 50, 250]
+            # }
+
+            # df = pd.DataFrame(data, columns=['x1', 'x2', 'x3'])
+            # print(df)
+            # df = mc.generate_features(df)
+
+            # pred = mdd.model.predict(df)
+            # print(pred)

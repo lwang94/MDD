@@ -12,11 +12,11 @@ It renders an input with the property `value`
 which is editable by the user.
 
 Keyword arguments:
-- children (list; default [' ']): The children in each part of the grid.
+- children (list; optional): The children in each part of the grid.
 - id (string; optional): The ID used to identify this component in Dash callbacks.
 - label (string; required): A label that will be printed when this component is rendered.
 - divstyle (dict; optional): The style of the Div that contains the children
-- layout (list; default [{i: 'default', x: 0, y: 0, w: 1, h: 1}]): The layout of the grid
+- layout (list; optional): The layout of the grid
 - compacttype (string; default 'horizontal'): The compact type
 - rowheight (number; default 30): The height of one row in the grid
 - width (number; default 1200): The total width of the grid

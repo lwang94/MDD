@@ -117,7 +117,8 @@ def app_layout():
                                 'marginTop': 50,
                                 'marginLeft': 5
                             }
-                        )
+                        ),
+                        dcc.Store(id='metadata')
                     ],
                     className='six columns',
                     style={
@@ -209,9 +210,23 @@ def app_layout():
                                     id='data_headers',
                                     placeholder='Header1, Header2,...',
                                     type='text',
-                                    style={'width': 130},
-                                    # className='one column'
+                                    style={
+                                        'width': 130,
+                                        'marginBottom': 18
+                                    }
                                 ),
+                                html.A(
+                                    html.Button(
+                                        'Save MDD',
+                                        style={
+                                            'backgroundColor': '#607D8B',
+                                            'color': 'white',
+                                            'marginBottom': 18
+                                        }
+                                    ),
+                                    id='save_data'
+                                ),
+
                                 # html.Pre(
                                 #         cf.warning_dataheader,
                                 #         style={
@@ -220,7 +235,9 @@ def app_layout():
                                 #             'color': '#f3742b'
                                 #         },
                                 #         # className='four columns'
-                                # )
+                                # ),
+                                dcc.Store(id='mdd'),
+                                dcc.Store(id='mddcopy')
                             ],
                             className='two columns',
                             style={'marginTop': 50}
@@ -240,14 +257,6 @@ def app_layout():
                 'height': 300,
                 'overflowY': 'scroll'
             }
-            # style={
-            #     'borderTop': '40px solid #50C878',
-            #     'borderRadius': '25px',
-            #     'backgroundColor': '#FFFDD0',
-            #     'borderBottom': '1px solid',
-            #     'height': 300,
-            #     'overflowY': 'scroll'
-            # }
         ),
 
         # Second Row
@@ -261,36 +270,7 @@ def app_layout():
                     style={'width': 120},
                     className='one column'
                 ),
-                html.Hr(className='five columns'),
-
-                # # Button to upload data to MDD
-                # dcc.Upload(
-                #     id='add_data',
-                #     children=html.Button(
-                #         'Add Data',
-                #         style={'width': 130, 'marginLeft': 40}
-                #     ),
-                #     multiple=True,
-                #     className='one column'
-                # ),
-
-                # # Input allowing app to to find correct column in datafile
-                # dcc.Input(
-                #     id='data_headers',
-                #     placeholder='Header1, Header2,...',
-                #     type='text',
-                #     style={'width': 130, 'marginLeft': 85},
-                #     className='one column'
-                # ),
-                # html.Pre(
-                #         cf.warning_dataheader,
-                #         style={
-                #             'textAlign': 'left',
-                #             'marginLeft': 20,
-                #             'color': '#f3742b'
-                #         },
-                #         className='four columns'
-                # )
+                html.Hr(className='five columns')
             ],
             className='one row'
         ),
@@ -300,57 +280,198 @@ def app_layout():
             children=[
                 html.Div(
                     children=[
-                        # Grid to move axis
-                        dg.DragGrid(
-                            id='moveaxis',
-                            label='label',
-                            width=900
-                        ),
-                        # Dropdown showing line graph parameters
-                        dcc.Dropdown(
-                            id='graph_params',
-                            multi=True
-                        )
-                    ],
-                    className='six columns'
-                ),
-                html.Div(
-                    children=[
-                        # Slice value datatable (for displaying graph)
-                        dt.DataTable(
-                            id='slice_table',
-                            editable=True,
-                            style_table={'overflowX': 'scroll'}
+                        html.Div(
+                            children=[
+                                html.Pre(
+                                    'Move Axis',
+                                    style={
+                                        'width': 100,
+                                        'borderTop': '1px solid #50C878',
+                                        'borderBottom': '1px solid #50C878',
+                                        'borderLeft': '10px solid #50C878',
+                                        'borderRight': '10px solid #50C878',
+                                        'marginLeft': 50,
+                                        'marginTop': 30,
+                                        'textAlign': 'center',
+                                        'fontSize': 18
+                                    }
+                                ),
+                                # Grid to move axis
+                                html.Div(
+                                    dg.DragGrid(
+                                        id='moveaxis',
+                                        label='label',
+                                        width=500
+                                    ),
+                                    style={
+                                        'backgroundColor': '#50C878',
+                                        'borderTop': '5px solid #2DC7D8',
+                                        'borderRadius': '10px',
+                                        'marginLeft': 50,
+                                        'marginTop': 10
+                                    }
+                                )
+                            ],
+                            className='four columns'
                         ),
                         html.Div(
                             children=[
-                                html.Pre(id='slice_validation'),
+                                # Slice value datatable (for displaying graph)
+                                html.Pre(
+                                    'Slice Axis',
+                                    style={
+                                        'width': 150,
+                                        'borderTop': '1px solid #50C878',
+                                        'borderBottom': '1px solid #50C878',
+                                        'borderLeft': '10px solid #50C878',
+                                        'borderRight': '10px solid #50C878',
+                                        'marginTop': 30,
+                                        'textAlign': 'center',
+                                        'fontSize': 18
+                                    }
+                                ),
+                                dt.DataTable(
+                                    id='slice_table',
+                                    editable=True,
+                                    style_header={
+                                        'backgroundColor': '#50C878',
+                                        'fontWeight': 'bold',
+                                        'border': '1px solid',
+                                        'textAlign': 'center'
+                                    },
+                                    style_cell={
+                                        'backgroundColor': 'transparent',
+                                        'border': '1px solid',
+                                        'textAlign': 'center'
+                                    },
+                                    style_table={
+                                        'marginTop': 10,
+                                        'width': 550,
+                                        'overflowX': 'scroll'
+                                    }
+                                ),
                                 html.Div(
-                                    id='slice_indices',
-                                    style={'display': 'none'}
+                                    children=[
+                                        html.Pre(id='slice_validation'),
+                                        dcc.Store(id='slice_indices')
+                                    ]
                                 )
-                            ]
+                            ],
+                            className='four columns'
+                        ),
+                        html.Div(
+                            children=[
+                            # Dropdown showing line graph parameters
+                                html.Pre(
+                                    'Select Graphs',
+                                    style={
+                                        'width': 150,
+                                        'borderTop': '1px solid #50C878',
+                                        'borderBottom': '1px solid #50C878',
+                                        'borderLeft': '10px solid #50C878',
+                                        'borderRight': '10px solid #50C878',
+                                        'marginTop': 30,
+                                        'textAlign': 'center',
+                                        'fontSize': 18
+                                    }
+                                ),
+                                dcc.Loading(
+                                    dcc.Dropdown(
+                                        id='graph_params',
+                                        style={
+                                            'width': 550,
+                                            'marginTop': 10
+                                        },
+                                        multi=True
+                                    ),
+                                    id='graph_params_loading',
+                                    type='default'
+                                ),
+                                dcc.Store(id='prev_val', data={}),
+                                dcc.Store(id='lastslice')
+                            ],
+                            className='four columns'
                         )
                     ],
-                    className='six columns'
+                    className='one row'
+                ),
+                html.Div(
+                    children = [
+                        dcc.Tabs(
+                            children=[
+                                dcc.Tab(
+                                    html.Div([
+                                        html.Pre('Title'),
+                                        dcc.Input(
+                                            id='graphtitles'
+                                        )
+                                    ]),
+                                    id='style_tab',
+                                    label='Style'
+                                )
+                            ],
+                            style={
+                                'marginLeft': 50,
+                                'marginRight': 30
+                            }
+                        ),
+                        html.Div(
+                            dg.DragGrid(
+                                id='graphs',
+                                label='label',
+                                children=[],
+                                layout=[],
+                                divstyle={'borderStyle': 'solid'},
+                                numcolumns=30,
+                                maxrows=0,
+                                rowheight=50,
+                                width=1800,
+                                compacttype='vertical'
+                            ),
+                            style={'height': 900, 'overflowY': 'scroll'},
+                            className='one row'
+                        )
+                    ],
+                    className='one row',
                 )
             ],
-            className='one row'
+            className='one row',
+            style={
+                'borderTop': '40px solid #50C878',
+                'borderRadius': '25px',
+                'backgroundColor': '#FFFDD0'
+            }
         ),
 
         # Fourth Row
-        html.Div(
-            # Graph grid
-            dg.DragGrid(
-                id='graphs',
-                label='label',
-                rowheight=50,
-                width=1800,
-                compacttype='vertical'
-            ),
-            className='one row',
-            style={'height': 900, 'overflowY': 'scroll'}
-        ),
+        # html.Div(
+        #     children = [
+        #         dcc.Tabs([
+        #             dcc.Tab(
+        #                 html.Div([
+        #                     html.Pre('Title'),
+        #                     dcc.Input(
+        #                         id='graphtitles'
+        #                     )
+        #                 ]),
+        #                 id='style_tab',
+        #                 label='Style'
+        #             )
+        #         ]),
+        #         html.Div(
+        #             dg.DragGrid(
+        #                 id='graphs',
+        #                 label='label',
+        #                 rowheight=50,
+        #                 width=1800,
+        #                 compacttype='vertical'
+        #             ),
+        #             style={'height': 900, 'overflowY': 'scroll'},
+        #             className='one row'
+        #         )
+        #     ],
+        #     className='one row',
+        # ),
 
         # TESTING MDD, DELETE LATER
         html.Button(
@@ -360,8 +481,9 @@ def app_layout():
         html.Div(id='check', style={'display': 'none'}),
 
         # hidden divs --> move to more appropriate locations later
-        html.Div(id='metadata', style={'display': 'none'}),
-        html.Div(id='mdd', style={'display': 'none'}),
-        html.Div(id='mddcopy', style={'display': 'none'}),
-        html.Div(id='lastslice', style={'display': 'none'})
+        html.Div(id='dummy', style={'display': 'none'}),
+        # html.Div(id='metadata', style={'display': 'none'}),
+        # html.Div(id='mdd', style={'display': 'none'}),
+        # html.Div(id='mddcopy', style={'display': 'none'}),
+        # html.Div(id='lastslice', style={'display': 'none'})
     ])

@@ -7,7 +7,12 @@
         "name": "create_children",
         "docblock": null,
         "modifiers": [],
-        "params": [],
+        "params": [
+          {
+            "name": "propchild",
+            "type": null
+          }
+        ],
         "returns": null
       },
       {
@@ -77,7 +82,7 @@
         "required": false,
         "description": "The children in each part of the grid.",
         "defaultValue": {
-          "value": "[' ']",
+          "value": "[]",
           "computed": false
         }
       },
@@ -99,7 +104,7 @@
         "required": false,
         "description": "The layout of the grid",
         "defaultValue": {
-          "value": "[{i: 'default', x: 0, y: 0, w: 1, h: 1}]",
+          "value": "[]",
           "computed": false
         }
       },

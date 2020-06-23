@@ -1,12 +1,13 @@
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, MATCH, ALL
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.exceptions import PreventUpdate
 
 import pandas as pd
-import numpy as np
 import itertools
-import json
 
-import MDDClass as mc
 import app_util as au
+import MDDClass as mc
 
 
 def graphs_callbacks(app):
@@ -14,15 +15,15 @@ def graphs_callbacks(app):
     @app.callback(
         [Output('graph_params', 'options'),
          Output('graph_params', 'value'),
-         Output('lastslice', 'children')],
-        [Input('slice_indices', 'children'),
+         Output('lastslice', 'data')],
+        [Input('slice_indices', 'data'),
          Input('moveaxis', 'layout')],
-        [State('metadata', 'children'),
+        [State('metadata', 'data'),
          State('graph_params', 'value')]
     )
-    def def_graphparams(si, layout, metadata, val_state):
+    def def_graphparams(indices, layout, metadata, val_state):
         meta = (
-            pd.read_json(metadata, orient='split')
+            pd.DataFrame(metadata)
             .sort_values(by=['Axis'], ignore_index=True)
         )
         new_x = [layout[i]['x'] for i in range(len(layout))]
@@ -31,7 +32,6 @@ def graphs_callbacks(app):
         new_name = [meta['Name'][new_pos.index(i)] for i in range(len(new_pos))]
 
         new_vals = []
-        indices = json.loads(si)
         for i, name in enumerate(new_name):
             vals = meta.loc[meta['Name'] == name]['Values'].array[0]
             start = indices[name][0]
@@ -73,81 +73,62 @@ def graphs_callbacks(app):
 
         return options, value, lastslice
 
-    @app.callback(
-        [Output('graphs', 'children'),
-         Output('graphs', 'layout'),
-         Output('graphs', 'divstyle'),
-         Output('graphs', 'maxrows'),
-         Output('graphs', 'numcolumns')],
-        [Input('graph_params', 'value'),
-         Input('mdd', 'children'),
-         Input('lastslice', 'children')],
-        [State('moveaxis', 'layout'),
-         State('graphs', 'layout'),
-         State('graphs', 'maxrows')]
+    app.clientside_callback(
+        """
+        function(graph_data, graph_lay) {
+            return {
+                'data': graph_data,
+                'layout': graph_lay
+            }
+        }
+        """,
+        Output({'type': 'linegraph', 'index': MATCH}, 'figure'),
+        [Input({'type': 'linegraph_data', 'index': MATCH}, 'data'),
+         Input({'type': 'linegraph_lay', 'index': MATCH}, 'data')]
     )
-    def create_graphs(vals, mdd_json, lastslice, layout, glayout, prev_rows):
-        if len(vals) == 0:
-            raise ValueError('No values found')
 
-        mdd = mc.read_json_pair(mdd_json)
+    @app.callback(
+        Output({'type': 'linegraph_data', 'index': ALL}, 'data'),
+        [Input('mdd', 'data'),
+         Input('lastslice', 'data')],
+        [State('metadata', 'data'),
+         State('moveaxis', 'layout'),
+         State('graph_params', 'value'),
+         State({'type': 'linegraph_data', 'index': ALL}, 'data'),
+         State({'type': 'linegraph_data', 'index': ALL}, 'id')]
+    )
+    def update_graphdata(mdd_data, lastslice, metadata, moveaxis, vals, olddata, identity):
+        graph_keys = {identity[i]['index']: i for i in range(len(identity))}
+        mdd = mc.MDD(
+            pd.DataFrame(metadata)
+        )
+        mdd.dataDF = pd.DataFrame(mdd_data)
+        mdd.move_axis(au.new_pos(moveaxis))
 
-        new_x = [layout[i]['x'] for i in range(len(layout))]
-        new_y = [layout[i]['y'] for i in range(len(layout))]
-        new_pos = [1 + new_x[i] + new_y[i] * (max(new_x) + 1) for i in range(len(new_x))]
-        mdd.move_axis(new_pos)
-
-        old_layout = {glayout[i]['i']: i for i in range(len(glayout))}
-        old_lay = []
-        old_keys, new_keys = [], []
-        old_items, new_items = [], []
         for i in range(len(vals)):
+            key = graph_keys[vals[i]]
 
             val = vals[i].split(',')
             sing_vals = [int(j) for j in val]
             last_vals = [int(j) for j in lastslice.split(':')]
 
-            if vals[i] in old_layout:
-                old_lay.append(glayout[old_layout[vals[i]]])
-                old_items.append(
-                    au.line_graph(mdd, sing_vals, last_vals)
-                )
-                old_keys.append(vals[i])
-            else:
-                new_items.append(
-                    au.line_graph(mdd, sing_vals, last_vals)
-                )
-                new_keys.append(vals[i])
+            x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
+            slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
+            y = mdd.dataArray[tuple(slice_list)]
 
-        spacing = 8
-        nrows = (len(vals) // 3 + 1) * spacing
-        if len(vals) % 3 == 0:
-            nrows = (len(vals) // 3) * spacing
-        ncolumns = 30
+            olddata[key][0]['x'] = x
+            olddata[key][0]['y'] = y.flatten()
 
-        if prev_rows is None:
-            prev_rows = 0
+        return olddata
 
-        new_layout = au.define_draggrid(
-            1,
-            1,
-            new_keys,
-            start_row=prev_rows,
-            w=ncolumns,
-            h=spacing,
-            spacex=spacing,
-            spacey=spacing
-        )
-        divstyle = {
-            'borderStyle': 'solid'
-        }
-
-        return old_items + new_items, old_lay + new_layout, divstyle, prev_rows + nrows, ncolumns
-
-
-
-
-
-
-
-
+    @app.callback(
+        Output({'type': 'linegraph_lay', 'index': MATCH}, 'data'),
+        [Input({'type': 'linegraph', 'index': MATCH}, 'relayoutData'),
+         Input('moveaxis', 'layout')],
+        [State('metadata', 'data')]
+    )
+    def update_graphlay(reData):
+        if 'title.text' in reData:
+            return {'title': reData['title.text']}
+        else:
+            raise PreventUpdate

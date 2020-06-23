@@ -44,7 +44,7 @@ def load_data(contents, usecols):
 
 def define_draggrid(
     nrows, ncolumns, keys,
-    start_row=0, w=1, h=1, spacex=1, spacey=1,
+    w=1, h=1, start_row=0, spacex=1, spacey=1,
     isResizable=True, isDraggable=True
 ):
     layout = []
@@ -66,26 +66,7 @@ def define_draggrid(
     return layout
 
 
-def line_graph(mdd, sing_vals, last_vals):
-    x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
-    slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
-    y = mdd.dataArray[tuple(slice_list)]
-
-    title = ''
-    for i, name in enumerate(mdd.metadata['Name'][:-1]):
-        title += f'{name}-{sing_vals[i]}'
-
-
-    return dcc.Graph(
-        figure={
-            'data': [go.Scatter(x=x, y=y.flatten(), mode='lines+markers')],
-            'layout': go.Layout(
-                title={'text': title},
-                xaxis={'title': mdd.metadata['Name'].iloc[-1]}
-            )
-        },
-        style={
-            'height': '90%',
-            'width': '90%'
-        }
-    )
+def new_pos(moveaxis):
+    new_x = [moveaxis[i]['x'] for i in range(len(moveaxis))]
+    new_y = [moveaxis[i]['y'] for i in range(len(moveaxis))]
+    return [1 + new_x[i] + new_y[i] * (max(new_x) + 1) for i in range(len(new_x))]

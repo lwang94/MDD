@@ -22,7 +22,7 @@ export default class DragGrid extends Component {
 
     }
 
-    create_children() {
+    create_children(propchild) {
         const children = []
         if (this.props.children != null) {
             let propchild = this.props.children;
@@ -73,30 +73,30 @@ export default class DragGrid extends Component {
 
     render() {
         return (
-        <div ref={this.myRef}>
-            <GridLayout
-                className='layout'
-                layout={this.props.layout}
-                compactType={this.props.compacttype}
-                rowHeight={this.props.rowheight}
-                width={this.props.width}
-                cols={this.props.numcolumns}
-                maxRows={this.props.maxrows}
-                onLayoutChange={this.onLC}
-                onDrag={this.onD}
-            >
-                {this.create_children()}
-            </GridLayout>
-        </div>
+            <div ref={this.myRef}>
+                <GridLayout
+                    className='layout'
+                    layout={this.props.layout}
+                    compactType={this.props.compacttype}
+                    rowHeight={this.props.rowheight}
+                    width={this.props.width}
+                    cols={this.props.numcolumns}
+                    maxRows={this.props.maxrows}
+                    onLayoutChange={this.onLC}
+                    onDrag={this.onD}
+                >
+                    {this.create_children()}
+                </GridLayout>
+            </div>
         )
     }
 }
 
 
 DragGrid.defaultProps = {
-    children: [' '],
+    children: [],
     divstyle: {},
-    layout: [{i: 'default', x: 0, y: 0, w: 1, h: 1}],
+    layout: [],
     compacttype: 'horizontal',
     rowheight: 30,
     width: 1200,

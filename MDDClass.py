@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from sklearn import linear_model as lm
+from sklearn import ensemble as em
 import itertools
 
 from pathlib import Path
@@ -24,6 +26,23 @@ def read_json_pair(js_pair):
     mdd = MDD(metadata)
     mdd.dataDF = pd.read_json(js_pair[1], orient='split')
     return mdd
+
+def generate_features(df):
+    cols = list(df.columns)
+
+    # squaring values
+    colssquared = [f'{col}_squared' for col in cols]
+    df[colssquared] = df[cols] ** 2
+
+    # cubing values
+    colscubed = [f'{col}_cubed' for col in cols]
+    df[colscubed] = df[cols] ** 3
+
+    # log values
+    # colslog = [f'{col}_log' for col in cols]
+    # df[colslog] = np.log(df[cols])
+
+    return df
 
 
 class MDD:
@@ -158,29 +177,19 @@ class MDD:
             rows.append({columns[i]: coord[i] for i in range(len(coord))})
         self.__dataDF[columns] = pd.DataFrame(rows, columns=columns)
 
-    def generate_features(self):
-        # try:
-        cols = list(self.training.columns)
-        cols.remove('y')
-
-        # squaring values
-        colssquared = [f'{col}_squared' for col in cols]
-        self.training[colssquared] = self.training[cols] ** 2
-
-        # cubing values
-        colscubed = [f'{col}_cubed' for col in cols]
-        self.training[colscubed] = self.training[cols] ** 3
-
-        # log values
-        colslog = [f'{col}_log' for col in cols]
-        self.training[colslog] = np.log(self.training[cols])
-
-        # except:
-        #     print('ERROR: Please create training first using mdd.create_training()')
 
     def create_training(self):
         self.training = self.dataDF.copy().dropna()
 
+        self.trainX = self.training.drop(['y'], axis=1)
+        self.trainX = generate_features(self.trainX)
+
+        self.trainY = self.training['y'] / self.dataDF['y'].max()
+
+    def train_model(self):
+        # self.model = lm.Lasso(alpha=0.01, tol=1e-4, max_iter=10000)
+        self.model = em.RandomForestRegressor(max_features=len(self.trainX.columns)//3, random_state=42, verbose=20)
+        self.model.fit(self.trainX, self.trainY)
 
 
 

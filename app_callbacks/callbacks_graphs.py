@@ -1,3 +1,4 @@
+from dash import callback_context
 from dash.dependencies import Input, Output, State, MATCH, ALL
 import dash_core_components as dcc
 import dash_html_components as html
@@ -88,44 +89,8 @@ def graphs_callbacks(app):
     )
 
     @app.callback(
-        Output({'type': 'linegraph_data', 'index': ALL}, 'data'),
-        [Input('mdd', 'data'),
-         Input('lastslice', 'data')],
-        [State('metadata', 'data'),
-         State('moveaxis', 'layout'),
-         State('graph_params', 'value'),
-         State({'type': 'linegraph_data', 'index': ALL}, 'data'),
-         State({'type': 'linegraph_data', 'index': ALL}, 'id')]
-    )
-    def update_graphdata(mdd_data, lastslice, metadata, moveaxis, vals, olddata, identity):
-        graph_keys = {identity[i]['index']: i for i in range(len(identity))}
-        mdd = mc.MDD(
-            pd.DataFrame(metadata)
-        )
-        mdd.dataDF = pd.DataFrame(mdd_data)
-        mdd.move_axis(au.new_pos(moveaxis))
-
-        for i in range(len(vals)):
-            key = graph_keys[vals[i]]
-
-            val = vals[i].split(',')
-            sing_vals = [int(j) for j in val]
-            last_vals = [int(j) for j in lastslice.split(':')]
-
-            x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
-            slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
-            y = mdd.dataArray[tuple(slice_list)]
-
-            olddata[key][0]['x'] = x
-            olddata[key][0]['y'] = y.flatten()
-
-        return olddata
-
-    @app.callback(
         Output({'type': 'linegraph_lay', 'index': MATCH}, 'data'),
-        [Input({'type': 'linegraph', 'index': MATCH}, 'relayoutData'),
-         Input('moveaxis', 'layout')],
-        [State('metadata', 'data')]
+        [Input({'type': 'linegraph', 'index': MATCH}, 'relayoutData')]
     )
     def update_graphlay(reData):
         if 'title.text' in reData:

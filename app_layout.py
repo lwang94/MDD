@@ -400,34 +400,105 @@ def app_layout():
                         dcc.Tabs(
                             children=[
                                 dcc.Tab(
-                                    html.Div([
-                                        html.Pre('Title'),
-                                        dcc.Input(
-                                            id='graphtitles'
-                                        )
-                                    ]),
+                                    html.Div(
+                                        children=[
+                                            html.Pre(
+                                                'Title',
+                                                style={
+                                                    'fontSize': 16,
+                                                    'textAlign': 'center',
+                                                    'display': 'inline-block'
+                                                }
+                                            ),
+                                            dcc.Input(
+                                                id='graphtitles',
+                                                debounce=True,
+                                                style={
+                                                    'marginLeft': 5,
+                                                    'display': 'inline-block'
+                                                }
+                                            ),
+                                            html.Pre(
+                                                'x-title',
+                                                style={
+                                                    'fontSize': 16,
+                                                    'textAlign': 'center',
+                                                    'marginLeft': 20,
+                                                    'display': 'inline-block'
+                                                }
+                                            ),
+                                            dcc.Input(
+                                                id='xaxistitles',
+                                                debounce=True,
+                                                style={
+                                                    'marginLeft': 5,
+                                                    'display': 'inline-block'
+                                                }
+                                            ),
+                                            html.Pre(
+                                                'y-title',
+                                                style={
+                                                    'fontSize': 16,
+                                                    'textAlign': 'center',
+                                                    'marginLeft': 20,
+                                                    'display': 'inline-block'
+                                                }
+                                            ),
+                                            dcc.Input(
+                                                id='yaxistitles',
+                                                debounce=True,
+                                                style={
+                                                    'marginLeft': 5,
+                                                    'display': 'inline-block'
+                                                }
+                                            ),
+                                            dcc.Checklist(
+                                                id='datamodes',
+                                                options=[
+                                                    {'label': 'Show Lines', 'value': 'lines'},
+                                                    {'label': 'Show Markers', 'value': 'markers'}
+                                                ],
+                                                value=['lines', 'markers'],
+                                                labelStyle={'display': 'inline-block'},
+                                                style={
+                                                    'marginLeft': 20,
+                                                    'display': 'inline-block'
+                                                }
+                                            )
+                                        ],
+                                        style={
+                                            'marginLeft': 50,
+                                            'marginRight': 30,
+                                            'backgroundColor': '#FFFFFF'
+                                        }
+                                    ),
                                     id='style_tab',
-                                    label='Style'
+                                    label='Style',
                                 )
                             ],
                             style={
+                                'marginTop': 15,
                                 'marginLeft': 50,
                                 'marginRight': 30
                             }
                         ),
                         html.Div(
-                            dg.DragGrid(
-                                id='graphs',
-                                label='label',
-                                children=[],
-                                layout=[],
-                                divstyle={'borderStyle': 'solid'},
-                                numcolumns=30,
-                                maxrows=0,
-                                rowheight=50,
-                                width=1800,
-                                compacttype='vertical'
-                            ),
+                            children=[
+                                dg.DragGrid(
+                                    id='graphs',
+                                    label='label',
+                                    children=[],
+                                    layout=[],
+                                    divstyle={'borderStyle': 'solid'},
+                                    numcolumns=30,
+                                    maxrows=0,
+                                    rowheight=50,
+                                    width=1800,
+                                    compacttype='vertical'
+                                ),
+                                html.Div(id='graphdata', children=[]),
+                                html.Div(id='graphstyle', children=[])
+                            ],
                             style={'height': 900, 'overflowY': 'scroll'},
                             className='one row'
                         )

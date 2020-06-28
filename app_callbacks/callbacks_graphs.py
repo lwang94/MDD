@@ -90,10 +90,39 @@ def graphs_callbacks(app):
 
     @app.callback(
         Output({'type': 'linegraph_lay', 'index': MATCH}, 'data'),
-        [Input({'type': 'linegraph', 'index': MATCH}, 'relayoutData')]
+        [Input({'type': 'linegraph', 'index': MATCH}, 'relayoutData')],
+        [State({'type': 'linegraph_lay', 'index': MATCH}, 'data')]
     )
-    def update_graphlay(reData):
+    def update_graphlay(reData, old_lay):
         if 'title.text' in reData:
-            return {'title': reData['title.text']}
+            return {
+                'title': reData['title.text'],
+                'xaxis': {
+                    'title': old_lay['xaxis']['title']
+                },
+                'yaxis': {
+                    'title': old_lay['yaxis']['title']
+                }
+            }
+        elif 'xaxis.title.text' in reData:
+            return {
+                'title': old_lay['title'],
+                'xaxis': {
+                    'title': reData['xaxis.title.text']
+                },
+                'yaxis': {
+                    'title': old_lay['yaxis']['title']
+                }
+            }
+        elif 'yaxis.title.text' in reData:
+            return {
+                'title': old_lay['title'],
+                'xaxis': {
+                    'title': old_lay['xaxis']['title']
+                },
+                'yaxis': {
+                    'title': reData['yaxis.title.text']
+                }
+            }
         else:
             raise PreventUpdate

@@ -270,6 +270,10 @@ def app_layout():
                     style={'width': 120},
                     className='one column'
                 ),
+                dcc.Input(
+                    id='ind_var',
+                    value=''
+                ),
                 html.Hr(className='five columns')
             ],
             className='one row'
@@ -412,6 +416,7 @@ def app_layout():
                                             ),
                                             dcc.Input(
                                                 id='graphtitles',
+                                                value='',
                                                 debounce=True,
                                                 style={
                                                     'marginLeft': 5,
@@ -429,6 +434,7 @@ def app_layout():
                                             ),
                                             dcc.Input(
                                                 id='xaxistitles',
+                                                value='',
                                                 debounce=True,
                                                 style={
                                                     'marginLeft': 5,
@@ -446,6 +452,7 @@ def app_layout():
                                             ),
                                             dcc.Input(
                                                 id='yaxistitles',
+                                                value='',
                                                 debounce=True,
                                                 style={
                                                     'marginLeft': 5,

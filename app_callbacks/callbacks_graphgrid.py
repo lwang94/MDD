@@ -12,21 +12,106 @@ import app_util as au
 
 
 def update_style(
-    ctx, vals, title, xtitle,
+    ctx, vals, title, xtitle, ytitle, ind_var,
     mdd_data, metadata, moveaxis, lastslice,
     children, layout, maxrows, graphdata, graphstyle
 ):
-    if (
-        ctx.triggered[-1]['prop_id'] == 'graphtitles.value' and
-        title is not None and title is not ''
-    ):
+    if ctx.triggered[-1]['prop_id'] == 'graphtitles.value':
         newgraphstyle = []
+
+        if title is '':
+            meta = pd.DataFrame(metadata).sort_values('Axis', ignore_index=True)
+            meta['Axis'] = au.new_pos(moveaxis)
+            meta = meta.sort_values('Axis', ignore_index=True)
+
+        graphtitle = title
+        for i in range(len(vals)):
+            children[i]['props']['relayoutData'] = None
+
+            if title is '':
+                sing_vals = [int(j) for j in vals[i].split(',')]
+                graphtitle = ''
+                for j, name in enumerate(meta['Name'][:-1]):
+                    graphtitle += f'{name}{sing_vals[j]}'
+
+            newgraphstyle.append(
+                dcc.Store(
+                    id={'type': 'linegraph_lay', 'index': vals[i]},
+                    data={
+                        'title': graphtitle,
+                        'xaxis': {
+                            'title': (
+                                graphstyle[i]
+                                ['props']['data']
+                                ['xaxis']['title']
+                            )
+                        },
+                        'yaxis': {
+                            'title': (
+                                graphstyle[i]
+                                ['props']['data']
+                                ['yaxis']['title']
+                            )
+                        }
+                    }
+                )
+            )
+        return children, layout, maxrows, graphdata, newgraphstyle, vals
+
+    elif ctx.triggered[-1]['prop_id'] == 'xaxistitles.value':
+        newgraphstyle = []
+        if xtitle is '':
+            meta = pd.DataFrame(metadata).sort_values('Axis', ignore_index=True)
+            meta['Axis'] = au.new_pos(moveaxis)
+            meta = meta.sort_values('Axis', ignore_index=True)
+
+            xtitle = meta['Name'][len(meta['Name']) - 1]
+
         for i in range(len(vals)):
             children[i]['props']['relayoutData'] = None
             newgraphstyle.append(
                 dcc.Store(
                     id={'type': 'linegraph_lay', 'index': vals[i]},
-                    data={'title': title}
+                    data={
+                        'title': graphstyle[i]['props']['data']['title'],
+                        'xaxis': {
+                            'title': xtitle
+                        },
+                        'yaxis': {
+                            'title': (
+                                graphstyle[i]
+                                ['props']['data']
+                                ['yaxis']['title']
+                            )
+                        }
+                    }
+                )
+            )
+        return children, layout, maxrows, graphdata, newgraphstyle, vals
+
+    elif ctx.triggered[-1]['prop_id'] == 'yaxistitles.value':
+        newgraphstyle = []
+        if ytitle is '':
+            ytitle = ind_var
+
+        for i in range(len(vals)):
+            children[i]['props']['relayoutData'] = None
+            newgraphstyle.append(
+                dcc.Store(
+                    id={'type': 'linegraph_lay', 'index': vals[i]},
+                    data={
+                        'title': graphstyle[i]['props']['data']['title'],
+                        'xaxis': {
+                            'title': (
+                                graphstyle[i]
+                                ['props']['data']
+                                ['xaxis']['title']
+                            )
+                        },
+                        'yaxis': {
+                            'title': ytitle
+                        }
+                    }
                 )
             )
         return children, layout, maxrows, graphdata, newgraphstyle, vals
@@ -94,7 +179,15 @@ def update_style(
             newgraphstyle.append(
                 dcc.Store(
                     id={'type': 'linegraph_lay', 'index': vals[i]},
-                    data={'title': title}
+                    data={
+                        'title': title,
+                        'xaxis': {
+                            'title': mdd.metadata['Name'][len(mdd.metadata['Name']) - 1]
+                        },
+                        'yaxis': {
+                            'title': ind_var
+                        }
+                    }
                 )
             )
         return children, layout, maxrows, newgraphdata, newgraphstyle, vals
@@ -117,20 +210,22 @@ def graphgrid_callbacks(app):
          Input('lastslice', 'data'),
          Input('moveaxis', 'layout'),
          Input('graphtitles', 'value'),
-         Input('xaxistitles', 'value')],
+         Input('xaxistitles', 'value'),
+         Input('yaxistitles', 'value')],
         [State('graphs', 'children'),
          State('graphs', 'layout'),
          State('graphs', 'maxrows'),
          State('graphdata', 'children'),
          State('graphstyle', 'children'),
          State('metadata', 'data'),
-         State('prev_val', 'data')]
+         State('prev_val', 'data'),
+         State('data_headers', 'value')]
     )
     def create_graphgrid(
         vals, mdd_data, lastslice, moveaxis,
-        title, xtitle,
+        title, xtitle, ytitle,
         children, layout, maxrows, graphdata, graphstyle,
-        metadata, prev_vals
+        metadata, prev_vals, ind_var
     ):
         if len(vals) == len(prev_vals):
             ctx = callback_context
@@ -139,6 +234,8 @@ def graphgrid_callbacks(app):
                 vals,
                 title,
                 xtitle,
+                ytitle,
+                ind_var,
                 mdd_data,
                 metadata,
                 moveaxis,
@@ -254,7 +351,15 @@ def graphgrid_callbacks(app):
             graphstyle.append(
                 dcc.Store(
                     id={'type': 'linegraph_lay', 'index': vals[-1]},
-                    data={'title': title}
+                    data={
+                        'title': title,
+                        'xaxis': {
+                            'title': mdd.metadata['Name'][len(mdd.metadata['Name']) - 1]
+                        },
+                        'yaxis': {
+                            'title': ind_var
+                        }
+                    }
                 )
             )
 

@@ -270,298 +270,285 @@ def app_layout():
                     style={'width': 120},
                     className='one column'
                 ),
-                dcc.Input(
-                    id='ind_var',
-                    value=''
-                ),
                 html.Hr(className='five columns')
             ],
             className='one row'
         ),
 
-        # Third Row
+        #graphs
+        html.Div(
+            children=[
+                dg.DragGrid(
+                    id='graphs',
+                    label='label',
+                    children=[],
+                    layout=[],
+                    divstyle={'borderStyle': 'solid'},
+                    numcolumns=30,
+                    maxrows=0,
+                    rowheight=50,
+                    width=1200,
+                    compacttype='vertical'
+                ),
+                html.Div(id='graphdata', children=[]),
+                html.Div(id='graphstyle', children=[])
+            ],
+            className='eight columns',
+            style={
+                'marginLeft': 0,
+                'height': 900,
+                'overflowY': 'scroll',
+                'border': 'solid'
+            }
+        ),
         html.Div(
             children=[
                 html.Div(
                     children=[
-                        html.Div(
-                            children=[
-                                html.Pre(
-                                    'Move Axis',
-                                    style={
-                                        'width': 100,
-                                        'borderTop': '1px solid #50C878',
-                                        'borderBottom': '1px solid #50C878',
-                                        'borderLeft': '10px solid #50C878',
-                                        'borderRight': '10px solid #50C878',
-                                        'marginLeft': 50,
-                                        'marginTop': 30,
-                                        'textAlign': 'center',
-                                        'fontSize': 18
-                                    }
-                                ),
-                                # Grid to move axis
-                                html.Div(
-                                    dg.DragGrid(
-                                        id='moveaxis',
-                                        label='label',
-                                        width=500
-                                    ),
-                                    style={
-                                        'backgroundColor': '#50C878',
-                                        'borderTop': '5px solid #2DC7D8',
-                                        'borderRadius': '10px',
-                                        'marginLeft': 50,
-                                        'marginTop': 10
-                                    }
-                                )
-                            ],
-                            className='four columns'
-                        ),
-                        html.Div(
-                            children=[
-                                # Slice value datatable (for displaying graph)
-                                html.Pre(
-                                    'Slice Axis',
-                                    style={
-                                        'width': 150,
-                                        'borderTop': '1px solid #50C878',
-                                        'borderBottom': '1px solid #50C878',
-                                        'borderLeft': '10px solid #50C878',
-                                        'borderRight': '10px solid #50C878',
-                                        'marginTop': 30,
-                                        'textAlign': 'center',
-                                        'fontSize': 18
-                                    }
-                                ),
-                                dt.DataTable(
-                                    id='slice_table',
-                                    editable=True,
-                                    style_header={
-                                        'backgroundColor': '#50C878',
-                                        'fontWeight': 'bold',
-                                        'border': '1px solid',
-                                        'textAlign': 'center'
-                                    },
-                                    style_cell={
-                                        'backgroundColor': 'transparent',
-                                        'border': '1px solid',
-                                        'textAlign': 'center'
-                                    },
-                                    style_table={
-                                        'marginTop': 10,
-                                        'width': 550,
-                                        'overflowX': 'scroll'
-                                    }
-                                ),
-                                html.Div(
-                                    children=[
-                                        html.Pre(id='slice_validation'),
-                                        dcc.Store(id='slice_indices')
-                                    ]
-                                )
-                            ],
-                            className='four columns'
-                        ),
-                        html.Div(
-                            children=[
-                            # Dropdown showing line graph parameters
-                                html.Pre(
-                                    'Select Graphs',
-                                    style={
-                                        'width': 150,
-                                        'borderTop': '1px solid #50C878',
-                                        'borderBottom': '1px solid #50C878',
-                                        'borderLeft': '10px solid #50C878',
-                                        'borderRight': '10px solid #50C878',
-                                        'marginTop': 30,
-                                        'textAlign': 'center',
-                                        'fontSize': 18
-                                    }
-                                ),
-                                dcc.Loading(
-                                    dcc.Dropdown(
-                                        id='graph_params',
-                                        style={
-                                            'width': 550,
-                                            'marginTop': 10
-                                        },
-                                        multi=True
-                                    ),
-                                    id='graph_params_loading',
-                                    type='default'
-                                ),
-                                dcc.Store(id='prev_val', data={}),
-                                dcc.Store(id='lastslice')
-                            ],
-                            className='four columns'
-                        )
-                    ],
-                    className='one row'
-                ),
-                html.Div(
-                    children = [
-                        dcc.Tabs(
-                            children=[
-                                dcc.Tab(
-                                    html.Div(
-                                        children=[
-                                            html.Pre(
-                                                'Title',
-                                                style={
-                                                    'fontSize': 16,
-                                                    'textAlign': 'center',
-                                                    'display': 'inline-block'
-                                                }
-                                            ),
-                                            dcc.Input(
-                                                id='graphtitles',
-                                                value='',
-                                                debounce=True,
-                                                style={
-                                                    'marginLeft': 5,
-                                                    'display': 'inline-block'
-                                                }
-                                            ),
-                                            html.Pre(
-                                                'x-title',
-                                                style={
-                                                    'fontSize': 16,
-                                                    'textAlign': 'center',
-                                                    'marginLeft': 20,
-                                                    'display': 'inline-block'
-                                                }
-                                            ),
-                                            dcc.Input(
-                                                id='xaxistitles',
-                                                value='',
-                                                debounce=True,
-                                                style={
-                                                    'marginLeft': 5,
-                                                    'display': 'inline-block'
-                                                }
-                                            ),
-                                            html.Pre(
-                                                'y-title',
-                                                style={
-                                                    'fontSize': 16,
-                                                    'textAlign': 'center',
-                                                    'marginLeft': 20,
-                                                    'display': 'inline-block'
-                                                }
-                                            ),
-                                            dcc.Input(
-                                                id='yaxistitles',
-                                                value='',
-                                                debounce=True,
-                                                style={
-                                                    'marginLeft': 5,
-                                                    'display': 'inline-block'
-                                                }
-                                            ),
-                                            dcc.Checklist(
-                                                id='datamodes',
-                                                options=[
-                                                    {'label': 'Show Lines', 'value': 'lines'},
-                                                    {'label': 'Show Markers', 'value': 'markers'}
-                                                ],
-                                                value=['lines', 'markers'],
-                                                labelStyle={'display': 'inline-block'},
-                                                style={
-                                                    'marginLeft': 20,
-                                                    'display': 'inline-block'
-                                                }
-                                            )
-                                        ],
-                                        style={
-                                            'marginLeft': 50,
-                                            'marginRight': 30,
-                                            'backgroundColor': '#FFFFFF'
-                                        }
-                                    ),
-                                    id='style_tab',
-                                    label='Style',
-                                )
-                            ],
+                        html.Pre(
+                            'Select Graphs',
                             style={
-                                'marginTop': 15,
-                                'marginLeft': 50,
-                                'marginRight': 30
+                                'marginLeft': 20,
+                                'borderBottom': '1px solid #50C878',
+                                'textAlign': 'center',
+                                'fontSize': 14
+                            }
+                        ),
+                        dcc.Loading(
+                            dcc.Dropdown(
+                                id='graph_params',
+                                style={
+                                    'width': 550,
+                                    'marginTop': 5,
+                                    'marginLeft': 10
+                                },
+                                multi=True
+                            ),
+                            id='graph_params_loading',
+                            type='default'
+                        ),
+                        dcc.Store(id='prev_val', data={}),
+                        dcc.Store(id='lastslice'),
+                        html.Pre(
+                            'Slice Axis',
+                            style={
+                                'marginTop': 20,
+                                'marginLeft': 20,
+                                'borderBottom': '1px solid #50C878',
+                                'textAlign': 'center',
+                                'fontSize': 14
+                            }
+                        ),
+                        dt.DataTable(
+                            id='slice_table',
+                            editable=True,
+                            style_header={
+                                'backgroundColor': '#50C878',
+                                'fontWeight': 'bold',
+                                'border': '1px solid',
+                                'textAlign': 'center'
+                            },
+                            style_cell={
+                                'backgroundColor': 'transparent',
+                                'border': '1px solid',
+                                'textAlign': 'center'
+                            },
+                            style_table={
+                                'marginTop': 5,
+                                'marginLeft': 10,
+                                'width': 550,
+                                'overflowX': 'scroll'
                             }
                         ),
                         html.Div(
                             children=[
-                                dg.DragGrid(
-                                    id='graphs',
-                                    label='label',
-                                    children=[],
-                                    layout=[],
-                                    divstyle={'borderStyle': 'solid'},
-                                    numcolumns=30,
-                                    maxrows=0,
-                                    rowheight=50,
-                                    width=1800,
-                                    compacttype='vertical'
-                                ),
-                                html.Div(id='graphdata', children=[]),
-                                html.Div(id='graphstyle', children=[])
-                            ],
-                            style={'height': 900, 'overflowY': 'scroll'},
-                            className='one row'
+                                html.Pre(id='slice_validation'),
+                                dcc.Store(id='slice_indices')
+                            ]
+                        ),
+                        html.Pre(
+                            'Move Axis',
+                            style={
+                                'marginTop': 20,
+                                'marginLeft': 20,
+                                'borderBottom': '1px solid #50C878',
+                                'textAlign': 'center',
+                                'fontSize': 14
+                            }
+                        ),
+                        # Grid to move axis
+                        html.Div(
+                            dg.DragGrid(
+                                id='moveaxis',
+                                label='label',
+                                width=500
+                            ),
+                            style={
+                                'backgroundColor': '#50C878',
+                                'borderTop': '5px solid #2DC7D8',
+                                'borderRadius': '10px',
+                                'marginTop': 5,
+                                'marginLeft': 10
+                            }
                         )
                     ],
-                    className='one row',
-                )
+                    style={
+                        'borderTop': '40px solid #50C878',
+                        'borderRadius': '25px',
+                        'backgroundColor': '#FFFDD0',
+                        'borderBottom': '1px solid'
+                    }
+                ),
+                dcc.Tabs(
+                    children=[
+                        # Style Tab
+                        dcc.Tab(
+                            html.Div(
+                                children=[
+                                    html.Pre(
+                                        'Title',
+                                        style={
+                                            'fontSize': 16,
+                                            'textAlign': 'center'
+                                        }
+                                    ),
+                                    dcc.Input(
+                                        id='graphtitles',
+                                        value='',
+                                        debounce=True,
+                                        style={
+                                            'display': 'block',
+                                            'marginLeft': 'auto',
+                                            'marginRight': 'auto'
+                                        }
+                                    ),
+                                    html.Pre(
+                                        'x-title',
+                                        style={
+                                            'fontSize': 16,
+                                            'textAlign': 'center'
+                                        }
+                                    ),
+                                    dcc.Input(
+                                        id='xaxistitles',
+                                        value='',
+                                        debounce=True,
+                                        style={
+                                            'display': 'block',
+                                            'marginLeft': 'auto',
+                                            'marginRight': 'auto'
+                                        }
+                                    ),
+                                    html.Pre(
+                                        'y-title',
+                                        style={
+                                            'fontSize': 16,
+                                            'textAlign': 'center'
+                                        }
+                                    ),
+                                    dcc.Input(
+                                        id='yaxistitles',
+                                        value='',
+                                        debounce=True,
+                                        style={
+                                            'display': 'block',
+                                            'marginLeft': 'auto',
+                                            'marginRight': 'auto'
+                                        }
+                                    ),
+                                    dcc.Checklist(
+                                        id='datamodes',
+                                        options=[
+                                            {'label': 'Show Lines', 'value': 'lines'},
+                                            {'label': 'Show Markers', 'value': 'markers'}
+                                        ],
+                                        value=['lines', 'markers'],
+                                        labelStyle={'display': 'inline-block'},
+                                        style={
+                                            'marginTop': 30,
+                                            'textAlign': 'center'
+                                        }
+                                    )
+                                ],
+                                style={
+                                    'backgroundColor': '#FFFFFF'
+                                }
+                            ),
+                            id='style_tab',
+                            label='Style',
+                        ),
+
+                        # Deriv Tab
+                        dcc.Tab(
+                            html.Div(
+                                children=[
+                                    dcc.Dropdown(
+                                        id='deriv_dropdown',
+                                        style={
+                                            'marginTop': 20
+                                        }
+                                    ),
+                                    html.Button(
+                                        'Confirm',
+                                        id='deriv_confirm'
+                                    ),
+                                    html.Div(
+                                        children=[
+                                            html.Pre(
+                                                'ipsum lorem whatever',
+                                                style={
+                                                    'border': 'solid',
+                                                    'marginRight': 20,
+                                                    'display': 'inline-block'
+                                                }
+                                            ),
+                                            html.Button(
+                                                'clear',
+                                                id='deriv_clear',
+                                                style={
+                                                    'display': 'inline-block'
+                                                }
+                                            )
+                                        ],
+                                        style={'textAlign': 'right'}
+                                    ),
+                                    dcc.Checklist(
+                                        id='derivmodes',
+                                        options=[
+                                            {'label': 'Show Lines', 'value': 'lines'},
+                                            {'label': 'Show Markers', 'value': 'markers'}
+                                        ],
+                                        value=['lines', 'markers'],
+                                        labelStyle={'display': 'inline-block'},
+                                        style={
+                                            'marginTop': 30,
+                                            'textAlign': 'center'
+                                        }
+                                    )
+                                ]
+                            ),
+                            id='deriv_tab',
+                            label='Derivative'
+                        )
+                    ],
+                    style={
+                        'marginTop': 50
+                    }
+                ),
             ],
-            className='one row',
-            style={
-                'borderTop': '40px solid #50C878',
-                'borderRadius': '25px',
-                'backgroundColor': '#FFFDD0'
-            }
+            className='four columns'
         ),
-
-        # Fourth Row
-        # html.Div(
-        #     children = [
-        #         dcc.Tabs([
-        #             dcc.Tab(
-        #                 html.Div([
-        #                     html.Pre('Title'),
-        #                     dcc.Input(
-        #                         id='graphtitles'
-        #                     )
-        #                 ]),
-        #                 id='style_tab',
-        #                 label='Style'
-        #             )
-        #         ]),
-        #         html.Div(
-        #             dg.DragGrid(
-        #                 id='graphs',
-        #                 label='label',
-        #                 rowheight=50,
-        #                 width=1800,
-        #                 compacttype='vertical'
-        #             ),
-        #             style={'height': 900, 'overflowY': 'scroll'},
-        #             className='one row'
-        #         )
-        #     ],
-        #     className='one row',
+        # # TESTING MDD, DELETE LATER
+        # html.Button(
+        #     'CHECK',
+        #     id='checkbutton'
         # ),
+        # html.Div(id='check', style={'display': 'none'}),
 
-        # TESTING MDD, DELETE LATER
-        html.Button(
-            'CHECK',
-            id='checkbutton'
-        ),
-        html.Div(id='check', style={'display': 'none'}),
-
-        # hidden divs --> move to more appropriate locations later
-        html.Div(id='dummy', style={'display': 'none'}),
-        # html.Div(id='metadata', style={'display': 'none'}),
-        # html.Div(id='mdd', style={'display': 'none'}),
-        # html.Div(id='mddcopy', style={'display': 'none'}),
-        # html.Div(id='lastslice', style={'display': 'none'})
+        # # hidden divs --> move to more appropriate locations later
+        # html.Div(id='dummy', style={'display': 'none'}),
+        # # html.Div(id='metadata', style={'display': 'none'}),
+        # # html.Div(id='mdd', style={'display': 'none'}),
+        # # html.Div(id='mddcopy', style={'display': 'none'}),
+        # # html.Div(id='lastslice', style={'display': 'none'})
     ])

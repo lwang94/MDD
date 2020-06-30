@@ -12,7 +12,7 @@ import app_util as au
 
 
 def update_style(
-    ctx, vals, title, xtitle, ytitle, ind_var,
+    ctx, vals, title, xtitle, ytitle, ind_var, mode,
     mdd_data, metadata, moveaxis, lastslice,
     children, layout, maxrows, graphdata, graphstyle
 ):
@@ -116,6 +116,18 @@ def update_style(
             )
         return children, layout, maxrows, graphdata, newgraphstyle, vals
 
+    elif ctx.triggered[-1]['prop_id'] == 'datamodes.value':
+        dmode = ''
+        if 'lines' in mode:
+            dmode += 'lines+'
+        if 'markers' in mode:
+            dmode += 'markers+'
+
+        for i in range(len(vals)):
+            graphdata[i]['props']['data'][0]['mode'] = dmode
+
+        return children, layout, maxrows, graphdata, graphstyle, vals
+
     elif ctx.triggered[0]['prop_id'] == 'graph_params.value' or ctx.triggered[-1]['prop_id'] == 'mdd.data':
         mdd = mc.MDD(
             pd.DataFrame(metadata)
@@ -123,6 +135,13 @@ def update_style(
         mdd.dataDF = pd.DataFrame(mdd_data)
         mdd.move_axis(au.new_pos(moveaxis))
         newgraphdata = []
+
+        dmode = ''
+        if 'lines' in mode:
+            dmode += 'lines+'
+        if 'markers' in mode:
+            dmode += 'markers+'
+
         for i in range(len(vals)):
             val = vals[i].split(',')
             sing_vals = [int(j) for j in val]
@@ -138,7 +157,7 @@ def update_style(
                     data=[{
                         'x': x,
                         'y': y.flatten(),
-                        'mode': 'lines+markers'
+                        'mode': dmode
                     }]
                 )
             )
@@ -166,13 +185,19 @@ def update_style(
             for j, name in enumerate(mdd.metadata['Name'][:-1]):
                 title += f'{name}{sing_vals[j]}'
 
+            dmode = ''
+            if 'lines' in mode:
+                dmode += 'lines+'
+            if 'markers' in mode:
+                dmode += 'markers+'
+
             newgraphdata.append(
                 dcc.Store(
                     id={'type': 'linegraph_data', 'index': vals[i]},
                     data=[{
                         'x': x,
                         'y': y.flatten(),
-                        'mode': 'lines+markers'
+                        'mode': dmode
                     }]
                 )
             )
@@ -211,7 +236,8 @@ def graphgrid_callbacks(app):
          Input('moveaxis', 'layout'),
          Input('graphtitles', 'value'),
          Input('xaxistitles', 'value'),
-         Input('yaxistitles', 'value')],
+         Input('yaxistitles', 'value'),
+         Input('datamodes', 'value')],
         [State('graphs', 'children'),
          State('graphs', 'layout'),
          State('graphs', 'maxrows'),
@@ -223,7 +249,7 @@ def graphgrid_callbacks(app):
     )
     def create_graphgrid(
         vals, mdd_data, lastslice, moveaxis,
-        title, xtitle, ytitle,
+        title, xtitle, ytitle, mode,
         children, layout, maxrows, graphdata, graphstyle,
         metadata, prev_vals, ind_var
     ):
@@ -236,6 +262,7 @@ def graphgrid_callbacks(app):
                 xtitle,
                 ytitle,
                 ind_var,
+                mode,
                 mdd_data,
                 metadata,
                 moveaxis,
@@ -279,13 +306,19 @@ def graphgrid_callbacks(app):
                     for j, name in enumerate(mdd.metadata['Name'][:-1]):
                         title += f'{name}{sing_vals[j]}'
 
+                    dmode = ''
+                    if 'lines' in mode:
+                        dmode += 'lines+'
+                    if 'markers' in mode:
+                        dmode += 'markers+'
+
                     graphdata[i] = (
                         dcc.Store(
                             id={'type': 'linegraph_data', 'index': vals[i]},
                             data=[{
                                 'x': x,
                                 'y': y.flatten(),
-                                'mode': 'lines+markers'
+                                'mode': dmode
                             }]
                         )
                     )
@@ -314,6 +347,12 @@ def graphgrid_callbacks(app):
             x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
             slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
             y = mdd.dataArray[tuple(slice_list)]
+
+            dmode = ''
+            if 'lines' in mode:
+                dmode += 'lines+'
+            if 'markers' in mode:
+                dmode += 'markers+'
 
             children.append(
                 dcc.Graph(
@@ -344,7 +383,7 @@ def graphgrid_callbacks(app):
                     data=[{
                         'x': x,
                         'y': y.flatten(),
-                        'mode': 'lines+markers'
+                        'mode': dmode
                     }]
                 )
             )

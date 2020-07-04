@@ -177,6 +177,17 @@ class MDD:
             rows.append({columns[i]: coord[i] for i in range(len(coord))})
         self.__dataDF[columns] = pd.DataFrame(rows, columns=columns)
 
+    def num_deriv(self, params):
+        deriv_array = self.dataArray
+        for name in params:
+            axis = self.metadata.loc[self.metadata['Name'] == name]['Axis'].values[0] - 1
+
+            xvalues = self.metadata.loc[self.metadata['Name'] == name]['Values'].values[0]
+            xvalues = np.array(xvalues)
+
+            deriv_array = np.gradient(deriv_array, xvalues, axis=axis)
+        return deriv_array
+
 
     def create_training(self):
         self.training = self.dataDF.copy().dropna()

@@ -6,6 +6,7 @@ from dash import callback_context
 import plotly.graph_objects as go
 
 import pandas as pd
+import numpy as np
 
 import MDDClass as mc
 import app_util as au
@@ -13,6 +14,7 @@ import app_util as au
 
 def update_style(
     ctx, vals, title, xtitle, ytitle, ind_var, mode,
+    deriv, deriv_mode,
     mdd_data, metadata, moveaxis, lastslice,
     children, layout, maxrows, graphdata, graphstyle
 ):
@@ -117,31 +119,40 @@ def update_style(
         return children, layout, maxrows, graphdata, newgraphstyle, vals
 
     elif ctx.triggered[-1]['prop_id'] == 'datamodes.value':
-        dmode = ''
-        if 'lines' in mode:
-            dmode += 'lines+'
-        if 'markers' in mode:
-            dmode += 'markers+'
-
+        mode = au.graphmode(mode)
         for i in range(len(vals)):
-            graphdata[i]['props']['data'][0]['mode'] = dmode
+            graphdata[i]['props']['data'][0]['mode'] = mode
 
         return children, layout, maxrows, graphdata, graphstyle, vals
 
-    elif ctx.triggered[0]['prop_id'] == 'graph_params.value' or ctx.triggered[-1]['prop_id'] == 'mdd.data':
+    elif ctx.triggered[-1]['prop_id'] == 'derivmodes.value':
+        derivmode = au.graphmode(deriv_mode)
+        for i in range(len(vals)):
+            graphdata[i]['props']['data'][1]['mode'] = derivmode
+
+        return children, layout, maxrows, graphdata, graphstyle, vals
+
+    elif (
+        ctx.triggered[0]['prop_id'] == 'graph_params.value'
+        or ctx.triggered[-1]['prop_id'] == 'mdd.data'
+        or ctx.triggered[-1]['prop_id'] == 'deriv_params.data'
+    ):
         mdd = mc.MDD(
             pd.DataFrame(metadata)
         )
         mdd.dataDF = pd.DataFrame(mdd_data)
         mdd.move_axis(au.new_pos(moveaxis))
+        if deriv is not '':
+            deriv_params = deriv.split(',')[:-1]
+            deriv_array = mdd.num_deriv(deriv_params)
+            show_legend = True
+        else:
+            show_legend = False
+
+        mode = au.graphmode(mode)
+        deriv_mode = au.graphmode(deriv_mode)
+
         newgraphdata = []
-
-        dmode = ''
-        if 'lines' in mode:
-            dmode += 'lines+'
-        if 'markers' in mode:
-            dmode += 'markers+'
-
         for i in range(len(vals)):
             val = vals[i].split(',')
             sing_vals = [int(j) for j in val]
@@ -150,15 +161,30 @@ def update_style(
             x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
             slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
             y = mdd.dataArray[tuple(slice_list)]
+            if deriv is '':
+                deriv_y = np.array([None] * len(x))
+            else:
+                deriv_y = deriv_array[tuple(slice_list)]
 
             newgraphdata.append(
                 dcc.Store(
                     id={'type': 'linegraph_data', 'index': vals[i]},
-                    data=[{
-                        'x': x,
-                        'y': y.flatten(),
-                        'mode': dmode
-                    }]
+                    data=[
+                        {
+                            'x': x,
+                            'y': y.flatten(),
+                            'mode': mode,
+                            'name': 'Raw Data',
+                            'showlegend': show_legend
+                        },
+                        {
+                            'x': x,
+                            'y': deriv_y.flatten(),
+                            'mode': deriv_mode,
+                            'name': 'Derivative',
+                            'showlegend': show_legend
+                        }
+                    ]
                 )
             )
 
@@ -170,6 +196,16 @@ def update_style(
         )
         mdd.dataDF = pd.DataFrame(mdd_data)
         mdd.move_axis(au.new_pos(moveaxis))
+        if deriv is not '':
+            deriv_params = deriv.split(',')[:-1]
+            deriv_array = mdd.num_deriv(deriv_params)
+            show_legend = True
+        else:
+            show_legend = False
+
+        mode = au.graphmode(mode)
+        deriv_mode = au.graphmode(deriv_mode)
+
         newgraphdata, newgraphstyle = [], []
         for i in range(len(vals)):
             children[i]['props']['relayoutData'] = None
@@ -180,25 +216,34 @@ def update_style(
             x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
             slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
             y = mdd.dataArray[tuple(slice_list)]
+            if deriv is '':
+                deriv_y = np.array([None] * len(x))
+            else:
+                deriv_y = deriv_array[tuple(slice_list)]
 
             title = ''
             for j, name in enumerate(mdd.metadata['Name'][:-1]):
                 title += f'{name}{sing_vals[j]}'
 
-            dmode = ''
-            if 'lines' in mode:
-                dmode += 'lines+'
-            if 'markers' in mode:
-                dmode += 'markers+'
-
             newgraphdata.append(
                 dcc.Store(
                     id={'type': 'linegraph_data', 'index': vals[i]},
-                    data=[{
-                        'x': x,
-                        'y': y.flatten(),
-                        'mode': dmode
-                    }]
+                    data=[
+                        {
+                            'x': x,
+                            'y': y.flatten(),
+                            'mode': mode,
+                            'name': 'Raw Data',
+                            'showlegend': show_legend
+                        },
+                        {
+                            'x': x,
+                            'y': deriv_y.flatten(),
+                            'mode': deriv_mode,
+                            'name': 'Derivative',
+                            'showlegend': show_legend
+                        }
+                    ]
                 )
             )
             newgraphstyle.append(
@@ -237,7 +282,9 @@ def graphgrid_callbacks(app):
          Input('graphtitles', 'value'),
          Input('xaxistitles', 'value'),
          Input('yaxistitles', 'value'),
-         Input('datamodes', 'value')],
+         Input('datamodes', 'value'),
+         Input('deriv_params', 'data'),
+         Input('derivmodes', 'value')],
         [State('graphs', 'children'),
          State('graphs', 'layout'),
          State('graphs', 'maxrows'),
@@ -250,6 +297,7 @@ def graphgrid_callbacks(app):
     def create_graphgrid(
         vals, mdd_data, lastslice, moveaxis,
         title, xtitle, ytitle, mode,
+        deriv, deriv_mode,
         children, layout, maxrows, graphdata, graphstyle,
         metadata, prev_vals, ind_var
     ):
@@ -263,6 +311,8 @@ def graphgrid_callbacks(app):
                 ytitle,
                 ind_var,
                 mode,
+                deriv,
+                deriv_mode,
                 mdd_data,
                 metadata,
                 moveaxis,
@@ -291,6 +341,15 @@ def graphgrid_callbacks(app):
                 )
                 mdd.dataDF = pd.DataFrame(mdd_data)
                 mdd.move_axis(au.new_pos(moveaxis))
+                if deriv is not '':
+                    deriv_params = deriv.split(',')[:-1]
+                    deriv_array = mdd.num_deriv(deriv_params)
+                    show_legend = True
+                else:
+                    show_legend = False
+
+                mode = au.graphmode(mode)
+                deriv_mode = au.graphmode(deriv_mode)
 
                 for i in range(len(vals)):
                     children[i]['props']['relayoutData'] = None
@@ -301,31 +360,48 @@ def graphgrid_callbacks(app):
                     x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
                     slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
                     y = mdd.dataArray[tuple(slice_list)]
+                    if deriv is '':
+                        deriv_y = np.array([None] * len(x))
+                    else:
+                        deriv_y = deriv_array[tuple(slice_list)]
 
                     title = ''
                     for j, name in enumerate(mdd.metadata['Name'][:-1]):
                         title += f'{name}{sing_vals[j]}'
 
-                    dmode = ''
-                    if 'lines' in mode:
-                        dmode += 'lines+'
-                    if 'markers' in mode:
-                        dmode += 'markers+'
-
                     graphdata[i] = (
                         dcc.Store(
                             id={'type': 'linegraph_data', 'index': vals[i]},
-                            data=[{
-                                'x': x,
-                                'y': y.flatten(),
-                                'mode': dmode
-                            }]
+                            data=[
+                                {
+                                    'x': x,
+                                    'y': y.flatten(),
+                                    'mode': mode,
+                                    'name': 'Raw Data',
+                                    'showlegend': show_legend
+                                },
+                                {
+                                    'x': x,
+                                    'y': deriv_y.flatten(),
+                                    'mode': deriv_mode,
+                                    'name': 'Derivative',
+                                    'showlegend': show_legend
+                                }
+                            ]
                         )
                     )
                     graphstyle[i] = (
                         dcc.Store(
                             id={'type': 'linegraph_lay', 'index': vals[i]},
-                            data={'title': title}
+                            data={
+                                'title': title,
+                                'xaxis': {
+                                    'title': mdd.metadata['Name'][len(mdd.metadata['Name']) - 1]
+                                },
+                                'yaxis': {
+                                    'title': ind_var
+                                }
+                            }
                         )
                     )
             return children, layout, maxrows, graphdata, graphstyle, vals
@@ -348,11 +424,17 @@ def graphgrid_callbacks(app):
             slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
             y = mdd.dataArray[tuple(slice_list)]
 
-            dmode = ''
-            if 'lines' in mode:
-                dmode += 'lines+'
-            if 'markers' in mode:
-                dmode += 'markers+'
+            if deriv is '':
+                deriv_y = np.array([None] * len(x))
+                show_legend=False
+            else:
+                deriv_params = deriv.split(',')[:-1]
+                deriv_array = mdd.num_deriv(deriv_params)
+                deriv_y = deriv_array[tuple(slice_list)]
+                show_legend=True
+
+            mode = au.graphmode(mode)
+            deriv_mode = au.graphmode(deriv_mode)
 
             children.append(
                 dcc.Graph(
@@ -380,11 +462,22 @@ def graphgrid_callbacks(app):
             graphdata.append(
                 dcc.Store(
                     id={'type': 'linegraph_data', 'index': vals[-1]},
-                    data=[{
-                        'x': x,
-                        'y': y.flatten(),
-                        'mode': dmode
-                    }]
+                    data=[
+                        {
+                            'x': x,
+                            'y': y.flatten(),
+                            'mode': mode,
+                            'name': 'Raw Data',
+                            'showlegend': show_legend
+                        },
+                        {
+                            'x': x,
+                            'y': deriv_y.flatten(),
+                            'mode': deriv_mode,
+                            'name': 'Derivative',
+                            'showlegend': show_legend
+                        }
+                    ]
                 )
             )
             graphstyle.append(

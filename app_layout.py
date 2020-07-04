@@ -471,11 +471,26 @@ def app_layout():
                                     )
                                 ],
                                 style={
-                                    'backgroundColor': '#FFFFFF'
+                                    'marginTop': -15,
+                                    'backgroundColor': '#FFFDD0'
                                 }
                             ),
                             id='style_tab',
                             label='Style',
+                            style={
+                                'borderTopLeftRadius': 15,
+                                'borderTopRightRadius': 15,
+                                'backgroundColor': '#607D8B',
+                                'borderBottom': '5px solid #FFFDD0',
+                                'color': 'white'
+                            },
+                            selected_style={
+                                'borderTopLeftRadius': 15,
+                                'borderTopRightRadius': 15,
+                                'backgroundColor': '#50C878',
+                                'borderTop': '2px solid #607D8B',
+                                'borderBottom': '1px solid #607D8B'
+                            }
                         ),
 
                         # Deriv Tab
@@ -485,27 +500,44 @@ def app_layout():
                                     dcc.Dropdown(
                                         id='deriv_dropdown',
                                         style={
-                                            'marginTop': 20
+                                            'marginLeft': 5,
+                                            'width': 400,
+                                            'display': 'inline-block',
+                                            'verticalAlign': 'top'
                                         }
                                     ),
                                     html.Button(
                                         'Confirm',
-                                        id='deriv_confirm'
+                                        id='deriv_confirm',
+                                        style={
+                                            'marginLeft': 10,
+                                            'display': 'inline-block',
+                                            'verticalAlign': 'top'
+                                        }
                                     ),
                                     html.Div(
                                         children=[
-                                            html.Pre(
-                                                'ipsum lorem whatever',
+                                            html.Div(
+                                                '',
+                                                id='deriv_tracker',
                                                 style={
-                                                    'border': 'solid',
+                                                    'fontWeight': 'bold',
+                                                    'backgroundColor': '#50C878',
+                                                    'borderRight': '5px solid #2DC7D8',
+                                                    'borderLeft': '5px solid #2DC7D8',
+                                                    'borderRadius': '10px',
+                                                    'marginTop': 25,
                                                     'marginRight': 20,
                                                     'display': 'inline-block'
                                                 }
                                             ),
+                                            dcc.Store(id='deriv_params', data=''),
                                             html.Button(
                                                 'clear',
                                                 id='deriv_clear',
                                                 style={
+                                                    'marginTop': 25,
+                                                    'marginRight': 50,
                                                     'display': 'inline-block'
                                                 }
                                             )
@@ -525,10 +557,28 @@ def app_layout():
                                             'textAlign': 'center'
                                         }
                                     )
-                                ]
+                                ],
+                                style={
+                                    'backgroundColor': '#FFFDD0',
+                                    'borderTop': '25px solid #FFFDD0'
+                                }
                             ),
                             id='deriv_tab',
-                            label='Derivative'
+                            label='Derivative',
+                            style={
+                                'borderTopLeftRadius': 15,
+                                'borderTopRightRadius': 15,
+                                'backgroundColor': '#607D8B',
+                                'borderBottom': '5px solid #FFFDD0',
+                                'color': 'white'
+                            },
+                            selected_style={
+                                'borderTopLeftRadius': 15,
+                                'borderTopRightRadius': 15,
+                                'backgroundColor': '#50C878',
+                                'borderTop': '2px solid #607D8B',
+                                'borderBottom': '1px solid #607D8B'
+                            }
                         )
                     ],
                     style={

@@ -80,3 +80,15 @@ def graphmode(mode):
         dmode += 'markers+'
 
     return dmode
+
+
+def linear_func(x, *p):
+    return p[0] * x + p[1]
+
+
+def exponential_func(x, *p):
+    return p[0] * np.exp(p[1] * x) + p[2]
+
+
+def polynomial_func(order):
+    return lambda x, *p: sum([p[i] * x ** i for i in range(order)])

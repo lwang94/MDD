@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 
 import pandas as pd
 import numpy as np
+import scipy.optimize as opt
 
 import MDDClass as mc
 import app_util as au
@@ -284,7 +285,10 @@ def graphgrid_callbacks(app):
          Input('yaxistitles', 'value'),
          Input('datamodes', 'value'),
          Input('deriv_params', 'data'),
-         Input('derivmodes', 'value')],
+         Input('derivmodes', 'value'),
+         Input('fit_iguess', 'data'),
+         Input('fitdata', 'value'),
+         Input('fitmodes', 'value')],
         [State('graphs', 'children'),
          State('graphs', 'layout'),
          State('graphs', 'maxrows'),
@@ -292,14 +296,17 @@ def graphgrid_callbacks(app):
          State('graphstyle', 'children'),
          State('metadata', 'data'),
          State('prev_val', 'data'),
-         State('data_headers', 'value')]
+         State('data_headers', 'value'),
+         State('fit_dropdown', 'value')]
     )
     def create_graphgrid(
         vals, mdd_data, lastslice, moveaxis,
         title, xtitle, ytitle, mode,
         deriv, deriv_mode,
+        fit_iguess, fitdata, fit_mode,
         children, layout, maxrows, graphdata, graphstyle,
-        metadata, prev_vals, ind_var
+        metadata, prev_vals, ind_var,
+        fit_dropdown
     ):
         if len(vals) == len(prev_vals):
             ctx = callback_context
@@ -420,21 +427,48 @@ def graphgrid_callbacks(app):
             for j, name in enumerate(mdd.metadata['Name'][:-1]):
                 title += f'{name}{sing_vals[j]}'
 
-            x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
-            slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
+            x = np.asarray(mdd.metadata['Values'].iloc[-1])
+            slice_list = [slice(i, i+1) for i in sing_vals]
             y = mdd.dataArray[tuple(slice_list)]
 
             if deriv is '':
                 deriv_y = np.array([None] * len(x))
-                show_legend=False
+                show_derivlegend = False
             else:
                 deriv_params = deriv.split(',')[:-1]
                 deriv_array = mdd.num_deriv(deriv_params)
                 deriv_y = deriv_array[tuple(slice_list)]
-                show_legend=True
+                show_derivlegend = True
+
+            if fit_iguess is None:
+                fit_y = np.array([None] * len(x))
+                show_fitlegend = False
+            else:
+                if fitdata == 'raw':
+                    ydata = y
+                else:
+                    ydata = deriv_y
+
+                if fit_dropdown == 'linear':
+                    func = au.linear_func
+                elif fit_dropdown == 'exponential':
+                    func = au.exponential_func
+                elif fit_dropdown == 'polynomial':
+                    func = au.polynomial_func(len(fit_iguess))
+                popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
+                print(popt)
+                fit_y = func(x, *popt)
+                show_fitlegend = True
+
+            if show_fitlegend is True or show_derivlegend is True:
+                show_rawlegend = True
+            else:
+                show_rawlegend = False
+
 
             mode = au.graphmode(mode)
             deriv_mode = au.graphmode(deriv_mode)
+            fit_mode = au.graphmode(fit_mode)
 
             children.append(
                 dcc.Graph(
@@ -464,18 +498,25 @@ def graphgrid_callbacks(app):
                     id={'type': 'linegraph_data', 'index': vals[-1]},
                     data=[
                         {
-                            'x': x,
-                            'y': y.flatten(),
+                            'x': x[last_vals[0]:last_vals[1]],
+                            'y': y[last_vals[0]:last_vals[1]].flatten(),
                             'mode': mode,
                             'name': 'Raw Data',
-                            'showlegend': show_legend
+                            'showlegend': show_rawlegend
                         },
                         {
-                            'x': x,
-                            'y': deriv_y.flatten(),
+                            'x': x[last_vals[0]:last_vals[1]],
+                            'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
                             'mode': deriv_mode,
                             'name': 'Derivative',
-                            'showlegend': show_legend
+                            'showlegend': show_derivlegend
+                        },
+                        {
+                            'x': x[last_vals[0]:last_vals[1]],
+                            'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
+                            'mode': fit_mode,
+                            'name': 'Fit',
+                            'showlegend': show_fitlegend
                         }
                     ]
                 )

@@ -8,6 +8,7 @@ error_rangeval = 'ERROR: Range values not correctly inputted as (Start, Stop). O
 error_nocustom = 'ERROR: No custom values were given'
 error_customval = 'ERROR: Only numeric inputs are accepted for Custom values'
 error_numval = 'ERROR: Number of values defined for row does not match Num Values column'
+error_fitinputs = 'ERROR: Only numeric inputs are accepted for initial guess of Function Fit'
 
 # Warning messages
 warning_dataheader = 'CAUTION: Leaving this field blank adds ALL the columns in the .csv file'

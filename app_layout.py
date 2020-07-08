@@ -20,6 +20,9 @@ def app_layout():
         dcc.ConfirmDialog(
             id='error_message'
         ),
+        dcc.ConfirmDialog(
+            id='fit_error'
+        ),
 
         # First Row
         html.Div(
@@ -298,7 +301,9 @@ def app_layout():
                 'marginLeft': 0,
                 'height': 900,
                 'overflowY': 'scroll',
-                'border': 'solid'
+                'border': '5px double #7B440B',
+                'borderRadius': 10,
+                'backgroundColor': '#F1F3F3'
             }
         ),
         html.Div(
@@ -381,10 +386,10 @@ def app_layout():
                             dg.DragGrid(
                                 id='moveaxis',
                                 label='label',
-                                width=500
+                                width=450
                             ),
                             style={
-                                'backgroundColor': '#50C878',
+                                'backgroundColor': '#607D8B',
                                 'borderTop': '5px solid #2DC7D8',
                                 'borderRadius': '10px',
                                 'marginTop': 5,
@@ -579,12 +584,85 @@ def app_layout():
                                 'borderTop': '2px solid #607D8B',
                                 'borderBottom': '1px solid #607D8B'
                             }
+                        ),
+                        dcc.Tab(
+                            html.Div(
+                                children=[
+                                    dcc.Dropdown(
+                                        id='fit_dropdown',
+                                        options=[
+                                            {'label': 'Linear', 'value': 'linear'},
+                                            {'label': 'Polynomial', 'value': 'polynomial'},
+                                            {'label': 'Exponential', 'value': 'exponential'}
+                                        ]
+                                    ),
+                                    html.Pre(
+                                        id='show_func'
+                                    ),
+                                    html.Div(
+                                        id='fit_params'
+                                    ),
+                                    dcc.Store(
+                                        id='fit_iguess'
+                                    ),
+                                    html.Button(
+                                        'Confirm',
+                                        id='fit_confirm'
+                                    ),
+                                    dcc.Checklist(
+                                        id='fitmodes',
+                                        options=[
+                                            {'label': 'Show Lines', 'value': 'lines'},
+                                            {'label': 'Show Markers', 'value': 'markers'}
+                                        ],
+                                        value=['lines', 'markers'],
+                                        labelStyle={'display': 'inline-block'},
+                                        style={
+                                            'marginTop': 30,
+                                            'textAlign': 'center'
+                                        }
+                                    ),
+                                    dcc.RadioItems(
+                                        id='fitdata',
+                                        options=[
+                                            {'label': 'Raw Data', 'value': 'raw'},
+                                            {'label': 'Derivative', 'value': 'deriv'}
+                                        ],
+                                        value='raw',
+                                        labelStyle={'display': 'inline-block'},
+                                        style={
+                                            'marginTop': 30,
+                                            'textAlign': 'center'
+                                        }
+                                    )
+                                ],
+                                style={
+                                    'backgroundColor': '#FFFDD0',
+                                    'borderTop': '25px solid #FFFDD0'
+                                }
+                            ),
+                            id='fit_tab',
+                            label='Function Fit',
+                            style={
+                                'borderTopLeftRadius': 15,
+                                'borderTopRightRadius': 15,
+                                'backgroundColor': '#607D8B',
+                                'borderBottom': '5px solid #FFFDD0',
+                                'color': 'white'
+                            },
+                            selected_style={
+                                'borderTopLeftRadius': 15,
+                                'borderTopRightRadius': 15,
+                                'backgroundColor': '#50C878',
+                                'borderTop': '2px solid #607D8B',
+                                'borderBottom': '1px solid #607D8B'
+                            }
                         )
                     ],
                     style={
                         'marginTop': 50
                     }
-                ),
+                )
             ],
             className='four columns'
         ),

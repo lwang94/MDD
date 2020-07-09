@@ -1,4 +1,4 @@
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, MATCH
 import dash_core_components as dcc
 import dash_html_components as html
 from dash import callback_context
@@ -30,8 +30,10 @@ def poly_fit_params(app):
                     style={'display': 'inline-block'}
                 ),
                 dcc.Input(
-                    id='poly_order',
+                    id={'type': 'poly_order', 'index': 0},
                     type='number',
+                    min=0,
+                    max=6,
                     style={
                         'display': 'inline-block',
                         'width': 75,
@@ -39,7 +41,8 @@ def poly_fit_params(app):
                     }
                 )
             ]
-        )
+        ),
+        html.Div(id={'type': 'poly_iguess', 'index': 0})
     ])
 
 
@@ -58,6 +61,7 @@ def exp_fit_params(app):
                         ),
                         dcc.Input(
                             id='expA',
+                            value='1',
                             style={
                                 'display': 'inline-block',
                                 'width': 100,
@@ -75,6 +79,7 @@ def exp_fit_params(app):
                         ),
                         dcc.Input(
                             id='expk',
+                            value='1',
                             style={
                                 'display': 'inline-block',
                                 'width': 100,
@@ -92,6 +97,7 @@ def exp_fit_params(app):
                         ),
                         dcc.Input(
                             id='expb',
+                            value='1',
                             style={
                                 'display': 'inline-block',
                                 'width': 100,
@@ -108,18 +114,47 @@ def exp_fit_params(app):
 def fit_callbacks(app):
 
     @app.callback(
-        Output('fit_params', 'children'),
-        [Input('fit_dropdown', 'value')]
+        [Output('fit_params', 'children'),
+         Output('fit_div', 'style')],
+        [Input('fit_dropdown', 'value')],
+        [State('fit_div', 'style')]
     )
-    def create_fit_params(val):
+    def create_fit_params(val, style):
         if val == 'linear':
-            return linear_fit_params(app)
+            style['height'] = 300
+            return linear_fit_params(app), style
         elif val == 'polynomial':
-            return poly_fit_params(app)
+            style['height'] = 400
+            return poly_fit_params(app), style
         elif val == 'exponential':
-            return exp_fit_params(app)
+            style['height'] = 400
+            return exp_fit_params(app), style
         else:
-            raise PreventUpdate
+            style['height'] = 300
+            return 'No Fit', style
+
+    @app.callback(
+        Output({'type': 'poly_iguess', 'index': MATCH}, 'children'),
+        [Input({'type': 'poly_order', 'index': MATCH}, 'value')]
+    )
+    def poly_iguess_inputs(order):
+        return [
+            html.Div(
+                children=[
+                    dcc.Input(
+                        id=f'p{i}',
+                        value='1',
+                        style={'width': 75 }
+                    ),
+                    html.H6(f'p{i}')
+                ],
+                style={
+                    'display': 'inline-block',
+                    'marginLeft': 5,
+                    'marginTop': 10
+                }
+            ) for i in range(order)
+        ]
 
     @app.callback(
         Output('fit_iguess', 'data'),
@@ -164,7 +199,22 @@ def fit_callbacks(app):
                     params[1],
                     'pc'
                 )[1]['props']['value']
-                p = [-1 for i in range(order)]
+                inputs = au.get_axis_info(
+                    params[2],
+                    'pc'
+                )
+                try:
+                    p = [
+                        float(
+                            au.get_axis_info(
+                                inputs[i],
+                                'pc'
+                            )[0]['props']['value']
+                        ) for i in range(order)
+                    ]
+                except:
+                    return cf.error_fitinputs
+
                 return tuple(p)
             else:
                 return None

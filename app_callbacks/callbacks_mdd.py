@@ -3,6 +3,7 @@ import dash_core_components as dcc
 import dash_daq as daq
 import dash_html_components as html
 from dash.dependencies import Input, Output, State, MATCH
+from dash.exceptions import PreventUpdate
 
 import bisect
 import json
@@ -91,6 +92,13 @@ def mdd_callbacks(app):
     def update_startstop(sliderval):
         return sliderval[0], sliderval[1]
 
+    @app.callback(
+        Output('add_data', 'contents'),
+        [Input('add_data_button', 'n_clicks')]
+    )
+    def clear_add_data_component(nclicks):
+        if nclicks > 0:
+            return ''
 
     # Create and add data to mdd
     @app.callback(
@@ -115,7 +123,10 @@ def mdd_callbacks(app):
             )
             return mdd.dataDF.to_dict('records')
 
-        else:
+        elif (
+            ctx.triggered[-1]['prop_id'] == 'add_data.contents'
+            and add_data is not ''
+        ):
             mdd = mc.MDD(
                 meta
             )
@@ -134,6 +145,8 @@ def mdd_callbacks(app):
 
             mdd.add_data(data, indices)
             return mdd.dataDF.to_dict('records')
+        else:
+            raise PreventUpdate
 
     @app.callback(
         [Output('slice_table', 'columns'),

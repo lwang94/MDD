@@ -199,6 +199,7 @@ def app_layout():
                                     id='add_data',
                                     children=html.Button(
                                         'Add Data',
+                                        id='add_data_button',
                                         style={
                                             'backgroundColor': '#50C878',
                                             'borderLeft': '15px solid #607D8B',
@@ -313,7 +314,7 @@ def app_layout():
                         html.Pre(
                             'Select Graphs',
                             style={
-                                'marginLeft': 20,
+                                'marginLeft': 15,
                                 'borderBottom': '1px solid #50C878',
                                 'textAlign': 'center',
                                 'fontSize': 14
@@ -325,7 +326,7 @@ def app_layout():
                                 style={
                                     'width': 550,
                                     'marginTop': 5,
-                                    'marginLeft': 10
+                                    'marginLeft': 5
                                 },
                                 multi=True
                             ),
@@ -338,7 +339,7 @@ def app_layout():
                             'Slice Axis',
                             style={
                                 'marginTop': 20,
-                                'marginLeft': 20,
+                                'marginLeft': 15,
                                 'borderBottom': '1px solid #50C878',
                                 'textAlign': 'center',
                                 'fontSize': 14
@@ -375,7 +376,7 @@ def app_layout():
                             'Move Axis',
                             style={
                                 'marginTop': 20,
-                                'marginLeft': 20,
+                                'marginLeft': 15,
                                 'borderBottom': '1px solid #50C878',
                                 'textAlign': 'center',
                                 'fontSize': 14
@@ -386,14 +387,16 @@ def app_layout():
                             dg.DragGrid(
                                 id='moveaxis',
                                 label='label',
-                                width=450
+                                width=550
                             ),
                             style={
                                 'backgroundColor': '#607D8B',
                                 'borderTop': '5px solid #2DC7D8',
                                 'borderRadius': '10px',
                                 'marginTop': 5,
-                                'marginLeft': 10
+                                'marginLeft': 10,
+                                'marginBottom': 20,
+                                'width': 550
                             }
                         )
                     ],
@@ -401,7 +404,10 @@ def app_layout():
                         'borderTop': '40px solid #50C878',
                         'borderRadius': '25px',
                         'backgroundColor': '#FFFDD0',
-                        'borderBottom': '1px solid'
+                        'borderBottom': '1px solid',
+                        'height': 400,
+                        'overflowY': 'scroll',
+                        'overflowX': 'hidden'
                     }
                 ),
                 dcc.Tabs(
@@ -476,8 +482,12 @@ def app_layout():
                                     )
                                 ],
                                 style={
-                                    'marginTop': -15,
-                                    'backgroundColor': '#FFFDD0'
+                                    'backgroundColor': '#FFFDD0',
+                                    'height': 300,
+                                    'borderTop': '25px solid #FFFDD0',
+                                    'borderBottom': '1px solid',
+                                    'borderBottomLeftRadius': 15,
+                                    'borderBottomRightRadius': 15
                                 }
                             ),
                             id='style_tab',
@@ -565,7 +575,11 @@ def app_layout():
                                 ],
                                 style={
                                     'backgroundColor': '#FFFDD0',
-                                    'borderTop': '25px solid #FFFDD0'
+                                    'height': 300,
+                                    'borderTop': '25px solid #FFFDD0',
+                                    'borderBottom': '1px solid',
+                                    'borderBottomLeftRadius': 15,
+                                    'borderBottomRightRadius': 15
                                 }
                             ),
                             id='deriv_tab',
@@ -587,6 +601,7 @@ def app_layout():
                         ),
                         dcc.Tab(
                             html.Div(
+                                id='fit_div',
                                 children=[
                                     dcc.Dropdown(
                                         id='fit_dropdown',
@@ -600,14 +615,19 @@ def app_layout():
                                         id='show_func'
                                     ),
                                     html.Div(
-                                        id='fit_params'
+                                        id='fit_params',
+                                        style={'marginLeft': 10}
                                     ),
                                     dcc.Store(
                                         id='fit_iguess'
                                     ),
                                     html.Button(
                                         'Confirm',
-                                        id='fit_confirm'
+                                        id='fit_confirm',
+                                        style={
+                                            'marginLeft': 10,
+                                            'marginTop': 10
+                                        }
                                     ),
                                     dcc.Checklist(
                                         id='fitmodes',
@@ -638,7 +658,11 @@ def app_layout():
                                 ],
                                 style={
                                     'backgroundColor': '#FFFDD0',
-                                    'borderTop': '25px solid #FFFDD0'
+                                    'height': 300,
+                                    'borderTop': '25px solid #FFFDD0',
+                                    'borderBottom': '1px solid',
+                                    'borderBottomLeftRadius': 15,
+                                    'borderBottomRightRadius': 15
                                 }
                             ),
                             id='fit_tab',

@@ -16,6 +16,7 @@ import app_util as au
 def update_style(
     ctx, vals, title, xtitle, ytitle, ind_var, mode,
     deriv, deriv_mode,
+    fit_iguess, fitdata, fit_mode, fit_dropdown,
     mdd_data, metadata, moveaxis, lastslice,
     children, layout, maxrows, graphdata, graphstyle
 ):
@@ -133,10 +134,19 @@ def update_style(
 
         return children, layout, maxrows, graphdata, graphstyle, vals
 
+    elif ctx.triggered[-1]['prop_id'] == 'fitmodes.value':
+        fitmode = au.graphmode(fit_mode)
+        for i in range(len(vals)):
+            graphdata[i]['props']['data'][2]['mode'] = fitmode
+
+        return children, layout, maxrows, graphdata, graphstyle, vals
+
     elif (
         ctx.triggered[0]['prop_id'] == 'graph_params.value'
         or ctx.triggered[-1]['prop_id'] == 'mdd.data'
         or ctx.triggered[-1]['prop_id'] == 'deriv_params.data'
+        or ctx.triggered[-1]['prop_id'] == 'fit_iguess.data'
+        or ctx.triggered[-1]['prop_id'] == 'fitdata.value'
     ):
         mdd = mc.MDD(
             pd.DataFrame(metadata)
@@ -146,12 +156,18 @@ def update_style(
         if deriv is not '':
             deriv_params = deriv.split(',')[:-1]
             deriv_array = mdd.num_deriv(deriv_params)
-            show_legend = True
-        else:
-            show_legend = False
+
+        if fit_iguess is not None:
+            if fit_dropdown == 'linear':
+                func = au.linear_func
+            elif fit_dropdown == 'exponential':
+                func = au.exponential_func
+            elif fit_dropdown == 'polynomial':
+                func = au.polynomial_func(len(fit_iguess))
 
         mode = au.graphmode(mode)
         deriv_mode = au.graphmode(deriv_mode)
+        fit_mode = au.graphmode(fit_mode)
 
         newgraphdata = []
         for i in range(len(vals)):
@@ -159,31 +175,58 @@ def update_style(
             sing_vals = [int(j) for j in val]
             last_vals = [int(j) for j in lastslice.split(':')]
 
-            x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
-            slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
+            x = np.asarray(mdd.metadata['Values'].iloc[-1])
+            slice_list = [slice(i, i+1) for i in sing_vals]
             y = mdd.dataArray[tuple(slice_list)]
             if deriv is '':
                 deriv_y = np.array([None] * len(x))
+                show_derivlegend = False
             else:
                 deriv_y = deriv_array[tuple(slice_list)]
+                show_derivlegend = True
+
+            if fit_iguess is None:
+                fit_y = np.array([None] * len(x))
+                show_fitlegend = False
+            else:
+                if fitdata == 'raw':
+                    ydata = y
+                else:
+                    ydata = deriv_y
+
+                popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
+                fit_y = func(x, *popt)
+                show_fitlegend = True
+
+            if show_fitlegend is True or show_derivlegend is True:
+                show_rawlegend = True
+            else:
+                show_rawlegend = False
 
             newgraphdata.append(
                 dcc.Store(
                     id={'type': 'linegraph_data', 'index': vals[i]},
                     data=[
                         {
-                            'x': x,
-                            'y': y.flatten(),
+                            'x': x[last_vals[0]:last_vals[1]],
+                            'y': y[last_vals[0]:last_vals[1]].flatten(),
                             'mode': mode,
                             'name': 'Raw Data',
-                            'showlegend': show_legend
+                            'showlegend': show_rawlegend
                         },
                         {
-                            'x': x,
-                            'y': deriv_y.flatten(),
+                            'x': x[last_vals[0]:last_vals[1]],
+                            'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
                             'mode': deriv_mode,
                             'name': 'Derivative',
-                            'showlegend': show_legend
+                            'showlegend': show_derivlegend
+                        },
+                        {
+                            'x': x[last_vals[0]:last_vals[1]],
+                            'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
+                            'mode': fit_mode,
+                            'name': 'Fit',
+                            'showlegend': show_fitlegend
                         }
                     ]
                 )
@@ -200,12 +243,18 @@ def update_style(
         if deriv is not '':
             deriv_params = deriv.split(',')[:-1]
             deriv_array = mdd.num_deriv(deriv_params)
-            show_legend = True
-        else:
-            show_legend = False
+
+        if fit_iguess is not None:
+            if fit_dropdown == 'linear':
+                func = au.linear_func
+            elif fit_dropdown == 'exponential':
+                func = au.exponential_func
+            elif fit_dropdown == 'polynomial':
+                func = au.polynomial_func(len(fit_iguess))
 
         mode = au.graphmode(mode)
         deriv_mode = au.graphmode(deriv_mode)
+        fit_mode = au.graphmode(fit_mode)
 
         newgraphdata, newgraphstyle = [], []
         for i in range(len(vals)):
@@ -214,13 +263,33 @@ def update_style(
             sing_vals = [int(j) for j in val]
             last_vals = [int(j) for j in lastslice.split(':')]
 
-            x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
-            slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
+            x = np.asarray(mdd.metadata['Values'].iloc[-1])
+            slice_list = [slice(i, i+1) for i in sing_vals]
             y = mdd.dataArray[tuple(slice_list)]
             if deriv is '':
                 deriv_y = np.array([None] * len(x))
+                show_derivlegend = False
             else:
                 deriv_y = deriv_array[tuple(slice_list)]
+                show_derivlegend = True
+
+            if fit_iguess is None:
+                fit_y = np.array([None] * len(x))
+                show_fitlegend = False
+            else:
+                if fitdata == 'raw':
+                    ydata = y
+                else:
+                    ydata = deriv_y
+
+                popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
+                fit_y = func(x, *popt)
+                show_fitlegend = True
+
+            if show_fitlegend is True or show_derivlegend is True:
+                show_rawlegend = True
+            else:
+                show_rawlegend = False
 
             title = ''
             for j, name in enumerate(mdd.metadata['Name'][:-1]):
@@ -231,18 +300,25 @@ def update_style(
                     id={'type': 'linegraph_data', 'index': vals[i]},
                     data=[
                         {
-                            'x': x,
-                            'y': y.flatten(),
+                            'x': x[last_vals[0]:last_vals[1]],
+                            'y': y[last_vals[0]:last_vals[1]].flatten(),
                             'mode': mode,
                             'name': 'Raw Data',
-                            'showlegend': show_legend
+                            'showlegend': show_rawlegend
                         },
                         {
-                            'x': x,
-                            'y': deriv_y.flatten(),
+                            'x': x[last_vals[0]:last_vals[1]],
+                            'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
                             'mode': deriv_mode,
                             'name': 'Derivative',
-                            'showlegend': show_legend
+                            'showlegend': show_derivlegend
+                        },
+                        {
+                            'x': x[last_vals[0]:last_vals[1]],
+                            'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
+                            'mode': fit_mode,
+                            'name': 'Fit',
+                            'showlegend': show_fitlegend
                         }
                     ]
                 )
@@ -320,6 +396,10 @@ def graphgrid_callbacks(app):
                 mode,
                 deriv,
                 deriv_mode,
+                fit_iguess,
+                fitdata,
+                fit_mode,
+                fit_dropdown,
                 mdd_data,
                 metadata,
                 moveaxis,
@@ -351,12 +431,18 @@ def graphgrid_callbacks(app):
                 if deriv is not '':
                     deriv_params = deriv.split(',')[:-1]
                     deriv_array = mdd.num_deriv(deriv_params)
-                    show_legend = True
-                else:
-                    show_legend = False
+
+                if fit_iguess is not None:
+                    if fit_dropdown == 'linear':
+                        func = au.linear_func
+                    elif fit_dropdown == 'exponential':
+                        func = au.exponential_func
+                    elif fit_dropdown == 'polynomial':
+                        func = au.polynomial_func(len(fit_iguess))
 
                 mode = au.graphmode(mode)
                 deriv_mode = au.graphmode(deriv_mode)
+                fit_mode = au.graphmode(fit_mode)
 
                 for i in range(len(vals)):
                     children[i]['props']['relayoutData'] = None
@@ -364,13 +450,33 @@ def graphgrid_callbacks(app):
                     sing_vals = [int(j) for j in val]
                     last_vals = [int(j) for j in lastslice.split(':')]
 
-                    x = mdd.metadata['Values'].iloc[-1][last_vals[0]:last_vals[1]]
-                    slice_list = [slice(i, i+1) for i in sing_vals] + [slice(last_vals[0], last_vals[1])]
+                    x = np.asarray(mdd.metadata['Values'].iloc[-1])
+                    slice_list = [slice(i, i+1) for i in sing_vals]
                     y = mdd.dataArray[tuple(slice_list)]
                     if deriv is '':
                         deriv_y = np.array([None] * len(x))
+                        show_derivlegend = False
                     else:
                         deriv_y = deriv_array[tuple(slice_list)]
+                        show_derivlegend = True
+
+                    if fit_iguess is None:
+                        fit_y = np.array([None] * len(x))
+                        show_fitlegend = False
+                    else:
+                        if fitdata == 'raw':
+                            ydata = y
+                        else:
+                            ydata = deriv_y
+
+                        popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
+                        fit_y = func(x, *popt)
+                        show_fitlegend = True
+
+                    if show_fitlegend is True or show_derivlegend is True:
+                        show_rawlegend = True
+                    else:
+                        show_rawlegend = False
 
                     title = ''
                     for j, name in enumerate(mdd.metadata['Name'][:-1]):
@@ -381,18 +487,25 @@ def graphgrid_callbacks(app):
                             id={'type': 'linegraph_data', 'index': vals[i]},
                             data=[
                                 {
-                                    'x': x,
-                                    'y': y.flatten(),
+                                    'x': x[last_vals[0]:last_vals[1]],
+                                    'y': y[last_vals[0]:last_vals[1]].flatten(),
                                     'mode': mode,
                                     'name': 'Raw Data',
-                                    'showlegend': show_legend
+                                    'showlegend': show_rawlegend
                                 },
                                 {
-                                    'x': x,
-                                    'y': deriv_y.flatten(),
+                                    'x': x[last_vals[0]:last_vals[1]],
+                                    'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
                                     'mode': deriv_mode,
                                     'name': 'Derivative',
-                                    'showlegend': show_legend
+                                    'showlegend': show_derivlegend
+                                },
+                                {
+                                    'x': x[last_vals[0]:last_vals[1]],
+                                    'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
+                                    'mode': fit_mode,
+                                    'name': 'Fit',
+                                    'showlegend': show_fitlegend
                                 }
                             ]
                         )
@@ -455,8 +568,8 @@ def graphgrid_callbacks(app):
                     func = au.exponential_func
                 elif fit_dropdown == 'polynomial':
                     func = au.polynomial_func(len(fit_iguess))
+
                 popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
-                print(popt)
                 fit_y = func(x, *popt)
                 show_fitlegend = True
 

@@ -426,7 +426,6 @@ def app_layout():
                                     dcc.Input(
                                         id='graphtitles',
                                         value='',
-                                        debounce=True,
                                         style={
                                             'display': 'block',
                                             'marginLeft': 'auto',
@@ -443,7 +442,6 @@ def app_layout():
                                     dcc.Input(
                                         id='xaxistitles',
                                         value='',
-                                        debounce=True,
                                         style={
                                             'display': 'block',
                                             'marginLeft': 'auto',
@@ -460,7 +458,6 @@ def app_layout():
                                     dcc.Input(
                                         id='yaxistitles',
                                         value='',
-                                        debounce=True,
                                         style={
                                             'display': 'block',
                                             'marginLeft': 'auto',
@@ -633,9 +630,10 @@ def app_layout():
                                         id='fitmodes',
                                         options=[
                                             {'label': 'Show Lines', 'value': 'lines'},
-                                            {'label': 'Show Markers', 'value': 'markers'}
+                                            {'label': 'Show Markers', 'value': 'markers'},
+                                            {'label': 'Show Fit Parameters', 'value': 'params'}
                                         ],
-                                        value=['lines', 'markers'],
+                                        value=['lines', 'markers', 'params'],
                                         labelStyle={'display': 'inline-block'},
                                         style={
                                             'marginTop': 30,

@@ -16,11 +16,11 @@ import app_util as au
 def update_style(
     ctx, vals, title, xtitle, ytitle, ind_var, mode,
     deriv, deriv_mode,
-    fit_iguess, fitdata, fit_mode, fit_dropdown,
+    fit_iguess, fitdata, fitmode, fit_dropdown,
     mdd_data, metadata, moveaxis, lastslice,
     children, layout, maxrows, graphdata, graphstyle
 ):
-    if ctx.triggered[-1]['prop_id'] == 'graphtitles.value':
+    if ctx.triggered[-1]['prop_id'] == 'graphtitles.n_blur':
         newgraphstyle = []
 
         if title is '':
@@ -56,13 +56,18 @@ def update_style(
                                 ['props']['data']
                                 ['yaxis']['title']
                             )
-                        }
+                        },
+                        'annotations': (
+                            graphstyle[i]
+                            ['props']['data']
+                            ['annotations']
+                        )
                     }
                 )
             )
         return children, layout, maxrows, graphdata, newgraphstyle, vals
 
-    elif ctx.triggered[-1]['prop_id'] == 'xaxistitles.value':
+    elif ctx.triggered[-1]['prop_id'] == 'xaxistitles.n_blur':
         newgraphstyle = []
         if xtitle is '':
             meta = pd.DataFrame(metadata).sort_values('Axis', ignore_index=True)
@@ -87,13 +92,18 @@ def update_style(
                                 ['props']['data']
                                 ['yaxis']['title']
                             )
-                        }
+                        },
+                        'annotations': (
+                            graphstyle[i]
+                            ['props']['data']
+                            ['annotations']
+                        )
                     }
                 )
             )
         return children, layout, maxrows, graphdata, newgraphstyle, vals
 
-    elif ctx.triggered[-1]['prop_id'] == 'yaxistitles.value':
+    elif ctx.triggered[-1]['prop_id'] == 'yaxistitles.n_blur':
         newgraphstyle = []
         if ytitle is '':
             ytitle = ind_var
@@ -114,7 +124,12 @@ def update_style(
                         },
                         'yaxis': {
                             'title': ytitle
-                        }
+                        },
+                        'annotations': (
+                            graphstyle[i]
+                            ['props']['data']
+                            ['annotations']
+                        )
                     }
                 )
             )
@@ -135,9 +150,15 @@ def update_style(
         return children, layout, maxrows, graphdata, graphstyle, vals
 
     elif ctx.triggered[-1]['prop_id'] == 'fitmodes.value':
-        fitmode = au.graphmode(fit_mode)
+        fit_mode = au.graphmode(fitmode)
+        if 'params' in fitmode:
+            visible = True
+        else:
+            visible = False
+
         for i in range(len(vals)):
-            graphdata[i]['props']['data'][2]['mode'] = fitmode
+            graphdata[i]['props']['data'][2]['mode'] = fit_mode
+            graphstyle[i]['props']['data']['annotations'][0]['visible'] = visible
 
         return children, layout, maxrows, graphdata, graphstyle, vals
 
@@ -160,14 +181,23 @@ def update_style(
         if fit_iguess is not None:
             if fit_dropdown == 'linear':
                 func = au.linear_func
+                param_name = 'm = {0:.2e}<br>b = {1:.2e}'
             elif fit_dropdown == 'exponential':
                 func = au.exponential_func
+                param_name = 'A = {0:.2e}<br>k = {1:.2e}<br>b = {2:.2e}'
             elif fit_dropdown == 'polynomial':
                 func = au.polynomial_func(len(fit_iguess))
+                param_name = ''
+                for i in range(len(fit_iguess)):
+                    param_name += f'p{i} = ' + '{' + str(i) + ':.2e}<br>'
 
         mode = au.graphmode(mode)
         deriv_mode = au.graphmode(deriv_mode)
-        fit_mode = au.graphmode(fit_mode)
+        fit_mode = au.graphmode(fitmode)
+        if 'params' in fitmode:
+            visible = True
+        else:
+            visible = False
 
         newgraphdata = []
         for i in range(len(vals)):
@@ -187,6 +217,9 @@ def update_style(
 
             if fit_iguess is None:
                 fit_y = np.array([None] * len(x))
+                param_name = ''
+                r2 = ''
+                popt=()
                 show_fitlegend = False
             else:
                 if fitdata == 'raw':
@@ -194,8 +227,24 @@ def update_style(
                 else:
                     ydata = deriv_y
 
-                popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
-                fit_y = func(x, *popt)
+                try:
+                    popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
+                    fit_y = func(x, *popt)
+                    ss = (
+                        np.sum((ydata.flatten() - fit_y) ** 2)
+                        / np.sum((ydata.flatten() - np.mean(ydata)) ** 2)
+                    )
+                    r2 = 'R2 = {0:.2e}<br>'.format(1-ss)
+                except ValueError:
+                    fit_y = np.array([None] * len(x))
+                    param_name = 'ERROR: Missing data.<br>Can\'t perform fit.'
+                    r2 = ''
+                    popt=()
+                except TypeError:
+                    fit_y = np.array([None] * len(x))
+                    param_name = 'ERROR: Order can\'t<br>be greater than<br>amount of data<br>for poly fit.'
+                    r2 = ''
+                    popt=()
                 show_fitlegend = True
 
             if show_fitlegend is True or show_derivlegend is True:
@@ -232,6 +281,19 @@ def update_style(
                 )
             )
 
+            graphstyle[i]['props']['data']['annotations'] = [{
+                            'x': 1.12,
+                            'y': 0.65,
+                            'showarrow': False,
+                            'bordercolor': 'black',
+                            'bgcolor': 'green',
+                            'font': {'color': 'white'},
+                            'text': r2 + param_name.format(*popt),
+                            'xref': 'paper',
+                            'yref': 'paper',
+                            'visible': visible
+                        }]
+
         return children, layout, maxrows, newgraphdata, graphstyle, vals
 
     else:
@@ -247,14 +309,23 @@ def update_style(
         if fit_iguess is not None:
             if fit_dropdown == 'linear':
                 func = au.linear_func
+                param_name = 'm = {0:.2e}<br>b = {1:.2e}'
             elif fit_dropdown == 'exponential':
                 func = au.exponential_func
+                param_name = 'A = {0:.2e}<br>k = {1:.2e}<br>b = {2:.2e}'
             elif fit_dropdown == 'polynomial':
                 func = au.polynomial_func(len(fit_iguess))
+                param_name = ''
+                for i in range(len(fit_iguess)):
+                    param_name += f'p{i} = ' + '{' + str(i) + ':.2e}<br>'
 
         mode = au.graphmode(mode)
         deriv_mode = au.graphmode(deriv_mode)
-        fit_mode = au.graphmode(fit_mode)
+        fit_mode = au.graphmode(fitmode)
+        if 'params' in fitmode:
+            visible = True
+        else:
+            visible = False
 
         newgraphdata, newgraphstyle = [], []
         for i in range(len(vals)):
@@ -275,6 +346,9 @@ def update_style(
 
             if fit_iguess is None:
                 fit_y = np.array([None] * len(x))
+                param_name = ''
+                r2 = ''
+                popt=()
                 show_fitlegend = False
             else:
                 if fitdata == 'raw':
@@ -282,8 +356,25 @@ def update_style(
                 else:
                     ydata = deriv_y
 
-                popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
-                fit_y = func(x, *popt)
+                try:
+                    popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
+                    fit_y = func(x, *popt)
+                    ss = (
+                        np.sum((ydata.flatten() - fit_y) ** 2)
+                        / np.sum((ydata.flatten() - np.mean(ydata)) ** 2)
+                    )
+                    r2 = 'R2 = {0:.2e}<br>'.format(1-ss)
+                except ValueError:
+                    fit_y = np.array([None] * len(x))
+                    param_name = 'ERROR: Missing data.<br>Can\'t perform fit.'
+                    r2 = ''
+                    popt=()
+                except TypeError:
+                    fit_y = np.array([None] * len(x))
+                    param_name = 'ERROR: Order can\'t<br>be greater than<br>amount of data<br>for poly fit.'
+                    r2 = ''
+                    popt=()
+
                 show_fitlegend = True
 
             if show_fitlegend is True or show_derivlegend is True:
@@ -333,7 +424,19 @@ def update_style(
                         },
                         'yaxis': {
                             'title': ind_var
-                        }
+                        },
+                        'annotations': [{
+                            'x': 1.12,
+                            'y': 0.65,
+                            'showarrow': False,
+                            'bordercolor': 'black',
+                            'bgcolor': 'green',
+                            'font': {'color': 'white'},
+                            'text': r2 + param_name.format(*popt),
+                            'xref': 'paper',
+                            'yref': 'paper',
+                            'visible': visible
+                        }]
                     }
                 )
             )
@@ -356,9 +459,9 @@ def graphgrid_callbacks(app):
          Input('mdd', 'data'),
          Input('lastslice', 'data'),
          Input('moveaxis', 'layout'),
-         Input('graphtitles', 'value'),
-         Input('xaxistitles', 'value'),
-         Input('yaxistitles', 'value'),
+         Input('graphtitles', 'n_blur'),
+         Input('xaxistitles', 'n_blur'),
+         Input('yaxistitles', 'n_blur'),
          Input('datamodes', 'value'),
          Input('deriv_params', 'data'),
          Input('derivmodes', 'value'),
@@ -373,15 +476,19 @@ def graphgrid_callbacks(app):
          State('metadata', 'data'),
          State('prev_val', 'data'),
          State('data_headers', 'value'),
+         State('graphtitles', 'value'),
+         State('xaxistitles', 'value'),
+         State('yaxistitles', 'value'),
          State('fit_dropdown', 'value')]
     )
     def create_graphgrid(
         vals, mdd_data, lastslice, moveaxis,
-        title, xtitle, ytitle, mode,
+        ntitle, nxtitle, nytitle, mode,
         deriv, deriv_mode,
-        fit_iguess, fitdata, fit_mode,
+        fit_iguess, fitdata, fitmode,
         children, layout, maxrows, graphdata, graphstyle,
         metadata, prev_vals, ind_var,
+        title, xtitle, ytitle,
         fit_dropdown
     ):
         if len(vals) == len(prev_vals):
@@ -398,7 +505,7 @@ def graphgrid_callbacks(app):
                 deriv_mode,
                 fit_iguess,
                 fitdata,
-                fit_mode,
+                fitmode,
                 fit_dropdown,
                 mdd_data,
                 metadata,
@@ -435,14 +542,23 @@ def graphgrid_callbacks(app):
                 if fit_iguess is not None:
                     if fit_dropdown == 'linear':
                         func = au.linear_func
+                        param_name = 'm = {0:.2e}<br>b = {1:.2e}'
                     elif fit_dropdown == 'exponential':
                         func = au.exponential_func
+                        param_name = 'A = {0:.2e}<br>k = {1:.2e}<br>b = {2:.2e}'
                     elif fit_dropdown == 'polynomial':
                         func = au.polynomial_func(len(fit_iguess))
+                        param_name = ''
+                        for i in range(len(fit_iguess)):
+                            param_name += f'p{i} = ' + '{' + str(i) + ':.2e}<br>'
 
                 mode = au.graphmode(mode)
                 deriv_mode = au.graphmode(deriv_mode)
-                fit_mode = au.graphmode(fit_mode)
+                fit_mode = au.graphmode(fitmode)
+                if 'params' in fitmode:
+                    visible = True
+                else:
+                    visible = False
 
                 for i in range(len(vals)):
                     children[i]['props']['relayoutData'] = None
@@ -462,6 +578,9 @@ def graphgrid_callbacks(app):
 
                     if fit_iguess is None:
                         fit_y = np.array([None] * len(x))
+                        param_name = ''
+                        r2 = ''
+                        popt=()
                         show_fitlegend = False
                     else:
                         if fitdata == 'raw':
@@ -469,8 +588,24 @@ def graphgrid_callbacks(app):
                         else:
                             ydata = deriv_y
 
-                        popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
-                        fit_y = func(x, *popt)
+                        try:
+                            popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
+                            fit_y = func(x, *popt)
+                            ss = (
+                                np.sum((ydata.flatten() - fit_y) ** 2)
+                                / np.sum((ydata.flatten() - np.mean(ydata)) ** 2)
+                            )
+                            r2 = 'R2 = {0:.2e}<br>'.format(1-ss)
+                        except ValueError:
+                            fit_y = np.array([None] * len(x))
+                            param_name = 'ERROR: Missing data.<br>Can\'t perform fit.'
+                            r2 = ''
+                            popt=()
+                        except TypeError:
+                            fit_y = np.array([None] * len(x))
+                            param_name = 'ERROR: Order can\'t<br>be greater than<br>amount of data<br>for poly fit.'
+                            r2 = ''
+                            popt=()
                         show_fitlegend = True
 
                     if show_fitlegend is True or show_derivlegend is True:
@@ -520,7 +655,19 @@ def graphgrid_callbacks(app):
                                 },
                                 'yaxis': {
                                     'title': ind_var
-                                }
+                                },
+                                'annotations': [{
+                                    'x': 1.12,
+                                    'y': 0.65,
+                                    'showarrow': False,
+                                    'bordercolor': 'black',
+                                    'bgcolor': 'green',
+                                    'font': {'color': 'white'},
+                                    'text': r2 + param_name.format(*popt),
+                                    'xref': 'paper',
+                                    'yref': 'paper',
+                                    'visible': visible
+                                }]
                             }
                         )
                     )
@@ -555,6 +702,9 @@ def graphgrid_callbacks(app):
 
             if fit_iguess is None:
                 fit_y = np.array([None] * len(x))
+                param_name = ''
+                r2 = ''
+                popt=()
                 show_fitlegend = False
             else:
                 if fitdata == 'raw':
@@ -564,13 +714,34 @@ def graphgrid_callbacks(app):
 
                 if fit_dropdown == 'linear':
                     func = au.linear_func
+                    param_name = 'm = {0:.2e}<br>b = {1:.2e}'
                 elif fit_dropdown == 'exponential':
                     func = au.exponential_func
+                    param_name = 'A = {0:.2e}<br>k = {1:.2e}<br>b = {2:.2e}'
                 elif fit_dropdown == 'polynomial':
                     func = au.polynomial_func(len(fit_iguess))
+                    param_name = ''
+                    for i in range(len(fit_iguess)):
+                        param_name += f'p{i} = ' + '{' + str(i) + ':.2e}<br>'
 
-                popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
-                fit_y = func(x, *popt)
+                try:
+                    popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
+                    fit_y = func(x, *popt)
+                    ss = (
+                        np.sum((ydata.flatten() - fit_y) ** 2)
+                        / np.sum((ydata.flatten() - np.mean(ydata)) ** 2)
+                    )
+                    r2 = 'R2 = {0:.2e}<br>'.format(1-ss)
+                except ValueError:
+                    fit_y = np.array([None] * len(x))
+                    param_name = 'ERROR: Missing data.<br>Can\'t perform fit.'
+                    r2 = ''
+                    popt=()
+                except TypeError:
+                    fit_y = np.array([None] * len(x))
+                    param_name = 'ERROR: Order can\'t<br>be greater than<br>amount of data<br>for poly fit.'
+                    r2 = ''
+                    popt=()
                 show_fitlegend = True
 
             if show_fitlegend is True or show_derivlegend is True:
@@ -581,7 +752,11 @@ def graphgrid_callbacks(app):
 
             mode = au.graphmode(mode)
             deriv_mode = au.graphmode(deriv_mode)
-            fit_mode = au.graphmode(fit_mode)
+            fit_mode = au.graphmode(fitmode)
+            if 'params' in fitmode:
+                visible = True
+            else:
+                visible = False
 
             children.append(
                 dcc.Graph(
@@ -644,7 +819,19 @@ def graphgrid_callbacks(app):
                         },
                         'yaxis': {
                             'title': ind_var
-                        }
+                        },
+                        'annotations': [{
+                            'x': 1.12,
+                            'y': 0.65,
+                            'showarrow': False,
+                            'bordercolor': 'black',
+                            'bgcolor': 'green',
+                            'font': {'color': 'white'},
+                            'text': r2 + param_name.format(*popt),
+                            'xref': 'paper',
+                            'yref': 'paper',
+                            'visible': visible
+                        }]
                     }
                 )
             )

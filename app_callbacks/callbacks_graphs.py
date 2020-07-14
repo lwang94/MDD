@@ -95,34 +95,23 @@ def graphs_callbacks(app):
     )
     def update_graphlay(reData, old_lay):
         if 'title.text' in reData:
-            return {
-                'title': reData['title.text'],
-                'xaxis': {
-                    'title': old_lay['xaxis']['title']
-                },
-                'yaxis': {
-                    'title': old_lay['yaxis']['title']
-                }
-            }
+            old_lay['title'] = reData['title.text']
+            return old_lay
         elif 'xaxis.title.text' in reData:
-            return {
-                'title': old_lay['title'],
-                'xaxis': {
-                    'title': reData['xaxis.title.text']
-                },
-                'yaxis': {
-                    'title': old_lay['yaxis']['title']
-                }
-            }
+            old_lay['xaxis']['title'] = reData['xaxis.title.text']
+            return old_lay
         elif 'yaxis.title.text' in reData:
-            return {
-                'title': old_lay['title'],
-                'xaxis': {
-                    'title': old_lay['xaxis']['title']
-                },
-                'yaxis': {
-                    'title': reData['yaxis.title.text']
-                }
+            old_lay['yaxis']['title'] = reData['yaxis.title.text']
+            return old_lay
+        elif 'annotations[0].x' in reData or 'annotations[0].y' in reData:
+            old_lay['annotations'][0]['x'] = reData['annotations[0].x']
+            old_lay['annotations'][0]['y'] = reData['annotations[0].y']
+            return old_lay
+        elif 'legend.x' in reData or 'legend.y' in reData:
+            old_lay['legend'] = {
+                'x': reData['legend.x'],
+                'y': reData['legend.y']
             }
+            return old_lay
         else:
             raise PreventUpdate

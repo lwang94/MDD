@@ -35,7 +35,6 @@ def mdd_callbacks(app):
                 type='text',
                 value=row['Values'][0],
                 style={
-                    # 'backgroundColor': 'transparent',
                     'marginBottom': 12,
                     'width': 50
                 }
@@ -46,7 +45,6 @@ def mdd_callbacks(app):
                 type='text',
                 value=row['Values'][-1],
                 style={
-                    # 'backgroundColor': 'transparent',
                     'marginBottom': 12,
                     'width': 50
                 }

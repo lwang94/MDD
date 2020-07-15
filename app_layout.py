@@ -11,17 +11,31 @@ import config as cf
 def app_layout():
     return html.Div([
         # Title
-        html.H1(
-            children='A3MD',
-            style={'textAlign': 'center'}
-        ),
+        html.Div(
+            children=[
+                html.Hr(
+                    style={'borderRight': '100px solid #607D8B'},
+                    className='five columns'
+                ),
+                html.H1(
+                    children='A3MD',
+                    style={'textAlign': 'center'},
+                    className='two columns'
+                ),
+                html.Hr(
+                    style={'borderLeft': '100px solid #607D8B'},
+                    className='five columns'
+                ),
 
-        # Error Messages
-        dcc.ConfirmDialog(
-            id='error_message'
-        ),
-        dcc.ConfirmDialog(
-            id='fit_error'
+                # Error Messages
+                dcc.ConfirmDialog(
+                    id='error_message'
+                ),
+                dcc.ConfirmDialog(
+                    id='fit_error'
+                )
+            ],
+            className='one row'
         ),
 
         # First Row
@@ -274,7 +288,12 @@ def app_layout():
                     style={'width': 120},
                     className='one column'
                 ),
-                html.Hr(className='five columns')
+                html.Hr(
+                    style={
+                        'borderRight': '50px solid #607D8B'
+                    },
+                    className='six columns'
+                )
             ],
             className='one row'
         ),

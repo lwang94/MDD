@@ -7,7 +7,6 @@ import plotly.graph_objects as go
 
 import pandas as pd
 import numpy as np
-import scipy.optimize as opt
 
 import MDDClass as mc
 import app_util as au
@@ -174,22 +173,11 @@ def update_style(
         )
         mdd.dataDF = pd.DataFrame(mdd_data)
         mdd.move_axis(au.new_pos(moveaxis))
-        if deriv is not '':
-            deriv_params = deriv.split(',')[:-1]
-            deriv_array = mdd.num_deriv(deriv_params)
+
+        deriv_array = au.calc_deriv(deriv, mdd)
 
         if fit_iguess is not None:
-            if fit_dropdown == 'linear':
-                func = au.linear_func
-                param_name = 'm = {0:.2e}<br>b = {1:.2e}'
-            elif fit_dropdown == 'exponential':
-                func = au.exponential_func
-                param_name = 'A = {0:.2e}<br>k = {1:.2e}<br>b = {2:.2e}'
-            elif fit_dropdown == 'polynomial':
-                func = au.polynomial_func(len(fit_iguess))
-                param_name = ''
-                for i in range(len(fit_iguess)):
-                    param_name += f'p{i} = ' + '{' + str(i) + ':.2e}<br>'
+            func, param_name = au.choose_func(fit_dropdown, fit_iguess)
 
         mode = au.graphmode(mode)
         deriv_mode = au.graphmode(deriv_mode)
@@ -208,44 +196,17 @@ def update_style(
             x = np.asarray(mdd.metadata['Values'].iloc[-1])
             slice_list = [slice(i, i+1) for i in sing_vals]
             y = mdd.dataArray[tuple(slice_list)]
-            if deriv is '':
-                deriv_y = np.array([None] * len(x))
-                show_derivlegend = False
-            else:
-                deriv_y = deriv_array[tuple(slice_list)]
-                show_derivlegend = True
+
+            deriv_y, show_derivlegend = au.find_derivslice(deriv, deriv_array, slice_list)
 
             if fit_iguess is None:
-                fit_y = np.array([None] * len(x))
-                param_name = ''
-                r2 = ''
-                popt=()
-                show_fitlegend = False
+                fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
             else:
-                if fitdata == 'raw':
-                    ydata = y
-                else:
-                    ydata = deriv_y
+                ydata = au.choose_fitdata(fitdata, y, deriv_y)
 
-                try:
-                    popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
-                    fit_y = func(x, *popt)
-                    ss = (
-                        np.sum((ydata.flatten() - fit_y) ** 2)
-                        / np.sum((ydata.flatten() - np.mean(ydata)) ** 2)
-                    )
-                    r2 = 'R2 = {0:.2e}<br>'.format(1-ss)
-                except ValueError:
-                    fit_y = np.array([None] * len(x))
-                    param_name = 'ERROR: Missing data.<br>Can\'t perform fit.'
-                    r2 = ''
-                    popt=()
-                except TypeError:
-                    fit_y = np.array([None] * len(x))
-                    param_name = 'ERROR: Order can\'t<br>be greater than<br>amount of data<br>for poly fit.'
-                    r2 = ''
-                    popt=()
-                show_fitlegend = True
+                fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
+                    func, x, ydata, fit_iguess, param_name
+                )
 
             if show_fitlegend is True or show_derivlegend is True:
                 show_rawlegend = True
@@ -302,22 +263,11 @@ def update_style(
         )
         mdd.dataDF = pd.DataFrame(mdd_data)
         mdd.move_axis(au.new_pos(moveaxis))
-        if deriv is not '':
-            deriv_params = deriv.split(',')[:-1]
-            deriv_array = mdd.num_deriv(deriv_params)
+
+        deriv_array = au.calc_deriv(deriv, mdd)
 
         if fit_iguess is not None:
-            if fit_dropdown == 'linear':
-                func = au.linear_func
-                param_name = 'm = {0:.2e}<br>b = {1:.2e}'
-            elif fit_dropdown == 'exponential':
-                func = au.exponential_func
-                param_name = 'A = {0:.2e}<br>k = {1:.2e}<br>b = {2:.2e}'
-            elif fit_dropdown == 'polynomial':
-                func = au.polynomial_func(len(fit_iguess))
-                param_name = ''
-                for i in range(len(fit_iguess)):
-                    param_name += f'p{i} = ' + '{' + str(i) + ':.2e}<br>'
+            func, param_name = au.choose_func(fit_dropdown, fit_iguess)
 
         mode = au.graphmode(mode)
         deriv_mode = au.graphmode(deriv_mode)
@@ -337,45 +287,17 @@ def update_style(
             x = np.asarray(mdd.metadata['Values'].iloc[-1])
             slice_list = [slice(i, i+1) for i in sing_vals]
             y = mdd.dataArray[tuple(slice_list)]
-            if deriv is '':
-                deriv_y = np.array([None] * len(x))
-                show_derivlegend = False
-            else:
-                deriv_y = deriv_array[tuple(slice_list)]
-                show_derivlegend = True
+
+            deriv_y, show_derivlegend = au.find_derivslice(deriv, deriv_array, slice_list)
 
             if fit_iguess is None:
-                fit_y = np.array([None] * len(x))
-                param_name = ''
-                r2 = ''
-                popt=()
-                show_fitlegend = False
+                fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
             else:
-                if fitdata == 'raw':
-                    ydata = y
-                else:
-                    ydata = deriv_y
+                ydata = au.choose_fitdata(fitdata, y, deriv_y)
 
-                try:
-                    popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
-                    fit_y = func(x, *popt)
-                    ss = (
-                        np.sum((ydata.flatten() - fit_y) ** 2)
-                        / np.sum((ydata.flatten() - np.mean(ydata)) ** 2)
-                    )
-                    r2 = 'R2 = {0:.2e}<br>'.format(1-ss)
-                except ValueError:
-                    fit_y = np.array([None] * len(x))
-                    param_name = 'ERROR: Missing data.<br>Can\'t perform fit.'
-                    r2 = ''
-                    popt=()
-                except TypeError:
-                    fit_y = np.array([None] * len(x))
-                    param_name = 'ERROR: Order can\'t<br>be greater than<br>amount of data<br>for poly fit.'
-                    r2 = ''
-                    popt=()
-
-                show_fitlegend = True
+                fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
+                    func, x, ydata, fit_iguess, param_name
+                )
 
             if show_fitlegend is True or show_derivlegend is True:
                 show_rawlegend = True
@@ -535,22 +457,11 @@ def graphgrid_callbacks(app):
                 )
                 mdd.dataDF = pd.DataFrame(mdd_data)
                 mdd.move_axis(au.new_pos(moveaxis))
-                if deriv is not '':
-                    deriv_params = deriv.split(',')[:-1]
-                    deriv_array = mdd.num_deriv(deriv_params)
+
+                deriv_array = au.calc_deriv(deriv, mdd)
 
                 if fit_iguess is not None:
-                    if fit_dropdown == 'linear':
-                        func = au.linear_func
-                        param_name = 'm = {0:.2e}<br>b = {1:.2e}'
-                    elif fit_dropdown == 'exponential':
-                        func = au.exponential_func
-                        param_name = 'A = {0:.2e}<br>k = {1:.2e}<br>b = {2:.2e}'
-                    elif fit_dropdown == 'polynomial':
-                        func = au.polynomial_func(len(fit_iguess))
-                        param_name = ''
-                        for i in range(len(fit_iguess)):
-                            param_name += f'p{i} = ' + '{' + str(i) + ':.2e}<br>'
+                    func, param_name = au.choose_func(fit_dropdown, fit_iguess)
 
                 mode = au.graphmode(mode)
                 deriv_mode = au.graphmode(deriv_mode)
@@ -569,44 +480,17 @@ def graphgrid_callbacks(app):
                     x = np.asarray(mdd.metadata['Values'].iloc[-1])
                     slice_list = [slice(i, i+1) for i in sing_vals]
                     y = mdd.dataArray[tuple(slice_list)]
-                    if deriv is '':
-                        deriv_y = np.array([None] * len(x))
-                        show_derivlegend = False
-                    else:
-                        deriv_y = deriv_array[tuple(slice_list)]
-                        show_derivlegend = True
+
+                    deriv_y, show_derivlegend = au.find_derivslice(deriv, deriv_array, slice_list)
 
                     if fit_iguess is None:
-                        fit_y = np.array([None] * len(x))
-                        param_name = ''
-                        r2 = ''
-                        popt=()
-                        show_fitlegend = False
+                        fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
                     else:
-                        if fitdata == 'raw':
-                            ydata = y
-                        else:
-                            ydata = deriv_y
+                        ydata = au.choose_fitdata(fitdata, y, deriv_y)
 
-                        try:
-                            popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
-                            fit_y = func(x, *popt)
-                            ss = (
-                                np.sum((ydata.flatten() - fit_y) ** 2)
-                                / np.sum((ydata.flatten() - np.mean(ydata)) ** 2)
-                            )
-                            r2 = 'R2 = {0:.2e}<br>'.format(1-ss)
-                        except ValueError:
-                            fit_y = np.array([None] * len(x))
-                            param_name = 'ERROR: Missing data.<br>Can\'t perform fit.'
-                            r2 = ''
-                            popt=()
-                        except TypeError:
-                            fit_y = np.array([None] * len(x))
-                            param_name = 'ERROR: Order can\'t<br>be greater than<br>amount of data<br>for poly fit.'
-                            r2 = ''
-                            popt=()
-                        show_fitlegend = True
+                        fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
+                            func, x, ydata, fit_iguess, param_name
+                        )
 
                     if show_fitlegend is True or show_derivlegend is True:
                         show_rawlegend = True
@@ -691,58 +575,18 @@ def graphgrid_callbacks(app):
             slice_list = [slice(i, i+1) for i in sing_vals]
             y = mdd.dataArray[tuple(slice_list)]
 
-            if deriv is '':
-                deriv_y = np.array([None] * len(x))
-                show_derivlegend = False
-            else:
-                deriv_params = deriv.split(',')[:-1]
-                deriv_array = mdd.num_deriv(deriv_params)
-                deriv_y = deriv_array[tuple(slice_list)]
-                show_derivlegend = True
+            deriv_array = au.calc_deriv(deriv, mdd)
+            deriv_y, show_derivlegend = au.find_derivslice(deriv, deriv_array, slice_list)
 
             if fit_iguess is None:
-                fit_y = np.array([None] * len(x))
-                param_name = ''
-                r2 = ''
-                popt=()
-                show_fitlegend = False
+                fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
             else:
-                if fitdata == 'raw':
-                    ydata = y
-                else:
-                    ydata = deriv_y
+                func, param_name = au.choose_func(fit_dropdown, fit_iguess)
+                ydata = au.choose_fitdata(fitdata, y, deriv_y)
 
-                if fit_dropdown == 'linear':
-                    func = au.linear_func
-                    param_name = 'm = {0:.2e}<br>b = {1:.2e}'
-                elif fit_dropdown == 'exponential':
-                    func = au.exponential_func
-                    param_name = 'A = {0:.2e}<br>k = {1:.2e}<br>b = {2:.2e}'
-                elif fit_dropdown == 'polynomial':
-                    func = au.polynomial_func(len(fit_iguess))
-                    param_name = ''
-                    for i in range(len(fit_iguess)):
-                        param_name += f'p{i} = ' + '{' + str(i) + ':.2e}<br>'
-
-                try:
-                    popt, pcov = opt.curve_fit(func, x, ydata.flatten(), p0=fit_iguess)
-                    fit_y = func(x, *popt)
-                    ss = (
-                        np.sum((ydata.flatten() - fit_y) ** 2)
-                        / np.sum((ydata.flatten() - np.mean(ydata)) ** 2)
-                    )
-                    r2 = 'R2 = {0:.2e}<br>'.format(1-ss)
-                except ValueError:
-                    fit_y = np.array([None] * len(x))
-                    param_name = 'ERROR: Missing data.<br>Can\'t perform fit.'
-                    r2 = ''
-                    popt=()
-                except TypeError:
-                    fit_y = np.array([None] * len(x))
-                    param_name = 'ERROR: Order can\'t<br>be greater than<br>amount of data<br>for poly fit.'
-                    r2 = ''
-                    popt=()
-                show_fitlegend = True
+                fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
+                    func, x, ydata, fit_iguess, param_name
+                )
 
             if show_fitlegend is True or show_derivlegend is True:
                 show_rawlegend = True

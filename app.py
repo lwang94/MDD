@@ -12,6 +12,7 @@ app = dash.Dash(__name__)
 app.config.suppress_callback_exceptions = True
 
 # create layout
+app.title = 'A3MD'
 app.layout = al.app_layout()
 
 # include callbacks

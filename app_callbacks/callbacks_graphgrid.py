@@ -177,7 +177,7 @@ def update_style(
         deriv_array = au.calc_deriv(deriv, mdd)
 
         if fit_iguess is not None:
-            func, param_name = au.choose_func(fit_dropdown, fit_iguess)
+            func, paramname = au.choose_func(fit_dropdown, fit_iguess)
 
         mode = au.graphmode(mode)
         deriv_mode = au.graphmode(deriv_mode)
@@ -203,10 +203,10 @@ def update_style(
                 fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
             else:
                 ydata = au.choose_fitdata(fitdata, y, deriv_y)
-
                 fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
-                    func, x, ydata, fit_iguess, param_name
+                    func, x, ydata, fit_iguess, paramname
                 )
+
 
             if show_fitlegend is True or show_derivlegend is True:
                 show_rawlegend = True
@@ -219,21 +219,21 @@ def update_style(
                     data=[
                         {
                             'x': x[last_vals[0]:last_vals[1]],
-                            'y': y[last_vals[0]:last_vals[1]].flatten(),
+                            'y': y.flatten()[last_vals[0]:last_vals[1]],
                             'mode': mode,
                             'name': 'Raw Data',
                             'showlegend': show_rawlegend
                         },
                         {
                             'x': x[last_vals[0]:last_vals[1]],
-                            'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
+                            'y': deriv_y.flatten()[last_vals[0]:last_vals[1]],
                             'mode': deriv_mode,
                             'name': 'Derivative',
                             'showlegend': show_derivlegend
                         },
                         {
                             'x': x[last_vals[0]:last_vals[1]],
-                            'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
+                            'y': fit_y.flatten()[last_vals[0]:last_vals[1]],
                             'mode': fit_mode,
                             'name': 'Fit',
                             'showlegend': show_fitlegend
@@ -267,7 +267,7 @@ def update_style(
         deriv_array = au.calc_deriv(deriv, mdd)
 
         if fit_iguess is not None:
-            func, param_name = au.choose_func(fit_dropdown, fit_iguess)
+            func, paramname = au.choose_func(fit_dropdown, fit_iguess)
 
         mode = au.graphmode(mode)
         deriv_mode = au.graphmode(deriv_mode)
@@ -294,10 +294,10 @@ def update_style(
                 fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
             else:
                 ydata = au.choose_fitdata(fitdata, y, deriv_y)
-
                 fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
-                    func, x, ydata, fit_iguess, param_name
+                    func, x, ydata, fit_iguess, paramname
                 )
+
 
             if show_fitlegend is True or show_derivlegend is True:
                 show_rawlegend = True
@@ -314,21 +314,21 @@ def update_style(
                     data=[
                         {
                             'x': x[last_vals[0]:last_vals[1]],
-                            'y': y[last_vals[0]:last_vals[1]].flatten(),
+                            'y': y.flatten()[last_vals[0]:last_vals[1]],
                             'mode': mode,
                             'name': 'Raw Data',
                             'showlegend': show_rawlegend
                         },
                         {
                             'x': x[last_vals[0]:last_vals[1]],
-                            'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
+                            'y': deriv_y.flatten()[last_vals[0]:last_vals[1]],
                             'mode': deriv_mode,
                             'name': 'Derivative',
                             'showlegend': show_derivlegend
                         },
                         {
                             'x': x[last_vals[0]:last_vals[1]],
-                            'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
+                            'y': fit_y.flatten()[last_vals[0]:last_vals[1]],
                             'mode': fit_mode,
                             'name': 'Fit',
                             'showlegend': show_fitlegend
@@ -461,7 +461,7 @@ def graphgrid_callbacks(app):
                 deriv_array = au.calc_deriv(deriv, mdd)
 
                 if fit_iguess is not None:
-                    func, param_name = au.choose_func(fit_dropdown, fit_iguess)
+                    func, paramname = au.choose_func(fit_dropdown, fit_iguess)
 
                 mode = au.graphmode(mode)
                 deriv_mode = au.graphmode(deriv_mode)
@@ -487,10 +487,10 @@ def graphgrid_callbacks(app):
                         fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
                     else:
                         ydata = au.choose_fitdata(fitdata, y, deriv_y)
-
                         fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
-                            func, x, ydata, fit_iguess, param_name
+                            func, x, ydata, fit_iguess, paramname
                         )
+
 
                     if show_fitlegend is True or show_derivlegend is True:
                         show_rawlegend = True
@@ -507,21 +507,21 @@ def graphgrid_callbacks(app):
                             data=[
                                 {
                                     'x': x[last_vals[0]:last_vals[1]],
-                                    'y': y[last_vals[0]:last_vals[1]].flatten(),
+                                    'y': y.flatten()[last_vals[0]:last_vals[1]],
                                     'mode': mode,
                                     'name': 'Raw Data',
                                     'showlegend': show_rawlegend
                                 },
                                 {
                                     'x': x[last_vals[0]:last_vals[1]],
-                                    'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
+                                    'y': deriv_y.flatten()[last_vals[0]:last_vals[1]],
                                     'mode': deriv_mode,
                                     'name': 'Derivative',
                                     'showlegend': show_derivlegend
                                 },
                                 {
                                     'x': x[last_vals[0]:last_vals[1]],
-                                    'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
+                                    'y': fit_y.flatten()[last_vals[0]:last_vals[1]],
                                     'mode': fit_mode,
                                     'name': 'Fit',
                                     'showlegend': show_fitlegend
@@ -631,21 +631,21 @@ def graphgrid_callbacks(app):
                     data=[
                         {
                             'x': x[last_vals[0]:last_vals[1]],
-                            'y': y[last_vals[0]:last_vals[1]].flatten(),
+                            'y': y.flatten()[last_vals[0]:last_vals[1]],
                             'mode': mode,
                             'name': 'Raw Data',
                             'showlegend': show_rawlegend
                         },
                         {
                             'x': x[last_vals[0]:last_vals[1]],
-                            'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
+                            'y': deriv_y.flatten()[last_vals[0]:last_vals[1]],
                             'mode': deriv_mode,
                             'name': 'Derivative',
                             'showlegend': show_derivlegend
                         },
                         {
                             'x': x[last_vals[0]:last_vals[1]],
-                            'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
+                            'y': fit_y.flatten()[last_vals[0]:last_vals[1]],
                             'mode': fit_mode,
                             'name': 'Fit',
                             'showlegend': show_fitlegend

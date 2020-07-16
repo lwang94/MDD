@@ -226,11 +226,18 @@ def app_layout():
                                 # Input allowing app to to find correct column in datafile
                                 dcc.Input(
                                     id='data_headers',
-                                    placeholder='Header1, Header2,...',
+                                    placeholder='Col. Header',
                                     type='text',
                                     style={
-                                        'width': 130,
-                                        'marginBottom': 18
+                                        'width': 130
+                                    }
+                                ),
+                                html.Pre(
+                                    cf.sugg_dataheader,
+                                    style={
+                                        'font': 6,
+                                        'marginTop': -2,
+                                        'marginBottom': 20
                                     }
                                 ),
                                 html.A(
@@ -244,16 +251,6 @@ def app_layout():
                                     ),
                                     id='save_data'
                                 ),
-
-                                # html.Pre(
-                                #         cf.warning_dataheader,
-                                #         style={
-                                #             'textAlign': 'left',
-                                #             'marginLeft': 20,
-                                #             'color': '#f3742b'
-                                #         },
-                                #         # className='four columns'
-                                # ),
                                 dcc.Store(id='mdd'),
                                 dcc.Store(id='mddcopy')
                             ],

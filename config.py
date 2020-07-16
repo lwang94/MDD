@@ -11,5 +11,5 @@ error_numval = 'ERROR: Number of values defined for row does not match Num Value
 error_fitinputs = 'ERROR: Only numeric inputs are accepted for initial guess of Function Fit'
 
 # Warning messages
-warning_dataheader = 'CAUTION: Leaving this field blank adds ALL the columns in the .csv file'
+sugg_dataheader = 'Keep above text blank to\nadd ALL columns in file'
 

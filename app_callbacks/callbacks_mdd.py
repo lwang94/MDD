@@ -12,10 +12,6 @@ import pandas as pd
 import MDDClass as mc
 import app_util as au
 
-from sklearn import ensemble as em
-from sklearn import model_selection as msl
-from sklearn import metrics
-
 
 def mdd_callbacks(app):
 
@@ -249,7 +245,15 @@ def mdd_callbacks(app):
             'backgroundColor': '#33DEF0',
             'textAlign': 'center'
         }
-        items = [meta[i]['Name'] for i in range(len(meta))]
+        items = [dcc.RangeSlider(
+            id={'type': 'slider', 'index': i},
+            min=row['Values'][0],
+            max=row['Values'][-1],
+            marks={j: '' for j in row['Values']},
+            step=None,
+            value=[row['Values'][0], row['Values'][-1]]
+        ) for i in range(len(meta))]
+        # items = [meta[i]['Name'] for i in range(len(meta))]
         keys = [f'axis_{i}' for i in range(len(meta))]
 
         nrows = len(meta) // 6 + 1

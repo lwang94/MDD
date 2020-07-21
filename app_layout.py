@@ -244,16 +244,6 @@ def app_layout():
                                     ),
                                     id='save_data'
                                 ),
-
-                                # html.Pre(
-                                #         cf.warning_dataheader,
-                                #         style={
-                                #             'textAlign': 'left',
-                                #             'marginLeft': 20,
-                                #             'color': '#f3742b'
-                                #         },
-                                #         # className='four columns'
-                                # ),
                                 dcc.Store(id='mdd'),
                                 dcc.Store(id='mddcopy')
                             ],
@@ -330,77 +320,77 @@ def app_layout():
             children=[
                 html.Div(
                     children=[
-                        html.Pre(
-                            'Select Graphs',
-                            style={
-                                'marginLeft': 15,
-                                'borderBottom': '1px solid #50C878',
-                                'textAlign': 'center',
-                                'fontSize': 14
-                            }
-                        ),
-                        dcc.Loading(
-                            dcc.Dropdown(
-                                id='graph_params',
-                                style={
-                                    'width': 550,
-                                    'marginTop': 5,
-                                    'marginLeft': 5
-                                },
-                                multi=True
-                            ),
-                            id='graph_params_loading',
-                            type='default'
-                        ),
-                        dcc.Store(id='prev_val', data={}),
-                        dcc.Store(id='lastslice'),
-                        html.Pre(
-                            'Slice Axis',
-                            style={
-                                'marginTop': 20,
-                                'marginLeft': 15,
-                                'borderBottom': '1px solid #50C878',
-                                'textAlign': 'center',
-                                'fontSize': 14
-                            }
-                        ),
-                        dt.DataTable(
-                            id='slice_table',
-                            editable=True,
-                            style_header={
-                                'backgroundColor': '#50C878',
-                                'fontWeight': 'bold',
-                                'border': '1px solid',
-                                'textAlign': 'center'
-                            },
-                            style_cell={
-                                'backgroundColor': 'transparent',
-                                'border': '1px solid',
-                                'textAlign': 'center'
-                            },
-                            style_table={
-                                'marginTop': 5,
-                                'marginLeft': 10,
-                                'width': 550,
-                                'overflowX': 'scroll'
-                            }
-                        ),
-                        html.Div(
-                            children=[
-                                html.Pre(id='slice_validation'),
-                                dcc.Store(id='slice_indices')
-                            ]
-                        ),
-                        html.Pre(
-                            'Move Axis',
-                            style={
-                                'marginTop': 20,
-                                'marginLeft': 15,
-                                'borderBottom': '1px solid #50C878',
-                                'textAlign': 'center',
-                                'fontSize': 14
-                            }
-                        ),
+                        # html.Pre(
+                        #     'Select Graphs',
+                        #     style={
+                        #         'marginLeft': 15,
+                        #         'borderBottom': '1px solid #50C878',
+                        #         'textAlign': 'center',
+                        #         'fontSize': 14
+                        #     }
+                        # ),
+                        # dcc.Loading(
+                        #     dcc.Dropdown(
+                        #         id='graph_params',
+                        #         style={
+                        #             'width': 550,
+                        #             'marginTop': 5,
+                        #             'marginLeft': 5
+                        #         },
+                        #         multi=True
+                        #     ),
+                        #     id='graph_params_loading',
+                        #     type='default'
+                        # ),
+                        # dcc.Store(id='prev_val', data={}),
+                        # dcc.Store(id='lastslice'),
+                        # html.Pre(
+                        #     'Slice Axis',
+                        #     style={
+                        #         'marginTop': 20,
+                        #         'marginLeft': 15,
+                        #         'borderBottom': '1px solid #50C878',
+                        #         'textAlign': 'center',
+                        #         'fontSize': 14
+                        #     }
+                        # ),
+                        # dt.DataTable(
+                        #     id='slice_table',
+                        #     editable=True,
+                        #     style_header={
+                        #         'backgroundColor': '#50C878',
+                        #         'fontWeight': 'bold',
+                        #         'border': '1px solid',
+                        #         'textAlign': 'center'
+                        #     },
+                        #     style_cell={
+                        #         'backgroundColor': 'transparent',
+                        #         'border': '1px solid',
+                        #         'textAlign': 'center'
+                        #     },
+                        #     style_table={
+                        #         'marginTop': 5,
+                        #         'marginLeft': 10,
+                        #         'width': 550,
+                        #         'overflowX': 'scroll'
+                        #     }
+                        # ),
+                        # html.Div(
+                        #     children=[
+                        #         html.Pre(id='slice_validation'),
+                        #         dcc.Store(id='slice_indices')
+                        #     ]
+                        # ),
+                        # html.Pre(
+                        #     'Move Axis',
+                        #     style={
+                        #         'marginTop': 20,
+                        #         'marginLeft': 15,
+                        #         'borderBottom': '1px solid #50C878',
+                        #         'textAlign': 'center',
+                        #         'fontSize': 14
+                        #     }
+                        # ),
                         # Grid to move axis
                         html.Div(
                             dg.DragGrid(

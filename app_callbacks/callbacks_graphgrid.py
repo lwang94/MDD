@@ -177,15 +177,9 @@ def update_style(
         deriv_array = au.calc_deriv(deriv, mdd)
 
         if fit_iguess is not None:
-            func, param_name = au.choose_func(fit_dropdown, fit_iguess)
+            func, paramname = au.choose_func(fit_dropdown, fit_iguess)
 
-        mode = au.graphmode(mode)
-        deriv_mode = au.graphmode(deriv_mode)
-        fit_mode = au.graphmode(fitmode)
-        if 'params' in fitmode:
-            visible = True
-        else:
-            visible = False
+        mode, deriv_mode, fit_mode, visible = au.determine_modes(mode, deriv_mode, fitmode)
 
         newgraphdata = []
         for i in range(len(vals)):
@@ -203,43 +197,26 @@ def update_style(
                 fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
             else:
                 ydata = au.choose_fitdata(fitdata, y, deriv_y)
-
                 fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
-                    func, x, ydata, fit_iguess, param_name
+                    func, x, ydata, fit_iguess, paramname
                 )
 
-            if show_fitlegend is True or show_derivlegend is True:
-                show_rawlegend = True
-            else:
-                show_rawlegend = False
+            show_rawlegend = au.raw_legend(show_fitlegend, show_derivlegend)
 
             newgraphdata.append(
-                dcc.Store(
-                    id={'type': 'linegraph_data', 'index': vals[i]},
-                    data=[
-                        {
-                            'x': x[last_vals[0]:last_vals[1]],
-                            'y': y[last_vals[0]:last_vals[1]].flatten(),
-                            'mode': mode,
-                            'name': 'Raw Data',
-                            'showlegend': show_rawlegend
-                        },
-                        {
-                            'x': x[last_vals[0]:last_vals[1]],
-                            'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
-                            'mode': deriv_mode,
-                            'name': 'Derivative',
-                            'showlegend': show_derivlegend
-                        },
-                        {
-                            'x': x[last_vals[0]:last_vals[1]],
-                            'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
-                            'mode': fit_mode,
-                            'name': 'Fit',
-                            'showlegend': show_fitlegend
-                        }
-                    ]
-                )
+                    au.graphdata_store(
+                        vals[i],
+                        x[last_vals[0]:last_vals[1]],
+                        y.flatten()[last_vals[0]:last_vals[1]],
+                        mode,
+                        show_rawlegend,
+                        deriv_y.flatten()[last_vals[0]:last_vals[1]],
+                        deriv_mode,
+                        show_derivlegend,
+                        fit_y.flatten()[last_vals[0]:last_vals[1]],
+                        fit_mode,
+                        show_fitlegend
+                    )
             )
 
             graphstyle[i]['props']['data']['annotations'] = [{
@@ -267,15 +244,9 @@ def update_style(
         deriv_array = au.calc_deriv(deriv, mdd)
 
         if fit_iguess is not None:
-            func, param_name = au.choose_func(fit_dropdown, fit_iguess)
+            func, paramname = au.choose_func(fit_dropdown, fit_iguess)
 
-        mode = au.graphmode(mode)
-        deriv_mode = au.graphmode(deriv_mode)
-        fit_mode = au.graphmode(fitmode)
-        if 'params' in fitmode:
-            visible = True
-        else:
-            visible = False
+        mode, deriv_mode, fit_mode, visible = au.determine_modes(mode, deriv_mode, fitmode)
 
         newgraphdata, newgraphstyle = [], []
         for i in range(len(vals)):
@@ -294,72 +265,40 @@ def update_style(
                 fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
             else:
                 ydata = au.choose_fitdata(fitdata, y, deriv_y)
-
                 fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
-                    func, x, ydata, fit_iguess, param_name
+                    func, x, ydata, fit_iguess, paramname
                 )
 
-            if show_fitlegend is True or show_derivlegend is True:
-                show_rawlegend = True
-            else:
-                show_rawlegend = False
+            show_rawlegend = au.raw_legend(show_fitlegend, show_derivlegend)
 
             title = ''
             for j, name in enumerate(mdd.metadata['Name'][:-1]):
                 title += f'{name}{sing_vals[j]}'
 
             newgraphdata.append(
-                dcc.Store(
-                    id={'type': 'linegraph_data', 'index': vals[i]},
-                    data=[
-                        {
-                            'x': x[last_vals[0]:last_vals[1]],
-                            'y': y[last_vals[0]:last_vals[1]].flatten(),
-                            'mode': mode,
-                            'name': 'Raw Data',
-                            'showlegend': show_rawlegend
-                        },
-                        {
-                            'x': x[last_vals[0]:last_vals[1]],
-                            'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
-                            'mode': deriv_mode,
-                            'name': 'Derivative',
-                            'showlegend': show_derivlegend
-                        },
-                        {
-                            'x': x[last_vals[0]:last_vals[1]],
-                            'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
-                            'mode': fit_mode,
-                            'name': 'Fit',
-                            'showlegend': show_fitlegend
-                        }
-                    ]
+                au.graphdata_store(
+                    vals[i],
+                    x[last_vals[0]:last_vals[1]],
+                    y.flatten()[last_vals[0]:last_vals[1]],
+                    mode,
+                    show_rawlegend,
+                    deriv_y.flatten()[last_vals[0]:last_vals[1]],
+                    deriv_mode,
+                    show_derivlegend,
+                    fit_y.flatten()[last_vals[0]:last_vals[1]],
+                    fit_mode,
+                    show_fitlegend
                 )
             )
+
             newgraphstyle.append(
-                dcc.Store(
-                    id={'type': 'linegraph_lay', 'index': vals[i]},
-                    data={
-                        'title': title,
-                        'xaxis': {
-                            'title': mdd.metadata['Name'][len(mdd.metadata['Name']) - 1]
-                        },
-                        'yaxis': {
-                            'title': ind_var
-                        },
-                        'annotations': [{
-                            'x': 1.12,
-                            'y': 0.65,
-                            'showarrow': False,
-                            'bordercolor': 'black',
-                            'bgcolor': 'green',
-                            'font': {'color': 'white'},
-                            'text': r2 + param_name.format(*popt),
-                            'xref': 'paper',
-                            'yref': 'paper',
-                            'visible': visible
-                        }]
-                    }
+                au.graphstyle_store(
+                    vals[i],
+                    title,
+                    mdd.metadata['Name'][len(mdd.metadata['Name']) - 1],
+                    ind_var,
+                    r2 + param_name.format(*popt),
+                    visible
                 )
             )
         return children, layout, maxrows, newgraphdata, newgraphstyle, vals
@@ -461,15 +400,9 @@ def graphgrid_callbacks(app):
                 deriv_array = au.calc_deriv(deriv, mdd)
 
                 if fit_iguess is not None:
-                    func, param_name = au.choose_func(fit_dropdown, fit_iguess)
+                    func, paramname = au.choose_func(fit_dropdown, fit_iguess)
 
-                mode = au.graphmode(mode)
-                deriv_mode = au.graphmode(deriv_mode)
-                fit_mode = au.graphmode(fitmode)
-                if 'params' in fitmode:
-                    visible = True
-                else:
-                    visible = False
+                mode, deriv_mode, fit_mode, visible = au.determine_modes(mode, deriv_mode, fitmode)
 
                 for i in range(len(vals)):
                     children[i]['props']['relayoutData'] = None
@@ -487,74 +420,39 @@ def graphgrid_callbacks(app):
                         fit_y, param_name, r2, popt, show_fitlegend = au.empty_fit(x)
                     else:
                         ydata = au.choose_fitdata(fitdata, y, deriv_y)
-
                         fit_y, param_name, r2, popt, show_fitlegend = au.perform_fit(
-                            func, x, ydata, fit_iguess, param_name
+                            func, x, ydata, fit_iguess, paramname
                         )
 
-                    if show_fitlegend is True or show_derivlegend is True:
-                        show_rawlegend = True
-                    else:
-                        show_rawlegend = False
+                    show_rawlegend = au.raw_legend(show_fitlegend, show_derivlegend)
 
                     title = ''
                     for j, name in enumerate(mdd.metadata['Name'][:-1]):
                         title += f'{name}{sing_vals[j]}'
 
-                    graphdata[i] = (
-                        dcc.Store(
-                            id={'type': 'linegraph_data', 'index': vals[i]},
-                            data=[
-                                {
-                                    'x': x[last_vals[0]:last_vals[1]],
-                                    'y': y[last_vals[0]:last_vals[1]].flatten(),
-                                    'mode': mode,
-                                    'name': 'Raw Data',
-                                    'showlegend': show_rawlegend
-                                },
-                                {
-                                    'x': x[last_vals[0]:last_vals[1]],
-                                    'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
-                                    'mode': deriv_mode,
-                                    'name': 'Derivative',
-                                    'showlegend': show_derivlegend
-                                },
-                                {
-                                    'x': x[last_vals[0]:last_vals[1]],
-                                    'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
-                                    'mode': fit_mode,
-                                    'name': 'Fit',
-                                    'showlegend': show_fitlegend
-                                }
-                            ]
-                        )
+                    graphdata[i] = au.graphdata_store(
+                        vals[i],
+                        x[last_vals[0]:last_vals[1]],
+                        y.flatten()[last_vals[0]:last_vals[1]],
+                        mode,
+                        show_rawlegend,
+                        deriv_y.flatten()[last_vals[0]:last_vals[1]],
+                        deriv_mode,
+                        show_derivlegend,
+                        fit_y.flatten()[last_vals[0]:last_vals[1]],
+                        fit_mode,
+                        show_fitlegend
                     )
-                    graphstyle[i] = (
-                        dcc.Store(
-                            id={'type': 'linegraph_lay', 'index': vals[i]},
-                            data={
-                                'title': title,
-                                'xaxis': {
-                                    'title': mdd.metadata['Name'][len(mdd.metadata['Name']) - 1]
-                                },
-                                'yaxis': {
-                                    'title': ind_var
-                                },
-                                'annotations': [{
-                                    'x': 1.12,
-                                    'y': 0.65,
-                                    'showarrow': False,
-                                    'bordercolor': 'black',
-                                    'bgcolor': 'green',
-                                    'font': {'color': 'white'},
-                                    'text': r2 + param_name.format(*popt),
-                                    'xref': 'paper',
-                                    'yref': 'paper',
-                                    'visible': visible
-                                }]
-                            }
-                        )
+
+                    graphstyle[i] = au.graphstyle_store(
+                        vals[i],
+                        title,
+                        mdd.metadata['Name'][len(mdd.metadata['Name']) - 1],
+                        ind_var,
+                        r2 + param_name.format(*popt),
+                        visible
                     )
+
             return children, layout, maxrows, graphdata, graphstyle, vals
 
         else:
@@ -588,19 +486,9 @@ def graphgrid_callbacks(app):
                     func, x, ydata, fit_iguess, param_name
                 )
 
-            if show_fitlegend is True or show_derivlegend is True:
-                show_rawlegend = True
-            else:
-                show_rawlegend = False
+            show_rawlegend = au.raw_legend(show_fitlegend, show_derivlegend)
 
-
-            mode = au.graphmode(mode)
-            deriv_mode = au.graphmode(deriv_mode)
-            fit_mode = au.graphmode(fitmode)
-            if 'params' in fitmode:
-                visible = True
-            else:
-                visible = False
+            mode, deriv_mode, fit_mode, visible = au.determine_modes(mode, deriv_mode, fitmode)
 
             children.append(
                 dcc.Graph(
@@ -626,57 +514,29 @@ def graphgrid_callbacks(app):
             maxrows += 8
 
             graphdata.append(
-                dcc.Store(
-                    id={'type': 'linegraph_data', 'index': vals[-1]},
-                    data=[
-                        {
-                            'x': x[last_vals[0]:last_vals[1]],
-                            'y': y[last_vals[0]:last_vals[1]].flatten(),
-                            'mode': mode,
-                            'name': 'Raw Data',
-                            'showlegend': show_rawlegend
-                        },
-                        {
-                            'x': x[last_vals[0]:last_vals[1]],
-                            'y': deriv_y[last_vals[0]:last_vals[1]].flatten(),
-                            'mode': deriv_mode,
-                            'name': 'Derivative',
-                            'showlegend': show_derivlegend
-                        },
-                        {
-                            'x': x[last_vals[0]:last_vals[1]],
-                            'y': fit_y[last_vals[0]:last_vals[1]].flatten(),
-                            'mode': fit_mode,
-                            'name': 'Fit',
-                            'showlegend': show_fitlegend
-                        }
-                    ]
+                au.graphdata_store(
+                    vals[-1],
+                    x[last_vals[0]:last_vals[1]],
+                    y.flatten()[last_vals[0]:last_vals[1]],
+                    mode,
+                    show_rawlegend,
+                    deriv_y.flatten()[last_vals[0]:last_vals[1]],
+                    deriv_mode,
+                    show_derivlegend,
+                    fit_y.flatten()[last_vals[0]:last_vals[1]],
+                    fit_mode,
+                    show_fitlegend
                 )
             )
+
             graphstyle.append(
-                dcc.Store(
-                    id={'type': 'linegraph_lay', 'index': vals[-1]},
-                    data={
-                        'title': title,
-                        'xaxis': {
-                            'title': mdd.metadata['Name'][len(mdd.metadata['Name']) - 1]
-                        },
-                        'yaxis': {
-                            'title': ind_var
-                        },
-                        'annotations': [{
-                            'x': 1.12,
-                            'y': 0.65,
-                            'showarrow': False,
-                            'bordercolor': 'black',
-                            'bgcolor': 'green',
-                            'font': {'color': 'white'},
-                            'text': r2 + param_name.format(*popt),
-                            'xref': 'paper',
-                            'yref': 'paper',
-                            'visible': visible
-                        }]
-                    }
+                au.graphstyle_store(
+                    vals[-1],
+                    title,
+                    mdd.metadata['Name'][len(mdd.metadata['Name']) - 1],
+                    ind_var,
+                    r2 + param_name.format(*popt),
+                    visible
                 )
             )
 

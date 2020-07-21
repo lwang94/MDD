@@ -226,34 +226,20 @@ def app_layout():
                                 # Input allowing app to to find correct column in datafile
                                 dcc.Input(
                                     id='data_headers',
-                                    placeholder='Header1, Header2,...',
+                                    placeholder='Col. Header',
                                     type='text',
                                     style={
-                                        'width': 130,
-                                        'marginBottom': 18
+                                        'width': 130
                                     }
                                 ),
-                                html.A(
-                                    html.Button(
-                                        'Save MDD',
-                                        style={
-                                            'backgroundColor': '#607D8B',
-                                            'color': 'white',
-                                            'marginBottom': 18
-                                        }
-                                    ),
-                                    id='save_data'
+                                html.Pre(
+                                    cf.sugg_dataheader,
+                                    style={
+                                        'font': 6,
+                                        'marginTop': -2,
+                                        'marginBottom': 20
+                                    }
                                 ),
-
-                                # html.Pre(
-                                #         cf.warning_dataheader,
-                                #         style={
-                                #             'textAlign': 'left',
-                                #             'marginLeft': 20,
-                                #             'color': '#f3742b'
-                                #         },
-                                #         # className='four columns'
-                                # ),
                                 dcc.Store(id='mdd'),
                                 dcc.Store(id='mddcopy')
                             ],
@@ -706,18 +692,5 @@ def app_layout():
                 )
             ],
             className='four columns'
-        ),
-        # # TESTING MDD, DELETE LATER
-        # html.Button(
-        #     'CHECK',
-        #     id='checkbutton'
-        # ),
-        # html.Div(id='check', style={'display': 'none'}),
-
-        # # hidden divs --> move to more appropriate locations later
-        # html.Div(id='dummy', style={'display': 'none'}),
-        # # html.Div(id='metadata', style={'display': 'none'}),
-        # # html.Div(id='mdd', style={'display': 'none'}),
-        # # html.Div(id='mddcopy', style={'display': 'none'}),
-        # # html.Div(id='lastslice', style={'display': 'none'})
+        )
     ])

@@ -155,7 +155,7 @@ def perform_fit(func, x, ydata, fit_iguess, param_name):
             np.sum((ydata.flatten() - fit_y) ** 2)
             / np.sum((ydata.flatten() - np.mean(ydata)) ** 2)
         )
-        r2 = 'R2 = {0:.2e}<br>'.format(1-ss)
+        r2 = 'R2 = {0:.2e}<br><br>'.format(1-ss)
         param_name = param_name
     except ValueError:
         fit_y = np.full(len(x), None)
@@ -177,3 +177,83 @@ def perform_fit(func, x, ydata, fit_iguess, param_name):
     show_fitlegend = True
 
     return fit_y, param_name, r2, popt, show_fitlegend
+
+
+def raw_legend(show_fitlegend, show_derivlegend):
+    if show_fitlegend is True or show_derivlegend is True:
+        show_rawlegend = True
+    else:
+        show_rawlegend = False
+    return show_rawlegend
+
+
+def determine_modes(mode, deriv_mode, fitmode):
+    mode = graphmode(mode)
+    deriv_mode = graphmode(deriv_mode)
+    fit_mode = graphmode(fitmode)
+    if 'params' in fitmode:
+        visible = True
+    else:
+        visible = False
+
+    return mode, deriv_mode, fit_mode, visible
+
+
+def graphdata_store(
+    index, x, y, mode, show_rawlegend,
+    deriv_y, deriv_mode, show_derivlegend,
+    fit_y, fit_mode, show_fitlegend
+):
+    return dcc.Store(
+        id={'type': 'linegraph_data', 'index': index},
+        data=[
+            {
+                'x': x,
+                'y': y,
+                'mode': mode,
+                'name': 'Raw Data',
+                'showlegend': show_rawlegend
+            },
+            {
+                'x': x,
+                'y': deriv_y,
+                'mode': deriv_mode,
+                'name': 'Derivative',
+                'showlegend': show_derivlegend
+            },
+            {
+                'x': x,
+                'y': fit_y,
+                'mode': fit_mode,
+                'name': 'Fit',
+                'showlegend': show_fitlegend
+            }
+        ]
+    )
+
+
+def graphstyle_store(index, title, xtitle, ytitle, text, visible):
+    return dcc.Store(
+        id={'type': 'linegraph_lay', 'index': index},
+        data={
+            'title': title,
+            'xaxis': {
+                'title': xtitle
+            },
+            'yaxis': {
+                'title': ytitle
+            },
+            'annotations': [{
+                'x': 1.12,
+                'y': 0.65,
+                'showarrow': False,
+                'bordercolor': 'black',
+                'bgcolor': 'green',
+                'font': {'color': 'white'},
+                'text': text,
+                'xref': 'paper',
+                'yref': 'paper',
+                'visible': visible
+            }]
+        }
+    )

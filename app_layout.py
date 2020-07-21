@@ -240,17 +240,6 @@ def app_layout():
                                         'marginBottom': 20
                                     }
                                 ),
-                                html.A(
-                                    html.Button(
-                                        'Save MDD',
-                                        style={
-                                            'backgroundColor': '#607D8B',
-                                            'color': 'white',
-                                            'marginBottom': 18
-                                        }
-                                    ),
-                                    id='save_data'
-                                ),
                                 dcc.Store(id='mdd'),
                                 dcc.Store(id='mddcopy')
                             ],
@@ -703,18 +692,5 @@ def app_layout():
                 )
             ],
             className='four columns'
-        ),
-        # # TESTING MDD, DELETE LATER
-        # html.Button(
-        #     'CHECK',
-        #     id='checkbutton'
-        # ),
-        # html.Div(id='check', style={'display': 'none'}),
-
-        # # hidden divs --> move to more appropriate locations later
-        # html.Div(id='dummy', style={'display': 'none'}),
-        # # html.Div(id='metadata', style={'display': 'none'}),
-        # # html.Div(id='mdd', style={'display': 'none'}),
-        # # html.Div(id='mddcopy', style={'display': 'none'}),
-        # # html.Div(id='lastslice', style={'display': 'none'})
+        )
     ])

@@ -442,6 +442,12 @@ hr {
   cursor: se-resize;
 }
 
+.react-grid-dragHandleExample {
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
 /*DataTable*/
 .dash-spreadsheet-container table {
   --accent: #1EAEDB !important;

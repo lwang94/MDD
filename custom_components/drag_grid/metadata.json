@@ -163,6 +163,17 @@
           "computed": false
         }
       },
+      "margin": {
+        "type": {
+          "name": "array"
+        },
+        "required": false,
+        "description": "Space between items",
+        "defaultValue": {
+          "value": "[10, 10]",
+          "computed": false
+        }
+      },
       "setProps": {
         "type": {
           "name": "func"

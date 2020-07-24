@@ -21,14 +21,15 @@ Keyword arguments:
 - rowheight (number; default 30): The height of one row in the grid
 - width (number; default 1200): The total width of the grid
 - numcolumns (number; default 6): The number of columns
-- maxrows (number; default 1): Maximum number of rows in grid"""
+- maxrows (number; default 1): Maximum number of rows in grid
+- margin (list; default [10, 10]): Space between items"""
     @_explicitize_args
-    def __init__(self, children=None, id=Component.UNDEFINED, label=Component.REQUIRED, divstyle=Component.UNDEFINED, layout=Component.UNDEFINED, compacttype=Component.UNDEFINED, rowheight=Component.UNDEFINED, width=Component.UNDEFINED, numcolumns=Component.UNDEFINED, maxrows=Component.UNDEFINED, **kwargs):
-        self._prop_names = ['children', 'id', 'label', 'divstyle', 'layout', 'compacttype', 'rowheight', 'width', 'numcolumns', 'maxrows']
+    def __init__(self, children=None, id=Component.UNDEFINED, label=Component.REQUIRED, divstyle=Component.UNDEFINED, layout=Component.UNDEFINED, compacttype=Component.UNDEFINED, rowheight=Component.UNDEFINED, width=Component.UNDEFINED, numcolumns=Component.UNDEFINED, maxrows=Component.UNDEFINED, margin=Component.UNDEFINED, **kwargs):
+        self._prop_names = ['children', 'id', 'label', 'divstyle', 'layout', 'compacttype', 'rowheight', 'width', 'numcolumns', 'maxrows', 'margin']
         self._type = 'DragGrid'
         self._namespace = 'drag_grid'
         self._valid_wildcard_attributes =            []
-        self.available_properties = ['children', 'id', 'label', 'divstyle', 'layout', 'compacttype', 'rowheight', 'width', 'numcolumns', 'maxrows']
+        self.available_properties = ['children', 'id', 'label', 'divstyle', 'layout', 'compacttype', 'rowheight', 'width', 'numcolumns', 'maxrows', 'margin']
         self.available_wildcard_properties =            []
 
         _explicit_args = kwargs.pop('_explicit_args')

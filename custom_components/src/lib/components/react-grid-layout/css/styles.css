@@ -59,3 +59,10 @@
 .react-resizable-hide > .react-resizable-handle {
   display: none;
 }
+
+.react-grid-dragHandleExample {
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}

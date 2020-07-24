@@ -50,7 +50,8 @@ def out(val):
         'w': 5,
         'h': 5,
         'isResizable': True,
-        'isDraggable': True
+        'isDraggable': True,
+        'draggableHandle': ".react-grid-dragHandleExample"
     } for compx, compy in itertools.product(range(val), range(val))]
     ncolumns = val * 5
     nrows = val * 5

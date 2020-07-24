@@ -4,11 +4,13 @@ import dash_html_components as html
 import drag_grid as dg
 
 import math as math
+import uuid
 
 import config as cf
 
 
 def app_layout():
+    session_id = str(uuid.uuid4())
     return html.Div([
         # Title
         html.Div(
@@ -161,7 +163,7 @@ def app_layout():
                                     }
                                 ),
                                 html.Div(
-                                    id='start_valueslice'
+                                    id='start_dataslice'
                                 )
                             ],
                             className='one column',
@@ -177,7 +179,7 @@ def app_layout():
                             children=[
                                 html.Hr(style={'marginBottom': 30}),
                                 html.Div(
-                                    id='slider_valueslice'
+                                    id='slider_dataslice'
                                 )
                             ],
                             className='eight columns',
@@ -200,12 +202,13 @@ def app_layout():
                                     }
                                 ),
                                 html.Div(
-                                    id='stop_valueslice'
+                                    id='stop_dataslice'
                                 )
                             ],
                             className='one column',
                             style={'marginTop': 50, 'marginLeft': 5}
                         ),
+                        html.Div(id='data_validvals', style={'display': 'none'}),
                         html.Div(
                             children=[
                                 # Button to upload data to MDD
@@ -292,7 +295,11 @@ def app_layout():
                     label='label',
                     children=[],
                     layout=[],
-                    divstyle={'borderStyle': 'solid'},
+                    divstyle={
+                        'borderStyle': '2px solid',
+                        'borderTopLeftRadius': '10px',
+                        'borderTopRightRadius': '10px'
+                    },
                     numcolumns=30,
                     maxrows=0,
                     rowheight=50,
@@ -316,21 +323,21 @@ def app_layout():
             children=[
                 html.Div(
                     children=[
-                        html.Pre(
-                            'Select Graphs',
-                            style={
-                                'marginLeft': 15,
-                                'borderBottom': '1px solid #50C878',
-                                'textAlign': 'center',
-                                'fontSize': 14
-                            }
-                        ),
+                        # html.Pre(
+                        #     'Select Graphs',
+                        #     style={
+                        #         'marginLeft': 15,
+                        #         'borderBottom': '1px solid #50C878',
+                        #         'textAlign': 'center',
+                        #         'fontSize': 14
+                        #     }
+                        # ),
                         dcc.Loading(
                             dcc.Dropdown(
                                 id='graph_params',
                                 style={
                                     'width': 550,
-                                    'marginTop': 5,
+                                    'marginTop': 10,
                                     'marginLeft': 5
                                 },
                                 multi=True
@@ -340,79 +347,74 @@ def app_layout():
                         ),
                         dcc.Store(id='prev_val', data={}),
                         dcc.Store(id='lastslice'),
-                        html.Pre(
-                            'Slice Axis',
-                            style={
-                                'marginTop': 20,
-                                'marginLeft': 15,
-                                'borderBottom': '1px solid #50C878',
-                                'textAlign': 'center',
-                                'fontSize': 14
-                            }
-                        ),
-                        dt.DataTable(
-                            id='slice_table',
-                            editable=True,
-                            style_header={
-                                'backgroundColor': '#50C878',
-                                'fontWeight': 'bold',
-                                'border': '1px solid',
-                                'textAlign': 'center'
-                            },
-                            style_cell={
-                                'backgroundColor': 'transparent',
-                                'border': '1px solid',
-                                'textAlign': 'center'
-                            },
-                            style_table={
-                                'marginTop': 5,
-                                'marginLeft': 10,
-                                'width': 550,
-                                'overflowX': 'scroll'
-                            }
-                        ),
-                        html.Div(
-                            children=[
-                                html.Pre(id='slice_validation'),
-                                dcc.Store(id='slice_indices')
-                            ]
-                        ),
-                        html.Pre(
-                            'Move Axis',
-                            style={
-                                'marginTop': 20,
-                                'marginLeft': 15,
-                                'borderBottom': '1px solid #50C878',
-                                'textAlign': 'center',
-                                'fontSize': 14
-                            }
-                        ),
+                        # html.Pre(
+                        #     'Slice Axis',
+                        #     style={
+                        #         'marginTop': 20,
+                        #         'marginLeft': 15,
+                        #         'borderBottom': '1px solid #50C878',
+                        #         'textAlign': 'center',
+                        #         'fontSize': 14
+                        #     }
+                        # ),
+                        # dt.DataTable(
+                        #     id='slice_table',
+                        #     editable=True,
+                        #     style_header={
+                        #         'backgroundColor': '#50C878',
+                        #         'fontWeight': 'bold',
+                        #         'border': '1px solid',
+                        #         'textAlign': 'center'
+                        #     },
+                        #     style_cell={
+                        #         'backgroundColor': 'transparent',
+                        #         'border': '1px solid',
+                        #         'textAlign': 'center'
+                        #     },
+                        #     style_table={
+                        #         'marginTop': 5,
+                        #         'marginLeft': 10,
+                        #         'width': 550,
+                        #         'overflowX': 'scroll'
+                        #     }
+                        # ),
+                        # html.Div(
+                        #     children=[
+                        #         html.Pre(id='slice_validation'),
+                        #         dcc.Store(id='slice_indices')
+                        #     ]
+                        # ),
+                        # html.Pre(
+                        #     'Move Axis',
+                        #     style={
+                        #         'marginTop': 20,
+                        #         'marginLeft': 15,
+                        #         'borderBottom': '1px solid #50C878',
+                        #         'textAlign': 'center',
+                        #         'fontSize': 14
+                        #     }
+                        # ),
                         # Grid to move axis
                         html.Div(
                             dg.DragGrid(
                                 id='moveaxis',
                                 label='label',
-                                width=550
+                                maxrows=1,
+                                width=550,
+                                margin=[10, 10],
+                                rowheight=325
                             ),
-                            style={
-                                'backgroundColor': '#607D8B',
-                                'borderTop': '5px solid #2DC7D8',
-                                'borderRadius': '10px',
-                                'marginTop': 5,
-                                'marginLeft': 10,
-                                'marginBottom': 20,
-                                'width': 550
-                            }
+                            style={'marginTop': 10}
                         )
                     ],
                     style={
-                        'borderTop': '40px solid #50C878',
+                        'borderTop': '30px solid #50C878',
                         'borderRadius': '25px',
                         'backgroundColor': '#FFFDD0',
                         'borderBottom': '1px solid',
-                        'height': 400,
-                        'overflowY': 'scroll',
-                        'overflowX': 'hidden'
+                        'height': 450,
+                        # 'overflowY': 'scroll',
+                        'overflowX': 'scroll'
                     }
                 ),
                 dcc.Tabs(
@@ -687,7 +689,7 @@ def app_layout():
                         )
                     ],
                     style={
-                        'marginTop': 50
+                        'marginTop': 25
                     }
                 )
             ],

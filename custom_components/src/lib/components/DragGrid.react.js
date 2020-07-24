@@ -31,6 +31,16 @@ export default class DragGrid extends Component {
             };
             for (let inc = 0; inc < propchild.length; inc += 1) {
                 const child = <div key={this.props.layout[inc].i} style={this.props.divstyle}>
+                    <div
+                        className="react-grid-dragHandleExample"
+                        style={{
+                            background: '#CFD8DC',
+                            borderTopLeftRadius: '10px',
+                            borderTopRightRadius:'10px',
+                            height:'5%'
+                        }}
+                    >
+                    </div>
                     {propchild[inc]}
                 </div>;
                 children.push(child);
@@ -82,8 +92,10 @@ export default class DragGrid extends Component {
                     width={this.props.width}
                     cols={this.props.numcolumns}
                     maxRows={this.props.maxrows}
+                    margin={this.props.margin}
                     onLayoutChange={this.onLC}
                     onDrag={this.onD}
+                    draggableHandle='.react-grid-dragHandleExample'
                 >
                     {this.create_children()}
                 </GridLayout>
@@ -101,7 +113,8 @@ DragGrid.defaultProps = {
     rowheight: 30,
     width: 1200,
     numcolumns: 6,
-    maxrows: 1
+    maxrows: 1,
+    margin: [10, 10]
 };
 
 DragGrid.propTypes = {
@@ -154,6 +167,12 @@ DragGrid.propTypes = {
      * Maximum number of rows in grid
      */
     maxrows: PropTypes.number,
+
+    /**
+     * Space between items
+     */
+    margin: PropTypes.array,
+
     /**
      * Dash-assigned callback that should be called to report property changes
      * to Dash, to make them available for callbacks.

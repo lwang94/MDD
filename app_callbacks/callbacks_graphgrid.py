@@ -5,6 +5,7 @@ from dash.exceptions import PreventUpdate
 from dash import callback_context
 import plotly.graph_objects as go
 
+import time
 import pandas as pd
 import numpy as np
 
@@ -456,10 +457,12 @@ def graphgrid_callbacks(app):
             return children, layout, maxrows, graphdata, graphstyle, vals
 
         else:
+            start = time.time()
             mdd = mc.MDD(
                 pd.DataFrame(metadata)
             )
             mdd.dataDF = pd.DataFrame(mdd_data)
+            print(time.time() - start)
             mdd.move_axis(au.new_pos(moveaxis))
 
             sing_vals = [int(j) for j in vals[-1].split(',')]
@@ -495,7 +498,7 @@ def graphgrid_callbacks(app):
                     id={'type': 'linegraph', 'index': vals[-1]},
                     config={'editable': True},
                     style={
-                        'height': '100%',
+                        'height': '95%',
                         'width': '100%'
                     }
                 )

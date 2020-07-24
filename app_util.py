@@ -68,9 +68,7 @@ def define_draggrid(
 
 
 def new_pos(moveaxis):
-    new_x = [moveaxis[i]['x'] for i in range(len(moveaxis))]
-    new_y = [moveaxis[i]['y'] for i in range(len(moveaxis))]
-    return [1 + new_x[i] + new_y[i] * (max(new_x) + 1) for i in range(len(new_x))]
+    return [moveaxis[i]['x'] + 1 for i in range(len(moveaxis))]
 
 
 def graphmode(mode):

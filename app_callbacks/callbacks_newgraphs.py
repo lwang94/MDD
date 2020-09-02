@@ -67,7 +67,7 @@ def graphs_callbacks(app):
                 step=None,
                 value=[start, stop],
                 vertical=True,
-                verticalHeight=175
+                verticalHeight=160
             )
 
             validvalues = dcc.Store(
@@ -78,14 +78,9 @@ def graphs_callbacks(app):
             items.append(
                 html.Div(
                     children=[
-                        row['Name'],
-                        html.Div(
-                            children=[
-                                graph_start,
-                                graph_stop
-                            ],
-                            style={'display': 'inline-block'}
-                        ),
+                        html.Div(row['Name']),
+                        graph_start,
+                        graph_stop,
                         html.Div(
                             graph_slider,
                             style={
@@ -156,65 +151,64 @@ def graphs_callbacks(app):
         return sliderval[0], sliderval[1]
 
     @app.callback(
-        [Output('graph_params', 'options'),
-         Output('graph_params', 'value'),
-         Output('lastslice', 'data')],
-        [Input('moveaxis', 'layout'),
-         Input({'type': 'graph_start', 'index': ALL}, 'value'),
-         Input({'type': 'graph_stop', 'index': ALL}, 'value')],
-        [State('metadata', 'data'),
-         State({'type': 'graph_slider', 'index': ALL}, 'id'),
-         State('graph_params', 'value')]
+        [Output('mddcopy', 'data'),
+         Output('metacopy', 'data')],
+        [Input('graphparam_confirm', 'n_clicks')],
+        [State('mdd', 'data'),
+         State('metadata', 'data'),
+         State('moveaxis', 'layout'),
+         State({'type': 'graph_start', 'index': ALL}, 'value'),
+         State({'type': 'graph_stop', 'index': ALL}, 'value'),
+         State({'type': 'graph_slider', 'index': ALL}, 'id')]
     )
-    def create_graphparams(layout, start, stop, metadata, identity, param_state):
+    def create_mddcopy(nclicks, mddstate, metadata, moveaxis, start, stop, identity):
+        if nclicks > 0:
+            mdd = mc.MDD(
+                pd.DataFrame(metadata)
+            )
+            mdd.dataDF = pd.DataFrame(mddstate)
+
+            mdd.move_axis(au.new_pos(moveaxis))
+
+            ind = {identity[i]['index']: [start[i], stop[i]] for i in range(len(identity))}
+            slice_indices = {}
+            for name in ind:
+                vals = mdd.metadata.loc[mdd.metadata['Name'] == name]['Values'].array[0]
+                start_ind = bisect.bisect_left(vals, ind[name][0])
+                stop_ind = bisect.bisect_left(vals, ind[name][1]) + 1
+                slice_indices[name] = [start_ind, stop_ind]
+            mdd.slice_mdd(slice_indices)
+            return mdd.dataDF.to_dict('records'), mdd.metadata.to_dict('records')
+
+    @app.callback(
+        Output('graph_params', 'options'),
+        [Input('metacopy', 'data')]
+    )
+    def create_graphparams(metacopy):
         meta = (
-            pd.DataFrame(metadata)
+            pd.DataFrame(metacopy)
             .sort_values(by=['Axis'], ignore_index=True)
         )
-        new_pos = [layout[i]['x'] for i in range(len(layout))]
-        new_name = [meta['Name'][new_pos.index(i)] for i in range(len(new_pos))]
 
-        ind = {identity[i]['index']: [start[i], stop[i]] for i in range(len(identity))}
-        new_vals = []
-        for i, name in enumerate(new_name):
-            vals = meta.loc[meta['Name'] == name]['Values'].array[0]
-            start_ind = bisect.bisect_left(vals, ind[name][0])
-            stop_ind = bisect.bisect_left(vals, ind[name][1]) + 1
-            new_vals.append(vals[start_ind: stop_ind])
-
-        if param_state is None:
-            param_set = {}
-        else:
-            param_set = set(param_state)
-
-        meta = meta.set_index('Name')
         options = []
         params = []
-        for coord in itertools.product(*new_vals[:-1]):
+        for coord in itertools.product(*meta['Values'][:-1]):
             lab = ''
             val = ''
             for i in range(len(coord)):
-                lab += f'{new_name[i]}({coord[i]}) x '
+                lab += f'{meta["Name"][i]}({coord[i]}) x '
                 val += str(
-                    meta.loc[new_name[i], 'Values']
+                    meta['Values'][i]
                     .index(coord[i])
                 ) + ','
-            lab += f'{new_name[-1]}'
-            if val[:-1] in param_set:
-                params.append(val[:-1])
+            lab += f'{meta["Name"][i+1]}'
+
             options.append({
                 'label': lab,
                 'value': val[:-1]
             })
 
-        last = (meta.loc[new_name[-1], 'Values'])
-        lastslice = (
-            str(last.index(new_vals[-1][0]))
-            + ':'
-            + str(last.index(new_vals[-1][-1]) + 1)
-        )
-
-        return options, params, lastslice
+        return options
 
     app.clientside_callback(
         """

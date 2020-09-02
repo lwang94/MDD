@@ -17,16 +17,14 @@ def update_style(
     ctx, vals, title, xtitle, ytitle, ind_var, mode,
     deriv, deriv_mode,
     fit_iguess, fitdata, fitmode, fit_dropdown,
-    mdd_data, metadata, moveaxis, lastslice,
+    mddcopy, metacopy,
     children, layout, maxrows, graphdata, graphstyle
 ):
     if ctx.triggered[-1]['prop_id'] == 'graphtitles.n_blur':
         newgraphstyle = []
 
         if title is '':
-            meta = pd.DataFrame(metadata).sort_values('Axis', ignore_index=True)
-            meta['Axis'] = au.new_pos(moveaxis)
-            meta = meta.sort_values('Axis', ignore_index=True)
+            meta = pd.DataFrame(metacopy).sort_values('Axis', ignore_index=True)
 
         graphtitle = title
         for i in range(len(vals)):
@@ -70,10 +68,7 @@ def update_style(
     elif ctx.triggered[-1]['prop_id'] == 'xaxistitles.n_blur':
         newgraphstyle = []
         if xtitle is '':
-            meta = pd.DataFrame(metadata).sort_values('Axis', ignore_index=True)
-            meta['Axis'] = au.new_pos(moveaxis)
-            meta = meta.sort_values('Axis', ignore_index=True)
-
+            meta = pd.DataFrame(metacopy).sort_values('Axis', ignore_index=True)
             xtitle = meta['Name'][len(meta['Name']) - 1]
 
         for i in range(len(vals)):
@@ -170,10 +165,9 @@ def update_style(
         or ctx.triggered[-1]['prop_id'] == 'fitdata.value'
     ):
         mdd = mc.MDD(
-            pd.DataFrame(metadata)
+            pd.DataFrame(metacopy)
         )
-        mdd.dataDF = pd.DataFrame(mdd_data)
-        mdd.move_axis(au.new_pos(moveaxis))
+        mdd.dataDF = pd.DataFrame(mddcopy)
 
         deriv_array = au.calc_deriv(deriv, mdd)
 
@@ -184,9 +178,7 @@ def update_style(
 
         newgraphdata = []
         for i in range(len(vals)):
-            val = vals[i].split(',')
-            sing_vals = [int(j) for j in val]
-            last_vals = [int(j) for j in lastslice.split(':')]
+            sing_vals = [int(j) for j in vals[i].split(',')]
 
             x = np.asarray(mdd.metadata['Values'].iloc[-1])
             slice_list = [slice(i, i+1) for i in sing_vals]
@@ -207,14 +199,14 @@ def update_style(
             newgraphdata.append(
                     au.graphdata_store(
                         vals[i],
-                        x[last_vals[0]:last_vals[1]],
-                        y.flatten()[last_vals[0]:last_vals[1]],
+                        x,
+                        y.flatten(),
                         mode,
                         show_rawlegend,
-                        deriv_y.flatten()[last_vals[0]:last_vals[1]],
+                        deriv_y.flatten(),
                         deriv_mode,
                         show_derivlegend,
-                        fit_y.flatten()[last_vals[0]:last_vals[1]],
+                        fit_y.flatten(),
                         fit_mode,
                         show_fitlegend
                     )
@@ -237,10 +229,9 @@ def update_style(
 
     else:
         mdd = mc.MDD(
-            pd.DataFrame(metadata)
+            pd.DataFrame(metacopy)
         )
-        mdd.dataDF = pd.DataFrame(mdd_data)
-        mdd.move_axis(au.new_pos(moveaxis))
+        mdd.dataDF = pd.DataFrame(mddcopy)
 
         deriv_array = au.calc_deriv(deriv, mdd)
 
@@ -252,9 +243,7 @@ def update_style(
         newgraphdata, newgraphstyle = [], []
         for i in range(len(vals)):
             children[i]['props']['relayoutData'] = None
-            val = vals[i].split(',')
-            sing_vals = [int(j) for j in val]
-            last_vals = [int(j) for j in lastslice.split(':')]
+            sing_vals = [int(j) for j in vals[i].split(',')]
 
             x = np.asarray(mdd.metadata['Values'].iloc[-1])
             slice_list = [slice(i, i+1) for i in sing_vals]
@@ -279,14 +268,14 @@ def update_style(
             newgraphdata.append(
                 au.graphdata_store(
                     vals[i],
-                    x[last_vals[0]:last_vals[1]],
-                    y.flatten()[last_vals[0]:last_vals[1]],
+                    x,
+                    y.flatten(),
                     mode,
                     show_rawlegend,
-                    deriv_y.flatten()[last_vals[0]:last_vals[1]],
+                    deriv_y.flatten(),
                     deriv_mode,
                     show_derivlegend,
-                    fit_y.flatten()[last_vals[0]:last_vals[1]],
+                    fit_y.flatten(),
                     fit_mode,
                     show_fitlegend
                 )
@@ -318,9 +307,7 @@ def graphgrid_callbacks(app):
          Output('graphstyle', 'children'),
          Output('prev_val', 'data')],
         [Input('graph_params', 'value'),
-         Input('mdd', 'data'),
-         Input('lastslice', 'data'),
-         Input('moveaxis', 'layout'),
+         Input('mddcopy', 'data'),
          Input('graphtitles', 'n_blur'),
          Input('xaxistitles', 'n_blur'),
          Input('yaxistitles', 'n_blur'),
@@ -335,7 +322,7 @@ def graphgrid_callbacks(app):
          State('graphs', 'maxrows'),
          State('graphdata', 'children'),
          State('graphstyle', 'children'),
-         State('metadata', 'data'),
+         State('metacopy', 'data'),
          State('prev_val', 'data'),
          State('data_headers', 'value'),
          State('graphtitles', 'value'),
@@ -344,12 +331,12 @@ def graphgrid_callbacks(app):
          State('fit_dropdown', 'value')]
     )
     def create_graphgrid(
-        vals, mdd_data, lastslice, moveaxis,
+        vals, mddcopy,
         ntitle, nxtitle, nytitle, mode,
         deriv, deriv_mode,
         fit_iguess, fitdata, fitmode,
         children, layout, maxrows, graphdata, graphstyle,
-        metadata, prev_vals, ind_var,
+        metacopy, prev_vals, ind_var,
         title, xtitle, ytitle,
         fit_dropdown
     ):
@@ -369,10 +356,8 @@ def graphgrid_callbacks(app):
                 fitdata,
                 fitmode,
                 fit_dropdown,
-                mdd_data,
-                metadata,
-                moveaxis,
-                lastslice,
+                mddcopy,
+                metacopy,
                 children,
                 layout,
                 maxrows,
@@ -393,10 +378,9 @@ def graphgrid_callbacks(app):
 
             if ctx.triggered[0]['prop_id'] == 'moveaxis.layout':
                 mdd = mc.MDD(
-                    pd.DataFrame(metadata)
+                    pd.DataFrame(metacopy)
                 )
-                mdd.dataDF = pd.DataFrame(mdd_data)
-                mdd.move_axis(au.new_pos(moveaxis))
+                mdd.dataDF = pd.DataFrame(mddcopy)
 
                 deriv_array = au.calc_deriv(deriv, mdd)
 
@@ -407,9 +391,7 @@ def graphgrid_callbacks(app):
 
                 for i in range(len(vals)):
                     children[i]['props']['relayoutData'] = None
-                    val = vals[i].split(',')
-                    sing_vals = [int(j) for j in val]
-                    last_vals = [int(j) for j in lastslice.split(':')]
+                    sing_vals = [int(j) for j in vals[i].split(',')]
 
                     x = np.asarray(mdd.metadata['Values'].iloc[-1])
                     slice_list = [slice(i, i+1) for i in sing_vals]
@@ -433,14 +415,14 @@ def graphgrid_callbacks(app):
 
                     graphdata[i] = au.graphdata_store(
                         vals[i],
-                        x[last_vals[0]:last_vals[1]],
-                        y.flatten()[last_vals[0]:last_vals[1]],
+                        x,
+                        y.flatten(),
                         mode,
                         show_rawlegend,
-                        deriv_y.flatten()[last_vals[0]:last_vals[1]],
+                        deriv_y.flatten(),
                         deriv_mode,
                         show_derivlegend,
-                        fit_y.flatten()[last_vals[0]:last_vals[1]],
+                        fit_y.flatten(),
                         fit_mode,
                         show_fitlegend
                     )
@@ -459,13 +441,11 @@ def graphgrid_callbacks(app):
         else:
             start = time.time()
             mdd = mc.MDD(
-                pd.DataFrame(metadata)
+                pd.DataFrame(metacopy)
             )
-            mdd.dataDF = pd.DataFrame(mdd_data)
-            mdd.move_axis(au.new_pos(moveaxis))
+            mdd.dataDF = pd.DataFrame(mddcopy)
 
             sing_vals = [int(j) for j in vals[-1].split(',')]
-            last_vals = [int(j) for j in lastslice.split(':')]
 
             title = ''
             for j, name in enumerate(mdd.metadata['Name'][:-1]):
@@ -518,14 +498,14 @@ def graphgrid_callbacks(app):
             graphdata.append(
                 au.graphdata_store(
                     vals[-1],
-                    x[last_vals[0]:last_vals[1]],
-                    y.flatten()[last_vals[0]:last_vals[1]],
+                    x,
+                    y.flatten(),
                     mode,
                     show_rawlegend,
-                    deriv_y.flatten()[last_vals[0]:last_vals[1]],
+                    deriv_y.flatten(),
                     deriv_mode,
                     show_derivlegend,
-                    fit_y.flatten()[last_vals[0]:last_vals[1]],
+                    fit_y.flatten(),
                     fit_mode,
                     show_fitlegend
                 )

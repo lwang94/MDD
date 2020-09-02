@@ -1,3 +1,4 @@
+import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State, MATCH
@@ -5,6 +6,10 @@ from dash.dependencies import Input, Output, State, MATCH
 import pandas as pd
 import math as math
 import numpy as np
+
+from io import BytesIO
+import base64
+import zipfile
 
 import app_util as au
 import config as cf
@@ -33,14 +38,27 @@ def initial_metadata_check(df):
 
 def metadata_callbacks(app):
 
-    # Add new row to metadata table
+    # Update metadata table
     @app.callback(
         Output('metadata_table', 'data'),
-        [Input('add_rows', 'n_clicks')],
+        [Input('add_rows', 'n_clicks'),
+         Input('load', 'contents')],
         [State('metadata_table', 'data'),
          State('metadata_table', 'columns')]
     )
-    def add_row(n_clicks, rows, columns):
+    def update_metatable(n_clicks, load, rows, columns):
+        ctx = dash.callback_context
+        if ctx.triggered[-1]['prop_id'] == 'load.contents':
+            load = load.split(',')[1]
+            decoded = base64.b64decode(load)
+            zip_str = BytesIO(decoded)
+            zip_obj = zipfile.ZipFile(zip_str, 'r')
+
+            meta_csv = zip_obj.read('meta.csv')
+            meta = pd.read_csv(BytesIO(meta_csv))
+            meta = meta.drop('Values', axis=1)
+            return meta.to_dict('records')
+
         if n_clicks > 0:
             rows.append({
                 'Axis': math.nan,
@@ -133,16 +151,28 @@ def metadata_callbacks(app):
     # Generates final metadata json
     @app.callback(
         Output('metadata', 'data'),
-        [Input('confirm_values', 'n_clicks')],
+        [Input('confirm_values', 'n_clicks'),
+         Input('load', 'contents')],
         [State('defval_methods', 'children'),
          State('metadata_table', 'data')]
     )
-    def define_values(n_clicks, defval_methods, data):
+    def define_values(n_clicks, load, defval_methods, data):
         """
         Consider clarifying error messages
         Throw error message (always start message with ERROR:)
         when encountering incorrect inputs
         """
+        ctx = dash.callback_context
+        if ctx.triggered[-1]['prop_id'] == 'load.contents':
+            load = load.split(',')[1]
+            decoded = base64.b64decode(load)
+            zip_str = BytesIO(decoded)
+            zip_obj = zipfile.ZipFile(zip_str, 'r')
+
+            meta_csv = zip_obj.read('meta.csv')
+            meta = pd.read_csv(BytesIO(meta_csv))
+            print(meta)
+            return meta.to_dict('records')
         if n_clicks > 0:
             # create metadata DataFrame
             df = pd.DataFrame(data)
@@ -232,6 +262,7 @@ def metadata_callbacks(app):
 
             # add values to Values columns
             df['Values'] = values
+            print(df)
 
             # return entire metadata json
             return df.to_dict('records')

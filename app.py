@@ -1,5 +1,4 @@
 import dash
-from flask_caching import Cache
 
 import pandas as pd
 
@@ -8,7 +7,7 @@ import app_layout as al
 from app_callbacks import callbacks_metadata
 from app_callbacks import callbacks_newmdd
 from app_callbacks import callbacks_newgraphs
-from app_callbacks import callbacks_graphgrid
+from app_callbacks import callbacks_newgraphgrid
 from app_callbacks import callbacks_deriv
 from app_callbacks import callbacks_fit
 
@@ -23,7 +22,7 @@ app.layout = al.app_layout()
 callbacks_metadata.metadata_callbacks(app)
 callbacks_newmdd.mdd_callbacks(app)
 callbacks_newgraphs.graphs_callbacks(app)
-callbacks_graphgrid.graphgrid_callbacks(app)
+callbacks_newgraphgrid.graphgrid_callbacks(app)
 callbacks_deriv.deriv_callbacks(app)
 callbacks_fit.fit_callbacks(app)
 

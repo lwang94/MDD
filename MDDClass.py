@@ -155,6 +155,24 @@ class MDD:
         self.__dataArray[tuple(slice_list)] = data.reshape(tuple(shape))
         self.__dataDF['y'] = self.__dataArray.flatten()
 
+    def slice_mdd(self, slice_indices):
+        for name in slice_indices:
+            row = self.metadata.loc[self.metadata['Name'] == name]
+            new_val = row['Values'].array[0][slice_indices[name][0]: slice_indices[name][1]]
+            new_nval = len(new_val)
+            self.metadata.loc[self.metadata['Name'] == name, ['Values', 'Num Values']] = [new_val], new_nval
+
+        columns = [
+            f'x{self.metadata.loc[i]["Axis"]}'
+            for i in range(len(self.metadata))
+        ]
+        rows = []
+        for coord in itertools.product(*self.metadata['Values']):
+            row = {columns[i]: coord[i] for i in range(len(coord))}
+            rows.append(row)
+        right = pd.DataFrame(rows, columns=columns)
+        self.dataDF = self.dataDF.merge(right, on=columns, how='right')
+
     def move_axis(self, new_pos):
         "Moves mdd axes"
         # move dataArray axes

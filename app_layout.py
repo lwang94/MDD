@@ -243,8 +243,30 @@ def app_layout():
                                         'marginBottom': 20
                                     }
                                 ),
-                                dcc.Store(id='mdd'),
-                                dcc.Store(id='mddcopy')
+                                html.A(
+                                    html.Button('Save', id='savebutton'),
+                                    id='save',
+                                    download='mdd.zip',
+                                    href='',
+                                    n_clicks=0
+                                ),
+                                dcc.Upload(
+                                    id='load',
+                                    children=html.Button(
+                                        'Load',
+                                        id='loadbutton'
+                                    )
+                                ),
+                                dcc.Store(id='temp'),
+                                dcc.Loading(
+                                    dcc.Store(id='mdd'),
+                                    type='circle'
+                                ),
+                                dcc.Loading(
+                                    dcc.Store(id='mddcopy'),
+                                    type='circle'
+                                ),
+                                dcc.Store(id='metacopy'),
                             ],
                             className='two columns',
                             style={'marginTop': 50}
@@ -323,22 +345,13 @@ def app_layout():
             children=[
                 html.Div(
                     children=[
-                        # html.Pre(
-                        #     'Select Graphs',
-                        #     style={
-                        #         'marginLeft': 15,
-                        #         'borderBottom': '1px solid #50C878',
-                        #         'textAlign': 'center',
-                        #         'fontSize': 14
-                        #     }
-                        # ),
                         dcc.Loading(
                             dcc.Dropdown(
                                 id='graph_params',
                                 style={
                                     'width': 550,
-                                    'marginTop': 10,
-                                    'marginLeft': 5
+                                    'marginLeft': 5,
+                                    'marginTop': 5
                                 },
                                 multi=True
                             ),
@@ -347,53 +360,19 @@ def app_layout():
                         ),
                         dcc.Store(id='prev_val', data={}),
                         dcc.Store(id='lastslice'),
-                        # html.Pre(
-                        #     'Slice Axis',
-                        #     style={
-                        #         'marginTop': 20,
-                        #         'marginLeft': 15,
-                        #         'borderBottom': '1px solid #50C878',
-                        #         'textAlign': 'center',
-                        #         'fontSize': 14
-                        #     }
-                        # ),
-                        # dt.DataTable(
-                        #     id='slice_table',
-                        #     editable=True,
-                        #     style_header={
-                        #         'backgroundColor': '#50C878',
-                        #         'fontWeight': 'bold',
-                        #         'border': '1px solid',
-                        #         'textAlign': 'center'
-                        #     },
-                        #     style_cell={
-                        #         'backgroundColor': 'transparent',
-                        #         'border': '1px solid',
-                        #         'textAlign': 'center'
-                        #     },
-                        #     style_table={
-                        #         'marginTop': 5,
-                        #         'marginLeft': 10,
-                        #         'width': 550,
-                        #         'overflowX': 'scroll'
-                        #     }
-                        # ),
-                        # html.Div(
-                        #     children=[
-                        #         html.Pre(id='slice_validation'),
-                        #         dcc.Store(id='slice_indices')
-                        #     ]
-                        # ),
-                        # html.Pre(
-                        #     'Move Axis',
-                        #     style={
-                        #         'marginTop': 20,
-                        #         'marginLeft': 15,
-                        #         'borderBottom': '1px solid #50C878',
-                        #         'textAlign': 'center',
-                        #         'fontSize': 14
-                        #     }
-                        # ),
+
+                        html.Hr(
+                            style={
+                                'marginTop': 10,
+                                'marginBottom': 5
+                            }
+                        ),
+                        html.Button(
+                            'Confirm',
+                            id='graphparam_confirm',
+                            n_clicks=0,
+                            style={'marginLeft': 10}
+                        ),
                         # Grid to move axis
                         html.Div(
                             dg.DragGrid(
@@ -402,9 +381,9 @@ def app_layout():
                                 maxrows=1,
                                 width=550,
                                 margin=[10, 10],
-                                rowheight=325
+                                rowheight=300
                             ),
-                            style={'marginTop': 10}
+                            style={'marginTop': 5}
                         )
                     ],
                     style={

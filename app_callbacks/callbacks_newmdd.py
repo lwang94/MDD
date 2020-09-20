@@ -4,16 +4,12 @@ import dash_daq as daq
 import dash_html_components as html
 from dash.dependencies import Input, Output, State, MATCH
 from dash.exceptions import PreventUpdate
-import flask
 
 import bisect
 import json
 import pandas as pd
 import base64
 
-from io import BytesIO
-import zipfile
-import urllib
 
 import MDDClass as mc
 import app_util as au
@@ -25,15 +21,12 @@ def mdd_callbacks(app):
         [Output('start_dataslice', 'children'),
          Output('stop_dataslice', 'children'),
          Output('slider_dataslice', 'children'),
-         Output('data_validvals', 'children')],
+         Output('valid_values', 'children')],
         [Input('metadata', 'data')]
     )
     def dataslice_inputs(metadata):
-        data_start = []
-        data_stop = []
-        data_slider = []
-        data_valid = []
-        print(metadata)
+        data_start, data_stop = [], []
+        data_slider, validvals = [], []
         for i, row in enumerate(metadata):
             data_start.append(
                 dcc.Input(
@@ -59,7 +52,6 @@ def mdd_callbacks(app):
                 )
             )
 
-
             data_slider.append(
                 html.Div(
                     dcc.RangeSlider(
@@ -76,14 +68,14 @@ def mdd_callbacks(app):
                 )
             )
 
-            data_valid.append(
+            validvals.append(
                 dcc.Store(
-                    id={'type': 'data_valid', 'index': i},
+                    id={'type': 'validvals', 'index': i},
                     data=row['Values']
                 )
             )
 
-        return data_start, data_stop, data_slider, data_valid
+        return data_start, data_stop, data_slider, validvals
 
     @app.callback(
         Output({'type': 'data_slider', 'index': MATCH}, 'value'),
@@ -91,7 +83,7 @@ def mdd_callbacks(app):
          Input({'type': 'data_stop', 'index': MATCH}, 'n_blur')],
         [State({'type': 'data_start', 'index': MATCH}, 'value'),
          State({'type': 'data_stop', 'index': MATCH}, 'value'),
-         State({'type': 'data_valid', 'index': MATCH}, 'data')]
+         State({'type': 'validvals', 'index': MATCH}, 'data')]
     )
     def update_dataslider(nstart, nstop, start, stop, validval):
         if nstart is not None or nstop is not None:
@@ -173,7 +165,7 @@ def mdd_callbacks(app):
             mdd.dataDF = pd.DataFrame(mdd_state)
 
             headers = data_headers.split(',')
-            data = au.load_data(add_data, usecols=headers)
+            data = au.load_data(add_data, usecols=headers, rtype='arr')
 
             indices = {}
             for i in range(len(start_dataslice)):
@@ -187,42 +179,3 @@ def mdd_callbacks(app):
             return mdd.dataDF.to_dict('records'), nclicks + 1
         else:
             raise PreventUpdate
-
-
-    @app.callback(
-        Output('save', 'href'),
-        [Input('mdd', 'data')],
-        [State('metadata', 'data')]
-    )
-    def update_savelink(mdd, meta):
-        return f'/dash/urlToDownload?mdd={mdd}&meta={meta}'
-
-    @app.server.route('/dash/urlToDownload')
-    def download_zip():
-        mdd = eval(flask.request.args.get('mdd'))
-        meta = eval(flask.request.args.get('meta'))
-
-        mdd = pd.DataFrame(mdd)
-        meta = pd.DataFrame(meta)
-
-        memory_file = BytesIO()
-        with zipfile.ZipFile(memory_file, 'w') as zf:
-            zf.writestr('mdd.csv', mdd.to_csv(index=False))
-            zf.writestr('meta.csv', meta.to_csv(index=False))
-        memory_file.seek(0)
-        return flask.send_file(memory_file, attachment_filename='mdd.zip', as_attachment=True)
-
-    # @app.callback(
-    #     Output('temp', 'data'),
-    #     [Input('load', 'contents')]
-    # )
-    # def load_mdd(contents):
-    #     content_string = contents.split(',')[1]
-    #     content_decoded = base64.b64decode(content_string)
-    #     zip_str = BytesIO(content_decoded)
-    #     zip_obj = zipfile.ZipFile(zip_str, 'r')
-
-    #     mdd_csv = zip_obj.read('mdd.csv')
-    #     mdd = pd.read_csv(BytesIO(mdd_csv))
-    #     print(mdd)
-

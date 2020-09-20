@@ -23,7 +23,7 @@ def get_axis_info(widget, keys='pcp'):
     return res
 
 
-def load_data(contents, usecols):
+def load_data(contents, usecols, rtype='l'):
     datapoints = []
     for csvfile in contents:
         content_string = csvfile.split(',')[1]
@@ -40,7 +40,11 @@ def load_data(contents, usecols):
                 .values.flatten()
             )
         datapoints += list(data)
-    return np.array(datapoints)
+    
+    # determine whether to return data as list or numpy array
+    if rtype == 'arr':
+        datapoints = np.array(datapoints)
+    return datapoints
 
 
 def define_draggrid(

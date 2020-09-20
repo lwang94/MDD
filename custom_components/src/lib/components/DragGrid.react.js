@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import GridLayout from 'react-grid-layout';
-// import '\\react-grid-layout\\css\\styles.css';
-// import '\\react-resizable\\css\\styles.css';
 
 /**
  * ExampleComponent is an example component.
@@ -14,11 +12,13 @@ import GridLayout from 'react-grid-layout';
 export default class DragGrid extends Component {
     constructor(props) {
         super(props);
-        this.myRef = React.createRef();
 
-        this.onLC = this.onLC.bind(this);
-        this.onD = this.onD.bind(this);
-        this.create_children = this.create_children.bind(this);
+        this.myRef = React.createRef(); /**keeps track of instance */
+
+        this.onLC = this.onLC.bind(this); /**binds layout change function */
+        this.fixedLayout = this.fixedLayout.bind(this);
+        this.onD = this.onD.bind(this); /**binds drag function */
+        this.create_children = this.create_children.bind(this); /**binds create children function */
 
     }
 
@@ -29,6 +29,13 @@ export default class DragGrid extends Component {
             if (propchild.constructor != Array) {
                 propchild = [propchild]
             };
+            
+            let hh = []
+            if (this.props.lg == true) {
+                hh = this.props.handleheight_lg
+            }
+            else {hh = this.props.handleheight_sm};
+
             for (let inc = 0; inc < propchild.length; inc += 1) {
                 const child = <div key={this.props.layout[inc].i} style={this.props.divstyle}>
                     <div
@@ -37,7 +44,7 @@ export default class DragGrid extends Component {
                             background: '#CFD8DC',
                             borderTopLeftRadius: '10px',
                             borderTopRightRadius:'10px',
-                            height:'5%'
+                            height:hh[inc]
                         }}
                     >
                     </div>
@@ -48,10 +55,45 @@ export default class DragGrid extends Component {
         }
         return children
     }
+    
+    fixedLayout(lc) {
+        const maxY = this.props.maxrows - 1
+
+        const maxRowXs = new Set()
+        for (let i = 0; i < lc.length; i += 1) {
+            if (lc[i].y == maxY) {
+                maxRowXs.add(lc[i].x)
+            }
+        }
+        
+        let missingX = undefined
+        let found = false;
+        for (let i = 0; i < this.props.validX.length; i += 1) {
+            if (!maxRowXs.has(this.props.validX[i]) && !found) {
+                missingX = this.props.validX[i];
+                found = true
+            }
+        }
+        
+        const fixedLayout = []
+        for (let i = 0; i < lc.length; i += 1) {
+            if (lc[i].y > maxY) {
+                fixedLayout.push({
+                    ...lc[i],
+                    y: maxY,
+                    x: missingX
+                })
+            }
+            else {fixedLayout.push(lc[i])}
+        }
+
+        return fixedLayout
+    }
 
     onLC(lc) {
+        const fixedLayout = this.fixedLayout(lc)
         this.props.setProps({
-            layout: lc
+            layout: fixedLayout
         })
     }
 
@@ -79,7 +121,13 @@ export default class DragGrid extends Component {
         }
 
         element.style.transform = `translate(${translateX}px, ${translateY}px)`;
+
+        const fixedLayout = this.fixedLayout(layout)
+        this.props.setProps({
+            layout: fixedLayout
+        })
     }
+
 
     render() {
         return (
@@ -88,6 +136,7 @@ export default class DragGrid extends Component {
                     className='layout'
                     layout={this.props.layout}
                     compactType={this.props.compacttype}
+                    verticalCompact={this.props.verticalcompact}
                     rowHeight={this.props.rowheight}
                     width={this.props.width}
                     cols={this.props.numcolumns}
@@ -109,7 +158,12 @@ DragGrid.defaultProps = {
     children: [],
     divstyle: {},
     layout: [],
+    validX: [],
+    lg: true,
+    handleheight_lg: [],
+    handleheight_sm: [],
     compacttype: 'horizontal',
+    verticalcompact: false,
     rowheight: 30,
     width: 1200,
     numcolumns: 6,
@@ -144,9 +198,34 @@ DragGrid.propTypes = {
     layout: PropTypes.array,
 
     /**
+     * Valid x-values in the layout
+     */
+    validX: PropTypes.array,
+
+    /**
+     * Whether each grid item is fully expanded
+     */
+    lg: PropTypes.bool,
+
+    /**
+     * The height of each draggable handle (large)
+     */
+    handleheight_lg: PropTypes.array,
+
+    /**
+     * The height of each draggable handle (small)
+     */
+    handleheight_sm: PropTypes.array,
+
+    /**
      * The compact type
      */
     compacttype: PropTypes.string,
+
+    /**
+     * Bool for vertical compacting
+     */
+    verticalcompact: PropTypes.bool,
 
     /**
      * The height of one row in the grid

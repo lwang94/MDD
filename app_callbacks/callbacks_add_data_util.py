@@ -42,16 +42,6 @@ def data_stop(row):
     )
 
 
-def data_vals(row):
-    """
-    Create value Store component for axis in adding data
-    """
-    return dcc.Store(
-        id={'type': 'data_vals', 'index': row['Axis']},
-        data=row['Values']
-    )
-
-
 def find_data_indices(validval, start, stop):
     """
     Find indices of start, stop in validval. 

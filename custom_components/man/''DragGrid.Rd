@@ -12,9 +12,9 @@ ExampleComponent is an example component. It takes a property, `label`, and di
 \usage{
 ''DragGrid(children=NULL, id=NULL, label=NULL, divstyle=NULL,
 layout=NULL, validX=NULL, lg=NULL, handleheight_lg=NULL,
-handleheight_sm=NULL, compacttype=NULL,
-verticalcompact=NULL, rowheight=NULL, width=NULL,
-numcolumns=NULL, maxrows=NULL, margin=NULL)
+handleheight_sm=NULL, limitX=NULL, limitY=NULL,
+compacttype=NULL, verticalcompact=NULL, rowheight=NULL,
+width=NULL, numcolumns=NULL, maxrows=NULL, margin=NULL)
 }
 
 \arguments{
@@ -35,6 +35,10 @@ numcolumns=NULL, maxrows=NULL, margin=NULL)
 \item{handleheight_lg}{Unnamed list. The height of each draggable handle (large)}
 
 \item{handleheight_sm}{Unnamed list. The height of each draggable handle (small)}
+
+\item{limitX}{Logical. Limits dragging by x boundaries}
+
+\item{limitY}{Logical. Limits dragging by y boundaries}
 
 \item{compacttype}{Character. The compact type}
 

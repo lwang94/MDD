@@ -7,6 +7,9 @@ import config as cf
 
 
 def layout_shift_view():
+    """
+    Entire layout for shift view section
+    """
     return html.Div(
         children=[
             # Button to show/hide change view section
@@ -19,14 +22,9 @@ def layout_shift_view():
                     'width': '28%'
                 }
             ),
+            # Shift view section
             dbc.Collapse(
-                html.Div(
-                    shift_view_dg(),
-                    style={
-                        'width': 450,
-                        'overflowX': 'scroll'
-                    }
-                ),
+                shift_view_div(),
                 id='shift_view_collapse',
                 style={
                     'borderRadius': '25px',
@@ -40,14 +38,67 @@ def layout_shift_view():
     )
 
 
+def shift_view_div():
+    """
+    Collapse section of shift view
+    """
+    return html.Div(
+        children=[
+            shift_view_dg(), # drag grid
+            html.Hr( # separator
+                style={
+                    'marginTop': 0, 
+                    'marginBottom': '1%'
+                }
+            ),
+            html.Pre( # show shape of shifted view
+                id='shift_view_shape',
+                style={'marginLeft': '5%'}
+            ),
+            html.Hr( # separator
+                style={
+                    'marginTop': 0,
+                    'marginBottom': '1%'
+                }
+            ),
+            shift_view_buttons() # confirm button
+        ],
+        style={
+            'width': 450,
+            'overflowX': 'scroll',
+            'overflowY': 'hidden'
+        }
+    )
+
+
 def shift_view_dg():
+    """
+    Grid layout for moving and slicing axes
+    of shift view
+    """
     return dg.DragGrid(
         id='shift_view',
         label='label',
         children=[],
         layout=[],
         lg=False,
-        # divstyle={'border': 'solid'},
+        limitY=True,
         rowheight=50,
         maxrows=1
+    )
+
+
+def shift_view_buttons():
+    """
+    Confirm button in shift view section
+    """
+    return html.Button(
+        'Confirm',
+        id='shift_confirm',
+        n_clicks=0,
+        style={
+            'marginLeft': '3%',
+            'background': '#607D8B',
+            'color': 'white'
+        }
     )

@@ -5,7 +5,12 @@ import drag_grid as dg
 from app_layouts import title_layout
 from app_layouts import metadata_layout
 from app_layouts import add_data_layout
+from app_layouts import mdd_layout
 from app_layouts import shift_view_layout
+
+from app_layouts import graph_layout
+
+from app_layouts import modify_layout
 
 
 def app_layout(app):
@@ -31,25 +36,28 @@ def app_layout(app):
             className='one row',
             style={'marginRight': '3%', 'marginLeft': '10%'}
         ),
-        dcc.Store(id='metadata'), # storing mdd.metadata
-        dcc.Store(id='meta_changed'), # bool: keeps track of whether MDD callback changed metadata
-        dcc.Store(id='mdd'), # storing mdd.dataDF
+        mdd_layout.layout_mdd(), # stores all information relating to mdd instance
 
         # Second Row
         html.Div(
             children=[
-                html.Div('graphs', className='col-sm-8'),
+                graph_layout.layout_graph(), # TO DO: MAKE GRAPHS PRETTIER
                 html.Div(
                     children=[
                         add_data_layout.layout_add_data(), # add data section
-                        shift_view_layout.layout_shift_view(), # change view section
-                        html.Div('Modify', className='one row')
+                        shift_view_layout.layout_shift_view(), # shift view section
+                        modify_layout.layout_modify() # modify section
                     ],
                     className='col-sm-4'
-                )
+                ),
+                mdd_layout.layout_mddcopy() # store all information relating to mdd copy
             ],
             className='one row',
-            style={'marginRight': '3%', 'marginLeft': '10%'}
+            style={
+                'marginRight': '3%', 
+                'marginLeft': '10%', 
+                'marginTop': '2%'
+            }
         )
     ])
 

@@ -1,3 +1,5 @@
+import dash_core_components as dcc
+
 import numpy as np
 import pandas as pd 
 import base64
@@ -18,7 +20,7 @@ def create_mdd_from_metatable(metatable, load, label):
     # check first two columns have been inputted correctly
     check = meta_util.initial_metadata_check(df)
     if check is not None:
-        return check, None, False
+        return None, check, None, False
 
     # create metadata by calculating values
     values = []
@@ -28,7 +30,7 @@ def create_mdd_from_metatable(metatable, load, label):
             value = list(sorted(set(value)))
             values.append(value)
         except ValueError: # exception if range inputted incorrectly
-            return cf.error_rangeval, None, False
+            return None, cf.error_rangeval, None, False
     df['Values'] = values
     df = df.drop(['Start', 'Stop', 'Step', 'Custom'], axis=1) # drop unneccessary columns
 
@@ -39,9 +41,12 @@ def create_mdd_from_metatable(metatable, load, label):
             load = pd.DataFrame(load)
             mdd.DFjoin(load)
         except:
-            return cf.error_load, None, False
+            return None, cf.error_load, None, False
+    
+    # store metadata as 'records' so don't have to perform same operation twice
+    meta = mdd.metadata.to_dict('records')
 
-    return mdd.metadata.to_dict('records'), mdd.dataDF.to_dict('records'), True
+    return mdd.dataDF.to_dict('records'), meta, store_values(meta), True
 
 
 def create_mdd_from_load(load, label):
@@ -57,12 +62,15 @@ def create_mdd_from_load(load, label):
         mdd = mc.MDD(meta, label)
         mdd.DFjoin(pd.DataFrame(load)) # join MDD to loaded data
     except:
-        return cf.error_load, None, False
+        return None, cf.error_load, None, False
 
-    return mdd.metadata.to_dict('records'), mdd.dataDF.to_dict('records'), True
+    # store metadata as 'records' so don't have to perform same operation twice
+    meta = mdd.metadata.to_dict('records')
+
+    return mdd.dataDF.to_dict('records'), meta, store_values(meta), True
 
 
-def fill_mdd(fill_contents, label, meta, mdd, validval, start, stop, fill_fname):
+def fill_mdd(fill_contents, label, meta, mdd, metavalues, validval, start, stop, fill_fname):
     """
     Add to MDD by filling parameter space
     """
@@ -96,10 +104,10 @@ def fill_mdd(fill_contents, label, meta, mdd, validval, start, stop, fill_fname)
     # fill parameter space with data
     mdd.fill(i_start, i_stop, data)
 
-    return mdd.metadata.to_dict('records'), mdd.dataDF.to_dict('records'), False
+    return mdd.dataDF.to_dict('records'), mdd.metadata.to_dict('records'), metavalues, False
 
 
-def join_mdd(join_fname, join_contents, meta, label, mdd):
+def join_mdd(join_fname, join_contents, meta, label, mdd, metavalues):
     """
     Add to MDD by joining to new dataset
     """
@@ -126,5 +134,21 @@ def join_mdd(join_fname, join_contents, meta, label, mdd):
         mdd.DFjoin(data)
     except:
         return cf.error_load, None, False
-    
-    return mdd.metadata.to_dict('records'), mdd.dataDF.to_dict('records'), False
+
+    return mdd.dataDF.to_dict('records'), mdd.metadata.to_dict('records'), metavalues, False
+
+
+def store_values(meta):
+    """
+    Create list of Stores for metadata values.
+    Useful in other callbacks with wildcard matching
+    """
+    children = []
+    for row in meta:
+        children.append(
+            dcc.Store(
+                id={'type': 'metavals', 'index': row['Axis']},
+                data=row['Values']
+            )
+        )
+    return children

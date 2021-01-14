@@ -2,11 +2,21 @@ import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 
+import numpy as np
+
+from app_callbacks import callbacks_add_data_util as add_data_util
+
 
 def shift_view_draggable(row, last=False):
+    """
+    Creates draggable component of shift view grid layout
+    """
     return html.Div(
         children=[
+            # axis button
             shift_view_axis_button(row),
+
+            # collapsible component of shift view axis
             dbc.Collapse(
                 children=[
                     shift_view_stop(row, last=last),
@@ -19,7 +29,11 @@ def shift_view_draggable(row, last=False):
         ]
     )
 
+
 def shift_view_axis_button(row):
+    """
+    Create axis button part of shift view grid layout
+    """
     return html.Button(
         f'{row["Name"]}', 
         id={'type': 'shift_view_axis_collapse_button', 'index': row['Axis']},
@@ -35,6 +49,10 @@ def shift_view_axis_button(row):
 
 
 def shift_view_stop(row, last=False):
+    """
+    Stop input for axis in shift view grid layout
+    """
+    # for last value, include all values in axis
     if last:
         value = row['Values'][-1]
     else:
@@ -54,6 +72,10 @@ def shift_view_stop(row, last=False):
 
 
 def shift_view_slider(row, last=False):
+    """
+    Slider component for axis in shift view grid layout
+    """
+    # for last value, include all values in axis
     if last:
         stop = row['Values'][-1]
     else:
@@ -75,6 +97,9 @@ def shift_view_slider(row, last=False):
 
 
 def shift_view_start(row):
+    """
+    Start input for axis in shift view grid layout
+    """
     return dcc.Input(
         id={'type': 'shift_start', 'index': row['Axis']},
         type='text',
@@ -88,34 +113,37 @@ def shift_view_start(row):
     )
 
 
-def static_x():
-    return html.Div(
-        'x', 
-        style={
-            'fontSize': '14', 
-            'marginTop': '30%',
-            'textAlign': 'center'
-        }
-    )
-
-
 def shift_view_layout_item(i, row):
-    return (
-        {
-            'i': f'sv{row["Axis"]}',
-            'x': 4 * i,
-            'y': 0,
-            'w': 3,
-            'h': 1,
-            'isResizable': False,
-            'isDraggable': True
-        },
-        {
-            'i': f'x{row["Axis"]}',
-            'x': 4 * i + 3,
-            'y': 0,
-            'w': 1,
-            'h': 1,
-            'static': True
-        }
-    )
+    """
+    Placement of each item in
+    shift view grid layout
+    """
+    return {
+        'i': f'sv{row["Axis"]}',
+        'x': i,
+        'y': 0,
+        'w': 1,
+        'h': 1,
+        'isResizable': False,
+        'isDraggable': True
+    }
+
+def find_shift_shape(layout, start, stop, validval):
+    """
+    Finds shape of shifted view given layout and 
+    start and stop of each axis
+    """
+    # find shape of each axis
+    i_start, i_stop = add_data_util.find_space(validval, start, stop)
+    shape = [i_stop[i] + 1 - i_start[i] for i in range(len(i_start))]
+
+    # reorder according to layout
+    new_pos = [layout[i]['x'] for i in range(len(layout))]
+    new_shape = sorted(zip(shape, new_pos), key=lambda x: x[1])
+
+    # show shape as string
+    s = ''
+    for i in range(len(shape)):
+        s += f'{new_shape[i][0]}x'
+    
+    return s[:-1]

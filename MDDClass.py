@@ -121,7 +121,37 @@ class MDD:
         # change dataDF to match dataArray
         self.dataDF[self.label] = arr.flatten()
 
+    def shift_view(self, i_start, i_stop, new_pos):
+        """
+        Changes view of mdd based on slicing and moving axes
+        """
+        sl = []
+        arr = self.dataArray() # grab original data
+        for i in range(len(i_start)):
+            # append slice objects to slice array along different axes
+            sl.append(
+                slice(i_start[i], i_stop[i] + 1)
+            )
+            # changes metadata to reflect slices
+            self.metadata['Values'][i] = self.metadata['Values'][i][i_start[i]: i_stop[i] + 1]
 
+        # change metadata to reflect moving axes
+        self.metadata['Axis'] = new_pos + 1
+        self.metadata = self.metadata.sort_values('Axis', ignore_index=True)
+
+        # create new emptyDF based on updated metadata
+        self.dataDF = self.emptyDF()
+
+        # slice and move axes of original array
+        arr = np.moveaxis(
+            arr[tuple(sl)],
+            np.arange(len(self.metadata.index)),
+            new_pos
+        )
+
+        # insert updated array data into new DF
+        self.dataDF[self.label] = arr.flatten()
+    
 
 
     # @dataArray.setter

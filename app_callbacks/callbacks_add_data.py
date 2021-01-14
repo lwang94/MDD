@@ -45,7 +45,6 @@ def add_data_callbacks(app):
                             util.data_start(row), # Start input
                             util.data_slider(row), # Slider component
                             util.data_stop(row), # Stop input
-                            util.data_vals(row) # Store values of axis for quick access
                         ],
                         className='row'
                     )
@@ -61,7 +60,7 @@ def add_data_callbacks(app):
          Input({'type': 'data_stop', 'index': MATCH}, 'n_blur')],
         [State({'type': 'data_start', 'index': MATCH}, 'value'),
          State({'type': 'data_stop', 'index': MATCH}, 'value'),
-         State({'type': 'data_vals', 'index': MATCH}, 'data')]
+         State({'type': 'metavals', 'index': MATCH}, 'data')]
     )
     def update_dataslider(nstart, nstop, start, stop, validval):
         if nstart is not None or nstop is not None: # update when inputs have lost focus
@@ -90,7 +89,7 @@ def add_data_callbacks(app):
         [Input({'type': 'data_start', 'index': ALL}, 'value'),
          Input({'type': 'data_stop', 'index': ALL}, 'value'),
          Input('mdd', 'data')],
-        [State({'type': 'data_vals', 'index': ALL}, 'data'),
+        [State({'type': 'metavals', 'index': ALL}, 'data'),
          State('ind_var', 'value'),
          State('metadata', 'data')]
     )
@@ -113,7 +112,7 @@ def add_data_callbacks(app):
         Output('fill_tooltip', 'children'),
         [Input({'type': 'data_start', 'index': ALL}, 'value'),
          Input({'type': 'data_stop', 'index': ALL}, 'value')],
-        [State({'type': 'data_vals', 'index': ALL}, 'data'),
+        [State({'type': 'metavals', 'index': ALL}, 'data'),
          State('ind_var', 'value')]
     )
     def update_fill_tooltip(start, stop, validval, label):
